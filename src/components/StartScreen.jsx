@@ -21,14 +21,15 @@ export default function StartScreen({
   return (
     <div className="relative w-full h-full flex flex-col justify-between items-center overflow-y-auto select-none bg-[#030712] text-white">
       
-      {/* ── SUBTLE ELEGANT BACKGROUND ── */}
+      {/* ── CINEMATIC SPACE BACKGROUND ── */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         <img
           src="/start_screen_bg.jpg"
-          alt="Earth and Space"
-          className="w-full h-full object-cover object-center opacity-40 scale-105"
+          alt="Space Earth Background"
+          className="w-full h-full object-cover object-center scale-[1.05]"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#030712]/90 via-[#03091e]/80 to-[#02050f]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#020a1a]/80 via-[#050c1b]/50 to-[#02050c]/90" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_30%,_#010510_85%)] opacity-80" />
       </div>
 
       {/* ── 1. CLEAN TOP HEADER ── */}
