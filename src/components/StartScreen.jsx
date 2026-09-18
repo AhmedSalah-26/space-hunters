@@ -82,7 +82,7 @@ export default function StartScreen({
             </span>
           </h1>
 
-          <p className="text-xs sm:text-sm font-bold text-slate-300 tracking-wide">
+          <p className="text-xs sm:text-sm font-mono font-black text-cyan-400 tracking-[0.25em] uppercase drop-shadow-[0_0_10px_rgba(0,180,216,0.6)]">
             {lang === 'ar' ? startScreenData.taglineAr : startScreenData.taglineEn}
           </p>
         </div>

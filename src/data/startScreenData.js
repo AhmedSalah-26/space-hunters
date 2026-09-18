@@ -11,8 +11,8 @@ export const startScreenData = {
   
   titlePrefix: "FIELD",
   titleSuffix: "SHIFT",
-  taglineAr: "تصميم الدورات الزراعية الذكية ببيانات أقمار NASA الفضائية",
-  taglineEn: "Adaptive Crop Rotation Engine Powered by NASA Earth Telemetry",
+  taglineAr: "SPACE HUNTERS",
+  taglineEn: "SPACE HUNTERS",
 
   descAr: "انضم إلى فريق Space Hunters في مهمة عالمية لمساعدة المزارعين على التكيف مع التغير المناخي، ترشيد مياه الري، واستعادة خصوبة التربة بالاعتماد على رصد الأقمار الصناعية (SMAP, Landsat, ECOSTRESS).",
   descEn: "Join Team Space Hunters on a global mission to help farmers adapt to climate stress, conserve water, and restore soil fertility using NASA Earth observations.",

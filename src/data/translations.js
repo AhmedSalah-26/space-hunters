@@ -2,7 +2,7 @@ export const translations = {
   ar: {
     // Navbar
     teamTitle: "NASA SPACE APPS",
-    teamSub: "SPACE HUNTERS",
+    teamSub: "SPACE HUNTERS FIELD",
     gameTitle: "FIELD SHIFT",
     gameSub: "ADAPTING FARMS WITH NASA DATA",
     navMap: "الخريطة",
@@ -203,7 +203,7 @@ export const translations = {
   en: {
     // Navbar
     teamTitle: "NASA SPACE APPS",
-    teamSub: "SPACE HUNTERS",
+    teamSub: "SPACE HUNTERS FIELD",
     gameTitle: "FIELD SHIFT",
     gameSub: "ADAPTING FARMS WITH NASA DATA",
     navMap: "Map",
