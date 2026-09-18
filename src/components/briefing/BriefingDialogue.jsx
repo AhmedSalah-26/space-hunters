@@ -366,13 +366,13 @@ export default function BriefingDialogue({ mission, onContinue }) {
         </div>
 
         {/* Bottom Actions inside Center Panel */}
-        <div className="flex items-center justify-between pt-2.5 border-t border-white/10 gap-3 shrink-0">
+        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between pt-2 border-t border-white/10 gap-2 shrink-0">
           <button
             onClick={handleNextMessage}
-            className="py-2 px-4 bg-[#0e3160] hover:bg-[#144280] border border-cyan-400/60 rounded-xl text-xs sm:text-sm font-black text-cyan-200 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-md"
+            className="flex-1 sm:flex-none py-2 px-3 sm:px-4 bg-[#0e3160] hover:bg-[#144280] border border-cyan-400/60 rounded-xl text-xs sm:text-sm font-black text-cyan-200 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md"
           >
-            <MessageSquare className="w-4 h-4 text-cyan-400" />
-            <span>
+            <MessageSquare className="w-4 h-4 text-cyan-400 shrink-0" />
+            <span className="truncate">
               {isTyping
                 ? (lang === 'ar' ? briefingDialogueUiData.completeBtnAr : briefingDialogueUiData.completeBtnEn)
                 : (currentStep < dialogueList.length - 1
@@ -383,14 +383,14 @@ export default function BriefingDialogue({ mission, onContinue }) {
 
           <button
             onClick={onContinue}
-            className="py-2.5 px-6 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white text-xs sm:text-sm font-black flex items-center gap-2 rounded-xl shadow-xl shadow-blue-500/40 transition-all hover:scale-105 cursor-pointer"
+            className="flex-1 sm:flex-none py-2 px-4 sm:px-6 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl shadow-xl shadow-blue-500/40 transition-all active:scale-95 hover:scale-[1.02] cursor-pointer"
           >
-            <span>
+            <span className="truncate">
               {lang === 'ar' 
                 ? briefingDialogueUiData.proceedToDecisionBtnAr 
                 : briefingDialogueUiData.proceedToDecisionBtnEn}
             </span>
-            {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+            {isRtl ? <ArrowLeft className="w-4 h-4 shrink-0" /> : <ArrowRight className="w-4 h-4 shrink-0" />}
           </button>
         </div>
 

@@ -28,7 +28,7 @@ export default function ImpactTab({ mission }) {
       </div>
 
       {/* Financial & Environmental Return Grid */}
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
         <div className="p-3 bg-[#081730] border border-emerald-500/40 rounded-xl space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-emerald-300 pb-1 border-b border-white/10">
             <span className="flex items-center gap-1.5">

@@ -28,27 +28,27 @@ export default function AgriBankModal({ isOpen, onClose }) {
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div 
-        className="relative w-full max-w-4xl bg-[#051329]/98 border border-cyan-400/50 shadow-[0_0_50px_rgba(0,180,216,0.35)] flex flex-col max-h-[90vh] overflow-hidden rounded-2xl"
+        className="relative w-full max-w-4xl bg-[#051329]/98 border border-cyan-400/50 shadow-[0_0_50px_rgba(0,180,216,0.35)] flex flex-col max-h-[94vh] sm:max-h-[90vh] overflow-hidden rounded-2xl"
         style={{
           clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)',
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-3.5 border-b border-cyan-500/25 bg-[#071a38] shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center text-cyan-300 shadow-sm">
+        <div className="flex items-center justify-between p-3 sm:p-3.5 border-b border-cyan-500/25 bg-[#071a38] shrink-0">
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center text-cyan-300 shadow-sm shrink-0">
               <Database className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-black text-white flex items-center gap-2">
+              <h2 className="text-xs sm:text-base font-black text-white flex items-center gap-1.5 sm:gap-2">
                 <span>{t.navAgriBank}</span>
-                <span className="text-xs text-cyan-300 font-mono px-2 py-0.5 bg-cyan-950 border border-cyan-500/40 rounded-lg">
+                <span className="text-[10px] sm:text-xs text-cyan-300 font-mono px-1.5 sm:px-2 py-0.5 bg-cyan-950 border border-cyan-500/40 rounded-lg">
                   {agriBankHeader.badge}
                 </span>
               </h2>
-              <p className="text-xs text-slate-300">
+              <p className="text-[10.5px] sm:text-xs text-slate-300 truncate max-w-[200px] sm:max-w-none">
                 {lang === 'ar' ? agriBankHeader.subAr : agriBankHeader.subEn}
               </p>
             </div>
@@ -56,15 +56,15 @@ export default function AgriBankModal({ isOpen, onClose }) {
 
           <button
             onClick={onClose}
-            className="w-8 h-8 bg-white/5 hover:bg-white/15 border border-cyan-500/30 rounded-lg flex items-center justify-center text-slate-300 hover:text-white transition-all cursor-pointer"
+            className="w-7 h-7 sm:w-8 sm:h-8 bg-white/5 hover:bg-white/15 border border-cyan-500/30 rounded-lg flex items-center justify-center text-slate-300 hover:text-white transition-all cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Selector & Search */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-3 bg-[#040e21] border-b border-cyan-500/20 shrink-0">
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 p-2.5 sm:p-3 bg-[#040e21] border-b border-cyan-500/20 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto overflow-x-auto no-scrollbar">
             {agriBankTabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -72,11 +72,11 @@ export default function AgriBankModal({ isOpen, onClose }) {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  className={`flex-1 sm:flex-none px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                     isActive ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${tab.iconColor}`} />
+                  <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${tab.iconColor}`} />
                   <span>{lang === 'ar' ? tab.labelAr : tab.labelEn}</span>
                 </button>
               );
@@ -85,13 +85,13 @@ export default function AgriBankModal({ isOpen, onClose }) {
 
           {activeTab === 'crops' && (
             <div className="relative w-full sm:w-64">
-              <Search className="w-4 h-4 text-cyan-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-3.5 h-3.5 text-cyan-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 placeholder={lang === 'ar' ? agriBankHeader.searchPlaceholderAr : agriBankHeader.searchPlaceholderEn}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#061633] border border-cyan-500/40 rounded-xl py-1.5 pr-9 pl-3 text-xs sm:text-sm text-white placeholder-slate-400 outline-none"
+                className="w-full bg-[#061633] border border-cyan-500/40 rounded-xl py-1.5 pr-8 pl-3 text-xs sm:text-sm text-white placeholder-slate-400 outline-none"
               />
             </div>
           )}

@@ -19,27 +19,27 @@ export default function LeaderboardModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div 
-        className="relative w-full max-w-4xl bg-[#051329]/98 border border-cyan-400/50 shadow-[0_0_50px_rgba(0,180,216,0.35)] flex flex-col max-h-[90vh] overflow-hidden rounded-2xl"
+        className="relative w-full max-w-4xl bg-[#051329]/98 border border-cyan-400/50 shadow-[0_0_50px_rgba(0,180,216,0.35)] flex flex-col max-h-[94vh] sm:max-h-[90vh] overflow-hidden rounded-2xl"
         style={{
           clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)',
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-3.5 border-b border-cyan-500/25 bg-[#071a38] shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-amber-300 shadow-sm">
+        <div className="flex items-center justify-between p-3 sm:p-3.5 border-b border-cyan-500/25 bg-[#071a38] shrink-0">
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-amber-300 shadow-sm shrink-0">
               <Trophy className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-black text-white flex items-center gap-2">
+              <h2 className="text-xs sm:text-base font-black text-white flex items-center gap-1.5 sm:gap-2">
                 <span>{t.navLeaderboard}</span>
-                <span className="text-xs text-amber-300 font-mono px-2 py-0.5 bg-amber-950 border border-amber-500/40 rounded-lg">
+                <span className="text-[10px] sm:text-xs text-amber-300 font-mono px-1.5 sm:px-2 py-0.5 bg-amber-950 border border-amber-500/40 rounded-lg">
                   {leaderboardHeader.badge}
                 </span>
               </h2>
-              <p className="text-xs text-slate-300">
+              <p className="text-[10.5px] sm:text-xs text-slate-300 truncate max-w-[200px] sm:max-w-none">
                 {lang === 'ar' ? leaderboardHeader.subAr : leaderboardHeader.subEn}
               </p>
             </div>
@@ -47,24 +47,24 @@ export default function LeaderboardModal({ isOpen, onClose }) {
 
           <button
             onClick={onClose}
-            className="w-8 h-8 bg-white/5 hover:bg-white/15 border border-cyan-500/30 rounded-lg flex items-center justify-center text-slate-300 hover:text-white transition-all cursor-pointer"
+            className="w-7 h-7 sm:w-8 sm:h-8 bg-white/5 hover:bg-white/15 border border-cyan-500/30 rounded-lg flex items-center justify-center text-slate-300 hover:text-white transition-all cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Global Impact Summary Row */}
-        <div className="grid grid-cols-3 gap-2.5 p-3 bg-[#040e21] border-b border-cyan-500/20 shrink-0 text-center">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5 p-2 sm:p-3 bg-[#040e21] border-b border-cyan-500/20 shrink-0 text-center">
           {leaderboardGlobalStats.map((stat) => {
             const Icon = stat.id === 'water' ? Droplets : stat.id === 'nitrogen' ? Sprout : ShieldCheck;
             return (
-              <div key={stat.id} className={`p-2.5 bg-[#081730] border ${stat.borderColor} rounded-xl shadow-sm`}>
-                <span className="text-xs text-slate-300 block mb-0.5 font-bold">
+              <div key={stat.id} className={`p-1.5 sm:p-2.5 bg-[#081730] border ${stat.borderColor} rounded-xl shadow-sm`}>
+                <span className="text-[10px] sm:text-xs text-slate-300 block mb-0.5 font-bold truncate">
                   {lang === 'ar' ? stat.titleAr : stat.titleEn}
                 </span>
-                <span className={`text-sm sm:text-base font-black ${stat.textColor} flex items-center justify-center gap-1.5 font-mono`}>
-                  <Icon className="w-4 h-4" />
-                  <span>{lang === 'ar' ? stat.value : (stat.valueEn || stat.value)}</span>
+                <span className={`text-xs sm:text-base font-black ${stat.textColor} flex items-center justify-center gap-1 font-mono`}>
+                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                  <span className="truncate">{lang === 'ar' ? stat.value : (stat.valueEn || stat.value)}</span>
                 </span>
               </div>
             );

@@ -8,21 +8,21 @@ export default function DecisionGauges({ customMetrics }) {
   const { t, lang } = useLanguage();
 
   return (
-    <div className="p-3 bg-[#040e21] border border-cyan-500/30 rounded-xl space-y-2.5 shadow-md">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-amber-400" />
+    <div className="p-2.5 sm:p-3 bg-[#040e21] border border-cyan-500/30 rounded-xl space-y-2 sm:space-y-2.5 shadow-md">
+      <div className="flex flex-wrap items-center justify-between gap-1">
+        <div className="flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
           <span className="text-xs sm:text-sm font-black text-white">{t.cumulativeResultsHeader}</span>
         </div>
-        <span className="text-xs text-cyan-300 font-mono font-bold">
+        <span className="text-[10.5px] sm:text-xs text-cyan-300 font-mono font-bold truncate max-w-[200px] sm:max-w-none">
           {lang === 'ar' ? customMetrics.c1.nameAr : customMetrics.c1.nameEn} ➔ {lang === 'ar' ? customMetrics.c2.nameAr : customMetrics.c2.nameEn} ➔ {lang === 'ar' ? customMetrics.c3.nameAr : customMetrics.c3.nameEn}
         </span>
       </div>
 
       {/* 3 Live Meters */}
-      <div className="grid grid-cols-3 gap-2.5 text-xs text-center">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 text-xs text-center">
         <div className="p-2 bg-[#081730] rounded-xl border border-white/5 flex flex-col justify-between">
-          <span className="text-slate-300 block text-xs font-bold mb-1">{t.waterSavedGauge}</span>
+          <span className="text-slate-300 block text-[11px] sm:text-xs font-bold mb-1">{t.waterSavedGauge}</span>
           <span className="font-black text-sky-400 text-xs sm:text-sm">-{customMetrics.waterSaved}% {t.waterUnit}</span>
           <div className="w-full h-1 bg-slate-800 rounded-full mt-1.5 overflow-hidden">
             <div 
@@ -33,7 +33,7 @@ export default function DecisionGauges({ customMetrics }) {
         </div>
         
         <div className="p-2 bg-[#081730] rounded-xl border border-white/5 flex flex-col justify-between">
-          <span className="text-slate-300 block text-xs font-bold mb-1">{t.soilNGauge}</span>
+          <span className="text-slate-300 block text-[11px] sm:text-xs font-bold mb-1">{t.soilNGauge}</span>
           <span className={`font-black text-xs sm:text-sm ${customMetrics.nBalance >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
             {customMetrics.nBalance >= 0 ? `+${customMetrics.nBalance}` : customMetrics.nBalance} kg/ha N
           </span>
@@ -46,7 +46,7 @@ export default function DecisionGauges({ customMetrics }) {
         </div>
 
         <div className="p-2 bg-[#081730] rounded-xl border border-white/5 flex flex-col justify-between">
-          <span className="text-slate-300 block text-xs font-bold mb-1">{t.pestBreakGauge}</span>
+          <span className="text-slate-300 block text-[11px] sm:text-xs font-bold mb-1">{t.pestBreakGauge}</span>
           <span className="font-black text-amber-400 text-xs sm:text-sm">
             {customMetrics.isMonoculture ? t.pestMonocultureWarning : t.pestExcellentScore}
           </span>

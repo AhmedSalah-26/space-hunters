@@ -10,46 +10,50 @@ export default function MissionsCarousel({
   selectedMission,
   setSelectedMission,
   onPrevMission,
-  onNextMission
+  onNextMission,
+  className = '',
+  isMobile = false,
 }) {
   const { t, lang } = useLanguage();
 
+  const containerClasses = className || "absolute bottom-3 left-[245px] right-[375px] z-20 hidden lg:block pointer-events-auto";
+
   return (
-    <div className="absolute bottom-3 left-[245px] right-[375px] z-20 hidden md:block pointer-events-auto">
+    <div className={containerClasses}>
       <div
-        className="p-3.5 bg-[#051329]/96 border border-cyan-400/50 backdrop-blur-xl shadow-2xl"
+        className="p-3 sm:p-3.5 bg-[#051329]/96 border border-cyan-400/50 backdrop-blur-xl shadow-2xl rounded-2xl"
         style={{
           clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)',
         }}
       >
         {/* Carousel Header */}
         <div className="flex items-center justify-between mb-2.5 px-1">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center shadow-sm">
               <Target className="w-3.5 h-3.5 text-cyan-400" />
             </div>
-            <h3 className="text-sm font-black text-white tracking-wide">{t.suggestedMissions}</h3>
+            <h3 className="text-xs sm:text-sm font-black text-white tracking-wide">{t.suggestedMissions}</h3>
           </div>
-          <div className="flex items-center gap-2 text-slate-400">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-slate-400">
             <button
               onClick={onPrevMission}
               title={lang === 'ar' ? mapControlsData.prevMissionTooltipAr : mapControlsData.prevMissionTooltipEn}
-              className="w-7 h-7 bg-[#0a1e3f] hover:bg-[#153f7e] border border-cyan-400/50 rounded-md flex items-center justify-center text-cyan-300 hover:text-white transition-all active:scale-90 shadow-sm cursor-pointer"
+              className="w-6 h-6 sm:w-7 sm:h-7 bg-[#0a1e3f] hover:bg-[#153f7e] border border-cyan-400/50 rounded-md flex items-center justify-center text-cyan-300 hover:text-white transition-all active:scale-90 shadow-sm cursor-pointer"
             >
-              <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+              <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
             </button>
             <button
               onClick={onNextMission}
               title={lang === 'ar' ? mapControlsData.nextMissionTooltipAr : mapControlsData.nextMissionTooltipEn}
-              className="w-7 h-7 bg-[#0a1e3f] hover:bg-[#153f7e] border border-cyan-400/50 rounded-md flex items-center justify-center text-cyan-300 hover:text-white transition-all active:scale-90 shadow-sm cursor-pointer"
+              className="w-6 h-6 sm:w-7 sm:h-7 bg-[#0a1e3f] hover:bg-[#153f7e] border border-cyan-400/50 rounded-md flex items-center justify-center text-cyan-300 hover:text-white transition-all active:scale-90 shadow-sm cursor-pointer"
             >
-              <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
+              <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
             </button>
           </div>
         </div>
 
         {/* Mission Cards Grid */}
-        <div className="grid grid-cols-5 gap-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-2.5">
           {missions.map(m => {
             const isSel = selectedMission.id === m.id;
             const countryCode = m.id === 'egypt' ? 'EG' : m.id === 'brazil' ? 'BR' : m.id === 'india' ? 'IN' : m.id === 'usa' ? 'US' : 'AU';

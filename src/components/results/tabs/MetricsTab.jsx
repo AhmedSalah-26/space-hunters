@@ -151,7 +151,7 @@ export default function MetricsTab({ dynamicResults }) {
       </div>
 
       {/* Seasonal Performance Cards */}
-      <div className="grid grid-cols-3 gap-2 text-xs">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
         <div className="p-2 bg-[#040e21] border border-cyan-500/25 rounded-lg">
           <span className="text-cyan-300 font-bold block mb-0.5">{t.season1Label}: {t.seasonWinterMain}</span>
           <p className="text-slate-200 text-[11px]">{t.seasonWinterDesc}</p>

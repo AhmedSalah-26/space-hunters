@@ -18,6 +18,7 @@ import {
 
 export default function DecisionMatrixScreen({ mission, onBack, onDecisionSubmit }) {
   const { t, lang, isRtl } = useLanguage();
+  const [mobileTab, setMobileTab] = useState('matrix'); // 'matrix' | 'telemetry'
 
   // Custom Sequence Builder State (Season 1, Season 2, Season 3)
   const [customSequence, setCustomSequence] = useState({
@@ -93,21 +94,43 @@ export default function DecisionMatrixScreen({ mission, onBack, onDecisionSubmit
   };
 
   return (
-    <div className="w-full max-w-[1650px] mx-auto px-3 sm:px-6 py-2 flex flex-col gap-3 flex-1 min-h-0 overflow-hidden">
+    <div className="w-full max-w-[1650px] mx-auto px-2 sm:px-6 py-1.5 sm:py-2 flex flex-col gap-2.5 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden">
       
       {/* 1. Stepper Header at Top */}
       <div className="shrink-0">
         <StepperHeader currentStep={2} />
       </div>
 
+      {/* Mobile Tab Switcher (Visible on < lg screens) */}
+      <div className="lg:hidden p-1.5 bg-[#061633]/95 border border-cyan-500/30 rounded-xl flex items-center gap-1 shrink-0 overflow-x-auto no-scrollbar">
+        {[
+          { id: 'matrix', label: '🌾 خطة الدورة الزراعية' },
+          { id: 'telemetry', label: '🛰️ بيانات الحقل وناسا' },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setMobileTab(tab.id)}
+            className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-black whitespace-nowrap transition-all cursor-pointer ${
+              mobileTab === tab.id
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'text-slate-300 hover:text-white bg-white/5'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* 2. Main 2-Panel Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 flex-1 min-h-0 items-stretch overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 flex-1 min-h-0 items-stretch overflow-y-auto lg:overflow-hidden">
         
         {/* 🛰️ Left Panel: NASA Earth Telemetry & Field Ground Truth (4 Cols) */}
-        <DecisionTelemetryPanel mission={mission} />
+        <div className={`lg:col-span-4 flex flex-col min-h-0 ${mobileTab === 'telemetry' ? 'block' : 'hidden lg:flex'}`}>
+          <DecisionTelemetryPanel mission={mission} />
+        </div>
 
         {/* 🌾 Right Panel: Interactive Crop Rotation Game Matrix (8 Cols) */}
-        <div className="lg:col-span-8 flex flex-col gap-2.5 min-h-0 overflow-hidden">
+        <div className={`lg:col-span-8 flex flex-col gap-2.5 min-h-0 ${mobileTab === 'matrix' ? 'flex flex-1 min-h-0' : 'hidden lg:flex'}`}>
           
           {/* Dynamic Farmer Reaction & Clue Strip */}
           <div className={`p-2.5 px-3.5 bg-[#06142e]/95 border rounded-xl flex items-center gap-3 shrink-0 shadow-md transition-all ${

@@ -76,7 +76,7 @@ export default function Home() {
   };
 
   return (
-    <main className="h-screen max-h-screen bg-[#040915] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0d1e3d] via-[#050c1b] to-[#02050c] flex flex-col justify-between relative overflow-hidden selection:bg-cyan-500 selection:text-black">
+    <main className="min-h-screen lg:h-screen lg:max-h-screen bg-[#040915] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0d1e3d] via-[#050c1b] to-[#02050c] flex flex-col justify-between relative overflow-x-hidden selection:bg-cyan-500 selection:text-black">
       
       {/* Background Starfield Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[350px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none" />
@@ -95,7 +95,7 @@ export default function Home() {
       )}
 
       {/* Dynamic Screen View - Takes full remaining vertical space */}
-      <div className="flex-1 min-h-0 flex flex-col justify-center relative z-10 w-full overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col justify-start md:justify-center relative z-10 w-full overflow-y-auto lg:overflow-hidden">
         
         {/* 🌟 1. START / LANDING SCREEN 🌟 */}
         {currentScreen === 'start' && (
@@ -162,14 +162,14 @@ export default function Home() {
       </div>
 
       {/* Persistent Space Apps Challenge 2026 Slim Footer */}
-      <footer className="w-full h-7 py-0.5 px-4 border-t border-white/5 bg-[#030712]/95 backdrop-blur-md text-[9.5px] text-slate-500 flex items-center justify-between shrink-0 z-20">
+      <footer className="w-full min-h-7 py-1 px-2.5 sm:px-4 border-t border-white/5 bg-[#030712]/95 backdrop-blur-md text-[8.5px] sm:text-[9.5px] text-slate-500 flex flex-wrap items-center justify-between gap-1 shrink-0 z-20">
         <div className="flex items-center gap-1.5 text-slate-400">
           <span className="text-cyan-400 font-black">NASA SPACE APPS 2026</span>
           <span>•</span>
           <span>Team Space Hunters</span>
         </div>
         
-        <div className="text-slate-400 font-medium truncate">
+        <div className="text-slate-400 font-medium truncate max-w-[240px] sm:max-w-none">
           {lang === 'ar' ? 'تحدي Field Shift: Adapting Farms with NASA Data' : 'Field Shift: Adapting Farms with NASA Data'}
         </div>
       </footer>

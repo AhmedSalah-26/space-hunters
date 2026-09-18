@@ -7,25 +7,37 @@ import {
   CloudRain, Globe2, CheckCircle2, BarChart3 
 } from 'lucide-react';
 
-export default function MapLegendSidebar() {
+export default function MapLegendSidebar({ className = '', isMobile = false, onCloseMobile }) {
   const { t } = useLanguage();
 
+  const containerClasses = className || "hidden lg:flex lg:absolute lg:top-3 lg:left-3 z-20 w-[230px] flex-col justify-between max-h-[calc(100%-1.5rem)] overflow-y-auto pointer-events-auto custom-scrollbar";
+
   return (
-    <div className="absolute top-3 left-3 z-20 w-[230px] flex flex-col justify-between max-h-[calc(100%-1.5rem)] overflow-y-auto pointer-events-auto">
+    <div className={containerClasses}>
       <div
-        className="p-3 bg-[#061633]/92 border border-cyan-400/40 shadow-2xl backdrop-blur-md"
+        className="p-3 bg-[#061633]/95 border border-cyan-400/40 shadow-2xl backdrop-blur-md rounded-2xl"
         style={{
           clipPath: 'polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px)',
         }}
       >
         {/* Header */}
-        <div className="mb-2.5 pb-2 border-b border-cyan-500/20">
-          <h2 className="text-sm font-black text-[#00b4d8] leading-tight">
-            {t.exploreWorld}
-          </h2>
-          <p className="text-[10px] text-slate-300/80 mt-0.5 leading-snug">
-            {t.exploreWorldSub}
-          </p>
+        <div className="mb-2.5 pb-2 border-b border-cyan-500/20 flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-black text-[#00b4d8] leading-tight">
+              {t.exploreWorld}
+            </h2>
+            <p className="text-[10px] text-slate-300/80 mt-0.5 leading-snug">
+              {t.exploreWorldSub}
+            </p>
+          </div>
+          {isMobile && onCloseMobile && (
+            <button
+              onClick={onCloseMobile}
+              className="p-1 text-slate-400 hover:text-white rounded-lg bg-white/5 border border-white/10"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         {/* Crisis Legend Items */}

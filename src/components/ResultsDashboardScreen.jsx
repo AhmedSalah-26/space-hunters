@@ -132,25 +132,25 @@ export default function ResultsDashboardScreen({
   }, [mission.crops, playerCustomSequence, t]);
 
   return (
-    <div className="w-full max-w-[1650px] mx-auto px-3 sm:px-6 py-2 flex flex-col gap-2.5 flex-1 min-h-0 overflow-hidden">
+    <div className="w-full max-w-[1650px] mx-auto px-2 sm:px-6 py-1.5 sm:py-2 flex flex-col gap-2.5 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden">
       
       {/* 1. Stepper Header at Top */}
       <div className="shrink-0">
         <StepperHeader currentStep={3} />
       </div>
 
-      {/* 2. Main 3-Column Content Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 flex-1 min-h-0 items-stretch overflow-hidden">
-        
-        {/* 🧭 Left Navigation Sidebar (3 Cols) */}
-        <ResultsSidebar 
-          mission={mission}
-          activeSideTab={activeSideTab}
-          setActiveSideTab={setActiveSideTab}
-        />
+      {/* 🧭 Navigation Tabs on Mobile & Sidebar on Desktop */}
+      <ResultsSidebar 
+        mission={mission}
+        activeSideTab={activeSideTab}
+        setActiveSideTab={setActiveSideTab}
+      />
 
-        {/* 📊 Center Dynamic Content Panel (6 Cols) */}
-        <div className="lg:col-span-6 flex flex-col gap-2.5 min-h-0 overflow-y-auto custom-scrollbar">
+      {/* 2. Main Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 flex-1 min-h-0 items-stretch overflow-y-auto lg:overflow-hidden">
+        
+        {/* 📊 Center Dynamic Content Panel (6 Cols on desktop, full width on mobile) */}
+        <div className="lg:col-span-8 xl:col-span-9 flex flex-col gap-2.5 min-h-0 overflow-y-auto custom-scrollbar">
           {activeSideTab === 'overview' && (
             <OverviewTab mission={mission} dynamicResults={dynamicResults} />
           )}
@@ -172,12 +172,14 @@ export default function ResultsDashboardScreen({
           )}
         </div>
 
-        {/* 🏆 Right Panel: Mission Evaluation & Grade Badge (3 Cols) */}
-        <ResultsEvaluationPanel
-          mission={mission}
-          dynamicResults={dynamicResults}
-          onBackToMap={onBackToMap}
-        />
+        {/* 🏆 Right Panel: Mission Evaluation & Grade Badge (3 Cols on desktop) */}
+        <div className="lg:col-span-4 xl:col-span-3 flex flex-col min-h-0">
+          <ResultsEvaluationPanel
+            mission={mission}
+            dynamicResults={dynamicResults}
+            onBackToMap={onBackToMap}
+          />
+        </div>
 
       </div>
 

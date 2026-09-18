@@ -101,17 +101,17 @@ export default function UniversalRotationScreen({ onBack }) {
   };
 
   return (
-    <div className="w-full h-full max-w-[1700px] mx-auto px-3 sm:px-6 py-2.5 flex flex-col justify-between overflow-hidden select-none">
+    <div className="w-full min-h-full sm:h-full max-w-[1700px] mx-auto px-2 sm:px-6 py-2 sm:py-2.5 flex flex-col justify-between overflow-y-auto lg:overflow-hidden select-none">
       
       {/* ── 1. HEADER BAR ── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-2 border-b border-cyan-500/25 shrink-0">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="px-2.5 py-0.5 bg-blue-950 border border-cyan-400/40 rounded-lg text-[11px] font-mono font-bold text-cyan-300">
+            <span className="px-2.5 py-0.5 bg-blue-950 border border-cyan-400/40 rounded-lg text-[10px] sm:text-[11px] font-mono font-bold text-cyan-300">
               {lang === 'ar' ? universalEngineTexts.headerBadgeAr : universalEngineTexts.headerBadgeEn}
             </span>
           </div>
-          <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+          <h2 className="text-sm sm:text-lg font-black text-white flex items-center gap-2">
             <span>{lang === 'ar' ? universalEngineTexts.titleAr : universalEngineTexts.titleEn}</span>
           </h2>
           <p className="text-xs text-slate-300 hidden sm:block">
@@ -122,7 +122,7 @@ export default function UniversalRotationScreen({ onBack }) {
         <div className="flex items-center gap-2 self-end sm:self-auto">
           <button
             onClick={handleResetSequence}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#061838] hover:bg-[#0c2a5c] border border-cyan-500/35 hover:border-cyan-400 rounded-xl text-xs font-bold text-slate-300 hover:text-white transition-all cursor-pointer shadow-sm"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-[#061838] hover:bg-[#0c2a5c] border border-cyan-500/35 hover:border-cyan-400 rounded-xl text-[11px] sm:text-xs font-bold text-slate-300 hover:text-white transition-all cursor-pointer shadow-sm"
           >
             <RotateCcw className="w-3.5 h-3.5 text-cyan-400" />
             <span>{lang === 'ar' ? universalEngineTexts.resetSequenceBtnAr : universalEngineTexts.resetSequenceBtnEn}</span>
@@ -130,7 +130,7 @@ export default function UniversalRotationScreen({ onBack }) {
 
           <button
             onClick={onBack}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white rounded-xl text-xs font-black shadow-md transition-all hover:scale-105 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1 sm:py-1.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white rounded-xl text-xs font-black shadow-md transition-all hover:scale-105 cursor-pointer"
           >
             {isRtl ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
             <span>{lang === 'ar' ? universalEngineTexts.backToHomeBtnAr : universalEngineTexts.backToHomeBtnEn}</span>
@@ -150,7 +150,7 @@ export default function UniversalRotationScreen({ onBack }) {
             <button
               key={preset.id}
               onClick={() => setSelectedPresetId(preset.id)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 selectedPresetId === preset.id
                   ? 'bg-blue-600 text-white border border-cyan-300 shadow-sm'
                   : 'bg-[#081730] border border-white/10 text-slate-300 hover:text-white'
@@ -171,7 +171,7 @@ export default function UniversalRotationScreen({ onBack }) {
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
-            className={`px-3 py-1 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
+            className={`px-2.5 sm:px-3 py-1 rounded-xl text-[11px] sm:text-xs font-black transition-all shrink-0 cursor-pointer ${
               activeCategory === cat.id
                 ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md'
                 : 'bg-[#061838] border border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
@@ -183,7 +183,7 @@ export default function UniversalRotationScreen({ onBack }) {
       </div>
 
       {/* ── 4. MAIN 3-SEASON INTERACTIVE BUILDER COLUMNS ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 flex-1 min-h-0 overflow-hidden my-1">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden my-1">
         
         {/* SEASON 1: WINTER / PRIMARY */}
         <div className="p-3 bg-[#051329]/95 border-2 border-cyan-500/40 rounded-2xl flex flex-col justify-between min-h-0 shadow-lg">

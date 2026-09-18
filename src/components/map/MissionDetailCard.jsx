@@ -7,12 +7,14 @@ import {
   ArrowRight, ArrowLeft, Satellite 
 } from 'lucide-react';
 
-export default function MissionDetailCard({ selectedMission, onStartMission }) {
+export default function MissionDetailCard({ selectedMission, onStartMission, className = '', isMobile = false, onCloseMobile }) {
   const { t, lang, isRtl } = useLanguage();
+
+  const containerClasses = className || "hidden lg:flex lg:absolute lg:top-3 lg:right-3 z-20 w-[360px] max-h-[calc(100%-1.5rem)] overflow-y-auto pointer-events-auto flex-col gap-3.5 p-4 bg-[#061633]/96 border border-cyan-400/50 shadow-2xl backdrop-blur-md custom-scrollbar rounded-2xl";
 
   return (
     <div
-      className="absolute top-3 right-3 z-20 w-[360px] max-h-[calc(100%-1.5rem)] overflow-y-auto pointer-events-auto flex flex-col gap-3.5 p-4 bg-[#061633]/96 border border-cyan-400/50 shadow-2xl backdrop-blur-md"
+      className={containerClasses}
       style={{
         clipPath: 'polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px)',
       }}
@@ -20,14 +22,24 @@ export default function MissionDetailCard({ selectedMission, onStartMission }) {
       {/* ROW 1: Flag + Country Name & Mission Code */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
-          <span className="text-3xl leading-none drop-shadow">{selectedMission.flag}</span>
-          <h2 className="text-xl font-black text-white leading-tight">
+          <span className="text-2xl sm:text-3xl leading-none drop-shadow">{selectedMission.flag}</span>
+          <h2 className="text-lg sm:text-xl font-black text-white leading-tight">
             {lang === 'ar' ? selectedMission.countryAr : selectedMission.countryEn}
           </h2>
         </div>
-        {/* Mission Code Pill */}
-        <div className="shrink-0 bg-[#0c2147] border border-cyan-400/50 rounded-lg px-3 py-1 text-xs font-black text-cyan-300 shadow-sm">
-          {t.missionNumber}{selectedMission.code}
+        <div className="flex items-center gap-1.5">
+          {/* Mission Code Pill */}
+          <div className="shrink-0 bg-[#0c2147] border border-cyan-400/50 rounded-lg px-2.5 sm:px-3 py-1 text-xs font-black text-cyan-300 shadow-sm">
+            {t.missionNumber}{selectedMission.code}
+          </div>
+          {isMobile && onCloseMobile && (
+            <button
+              onClick={onCloseMobile}
+              className="p-1 text-slate-400 hover:text-white rounded-lg bg-white/5 border border-white/10 text-xs"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 

@@ -19,7 +19,7 @@ export default function StartScreen({
   const { lang, isRtl, toggleLanguage } = useLanguage();
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-between p-4 sm:p-6 overflow-hidden select-none">
+    <div className="relative w-full min-h-full h-full flex flex-col items-center justify-between p-3 sm:p-6 overflow-y-auto lg:overflow-hidden select-none">
       
       {/* ── CINEMATIC SPACE BACKGROUND IMAGE ── */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
@@ -34,18 +34,18 @@ export default function StartScreen({
       </div>
       
       {/* ── TOP LUXURY NAV BAR ── */}
-      <div className="w-full max-w-4xl flex items-center justify-between gap-3 shrink-0 z-20">
+      <div className="w-full max-w-4xl flex flex-wrap items-center justify-between gap-2 shrink-0 z-20">
         <div className="flex items-center gap-2">
-          <span className="px-3 py-1 bg-[#061530]/80 border border-cyan-400/30 rounded-full text-[11px] font-mono font-bold text-cyan-300 shadow-sm backdrop-blur-md">
+          <span className="px-2.5 sm:px-3 py-1 bg-[#061530]/80 border border-cyan-400/30 rounded-full text-[10px] sm:text-[11px] font-mono font-bold text-cyan-300 shadow-sm backdrop-blur-md">
             {lang === 'ar' ? startScreenData.badgeAr : startScreenData.badgeEn}
           </span>
         </div>
 
         {/* Action Pills */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <button
             onClick={onOpenGameGuide}
-            className="flex items-center gap-1.5 px-3 py-1 bg-[#061530]/80 hover:bg-[#0c2858] border border-cyan-500/25 hover:border-cyan-400 text-xs font-bold text-slate-300 hover:text-white rounded-full transition-all cursor-pointer backdrop-blur-md"
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 bg-[#061530]/80 hover:bg-[#0c2858] border border-cyan-500/25 hover:border-cyan-400 text-[11px] sm:text-xs font-bold text-slate-300 hover:text-white rounded-full transition-all cursor-pointer backdrop-blur-md"
           >
             <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
             <span>{lang === 'ar' ? startScreenData.guideBtnAr : startScreenData.guideBtnEn}</span>
@@ -53,7 +53,7 @@ export default function StartScreen({
 
           <button
             onClick={onOpenLeaderboard}
-            className="flex items-center gap-1.5 px-3 py-1 bg-[#061530]/80 hover:bg-[#0c2858] border border-amber-500/25 hover:border-amber-400 text-xs font-bold text-slate-300 hover:text-white rounded-full transition-all cursor-pointer backdrop-blur-md"
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 bg-[#061530]/80 hover:bg-[#0c2858] border border-amber-500/25 hover:border-amber-400 text-[11px] sm:text-xs font-bold text-slate-300 hover:text-white rounded-full transition-all cursor-pointer backdrop-blur-md"
           >
             <Trophy className="w-3.5 h-3.5 text-amber-400" />
             <span className="hidden sm:inline">{lang === 'ar' ? startScreenData.leaderboardBtnAr : startScreenData.leaderboardBtnEn}</span>
@@ -61,7 +61,7 @@ export default function StartScreen({
 
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-1.5 px-3 py-1 bg-[#082046]/90 hover:bg-[#103672] border border-cyan-400/40 text-xs font-bold text-cyan-300 rounded-full transition-all shadow-sm cursor-pointer backdrop-blur-md"
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 bg-[#082046]/90 hover:bg-[#103672] border border-cyan-400/40 text-[11px] sm:text-xs font-bold text-cyan-300 rounded-full transition-all shadow-sm cursor-pointer backdrop-blur-md"
           >
             <Languages className="w-3.5 h-3.5 text-cyan-400" />
             <span>{lang === 'ar' ? 'English' : 'عربي'}</span>
@@ -70,13 +70,13 @@ export default function StartScreen({
       </div>
 
       {/* ── CENTER MINIMALIST LUXURY HERO HUB ── */}
-      <div className="my-auto flex flex-col items-center text-center z-10 space-y-5 max-w-lg w-full">
+      <div className="my-auto py-4 flex flex-col items-center text-center z-10 space-y-4 sm:space-y-5 max-w-lg w-full">
         
         {/* LOGO BADGE (Refined, Elegant Glow) */}
         <div className="relative group">
           <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500/30 via-blue-600/30 to-emerald-500/30 rounded-full blur-xl opacity-75 group-hover:opacity-100 transition-opacity" />
           
-          <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-2 border-cyan-400/80 shadow-[0_0_35px_rgba(0,180,216,0.6)] bg-[#041026] flex items-center justify-center">
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-2 border-cyan-400/80 shadow-[0_0_35px_rgba(0,180,216,0.6)] bg-[#041026] flex items-center justify-center">
             <img
               src="/space_hunters_badge.jpg"
               alt="Space Hunters Logo"

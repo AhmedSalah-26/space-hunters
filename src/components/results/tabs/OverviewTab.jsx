@@ -55,7 +55,7 @@ export default function OverviewTab({ mission, dynamicResults }) {
           <span className="text-emerald-400 text-xs font-mono font-bold">{t.consecutiveSeasonsTag}</span>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 text-center">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
           {[
             { 
               season: t.season1Label, 
