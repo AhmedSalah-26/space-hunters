@@ -3,7 +3,7 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { geoNaturalEarth1 } from 'd3-geo';
 import { useLanguage } from '../context/LanguageContext';
-import { Compass } from 'lucide-react';
+import { Compass, Globe, MapPin, ArrowRight, ArrowLeft } from 'lucide-react';
 import WorldMapSvg from './map/WorldMapSvg';
 import MapLegendSidebar from './map/MapLegendSidebar';
 import MissionDetailCard from './map/MissionDetailCard';
@@ -99,7 +99,6 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
     }
   }, [selectedMission, beaconPositions, isMobile]);
 
-
   const handleMouseDown = (e) => {
     if (e.button !== 0) return;
     setIsDragging(true);
@@ -167,31 +166,42 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
     <div
       className="relative w-full max-w-[1600px] mx-auto h-full overflow-hidden bg-[#040c1a] shadow-2xl flex flex-col"
       style={{
-        clipPath: isMobile ? 'none' : 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)',
+        clipPath: isMobile ? 'none' : 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 12px), 0 16px)',
       }}
     >
       {/* ═══════════════════════════════════════════════════════════
-          MOBILE TOP HUD TAB SWITCHER (Visible on screens < lg)
+          MOBILE TOP SUB-BAR (Visible on < lg screens)
           ═══════════════════════════════════════════════════════════ */}
-      <div className="lg:hidden z-30 px-2 pt-1.5 pb-1.5 bg-[#051329]/98 border-b border-cyan-500/30 grid grid-cols-4 gap-1 shrink-0">
-        {[
-          { id: 'map', label: lang === 'ar' ? '🗺️ الخريطة' : '🗺️ Map' },
-          { id: 'details', label: lang === 'ar' ? '📋 التفاصيل' : '📋 Details' },
-          { id: 'missions', label: lang === 'ar' ? '🎯 المهمات' : '🎯 Missions' },
-          { id: 'legend', label: lang === 'ar' ? '📊 الدليل' : '📊 Legend' },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setMobileView(tab.id)}
-            className={`py-1.5 px-1 rounded-lg text-[10px] font-black whitespace-nowrap transition-all cursor-pointer text-center ${
-              mobileView === tab.id
-                ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md'
-                : 'bg-[#081838] border border-white/10 text-slate-300'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="lg:hidden z-30 px-2 py-1.5 bg-[#051329]/98 border-b border-cyan-500/30 flex items-center justify-between gap-1.5 shrink-0 shadow-md">
+        <div className="flex-1 grid grid-cols-3 gap-1">
+          {[
+            { id: 'map', label: lang === 'ar' ? '🗺️ الخريطة' : '🗺️ Map' },
+            { id: 'details', label: lang === 'ar' ? '📋 التفاصيل' : '📋 Details' },
+            { id: 'missions', label: lang === 'ar' ? '🎯 المهمات' : '🎯 Missions' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setMobileView(tab.id)}
+              className={`py-1.5 px-1 rounded-lg text-[10.5px] font-black transition-all cursor-pointer text-center truncate ${
+                mobileView === tab.id
+                  ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md shadow-blue-500/30 border border-cyan-300/40'
+                  : 'bg-[#081838] border border-white/10 text-slate-300 hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Recenter Button as Part of Top Bar */}
+        <button
+          onClick={() => recenterMap()}
+          className="py-1.5 px-2.5 bg-[#081d3d] hover:bg-[#0c2a57] border border-cyan-400/40 rounded-lg text-[10.5px] font-black text-cyan-300 flex items-center gap-1 shrink-0 active:scale-95 transition-all shadow-sm cursor-pointer"
+          title={lang === 'ar' ? 'تركيز الخريطة' : 'Recenter Map'}
+        >
+          <Compass className="w-3.5 h-3.5 text-cyan-400" />
+          <span>{lang === 'ar' ? 'تركيز' : 'Center'}</span>
+        </button>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
@@ -220,14 +230,14 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
         <div className="absolute inset-0 pointer-events-none"
           style={{ boxShadow: 'inset 0 0 80px 25px rgba(2,7,18,0.85)' }} />
 
-        {/* Compass Widget / Recenter Selected Mission Button */}
+        {/* Desktop Compass Widget */}
         <div
           onClick={(e) => { e.stopPropagation(); recenterMap(); }}
-          className="absolute top-3 left-3 lg:left-[250px] z-30 flex items-center gap-1.5 px-2.5 py-1 bg-[#061633]/95 border border-cyan-400/50 hover:border-cyan-300 text-cyan-300 hover:text-white rounded-lg backdrop-blur-md shadow-xl pointer-events-auto cursor-pointer transition-all active:scale-95 group"
+          className="hidden lg:flex absolute top-3 left-[250px] z-30 items-center gap-1.5 px-3 py-1.5 bg-[#061633]/95 border border-cyan-400/50 hover:border-cyan-300 text-cyan-300 hover:text-white rounded-lg backdrop-blur-md shadow-xl pointer-events-auto cursor-pointer transition-all active:scale-95 group"
           title={lang === 'ar' ? mapControlsData.recenterTooltipAr : mapControlsData.recenterTooltipEn}
         >
-          <Compass className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-300 transition-transform group-hover:rotate-45 ${isDragging ? 'animate-spin' : ''}`} />
-          <span className="text-[9.5px] sm:text-[10.5px] font-mono font-black tracking-wider">
+          <Compass className={`w-4 h-4 text-cyan-300 transition-transform group-hover:rotate-45 ${isDragging ? 'animate-spin' : ''}`} />
+          <span className="text-[10.5px] font-mono font-black tracking-wider">
             {lang === 'ar' ? mapControlsData.recenterBtnAr : mapControlsData.recenterBtnEn}
           </span>
         </div>
@@ -250,64 +260,71 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          MOBILE FLOATING BOTTOM HUD BAR (Visible on Mobile Map mode)
+          MOBILE FLOATING BOTTOM HUD BAR — No overlap, spacious & clean
           ═══════════════════════════════════════════════════════════ */}
-      <div className={`lg:hidden absolute bottom-0 left-0 right-0 z-30 pointer-events-auto transition-transform duration-300 ${mobileView !== 'map' ? 'translate-y-full' : 'translate-y-0'}`}>
-        <div className="p-2 bg-[#051329]/97 border-t border-cyan-400/50 shadow-[0_-4px_30px_rgba(0,0,0,0.8)] backdrop-blur-xl flex flex-col gap-1.5">
+      <div className={`lg:hidden absolute bottom-0 left-0 right-0 z-30 pointer-events-auto transition-transform duration-300 ${mobileView !== 'map' ? 'translate-y-full pointer-events-none' : 'translate-y-0'}`}>
+        <div className="p-2.5 bg-gradient-to-t from-[#020713] via-[#051329]/98 to-[#051329]/95 border-t border-cyan-400/50 shadow-[0_-8px_32px_rgba(0,0,0,0.95)] backdrop-blur-xl flex flex-col gap-2">
+          
+          {/* Row 1: Selected Mission Info + Prev/Next Controls */}
           <div className="flex items-center justify-between gap-2">
             {/* Mission Flag & Name */}
             <div
               onClick={() => setMobileView('details')}
-              className="flex items-center gap-2 cursor-pointer flex-1 min-w-0 active:scale-95 transition-transform"
+              className="flex items-center gap-2 cursor-pointer flex-1 min-w-0 active:scale-98 transition-transform"
             >
-              <span className="text-xl shrink-0">{selectedMission.flag}</span>
-              <div className="min-w-0">
+              <span className="text-2xl shrink-0 p-1 bg-[#091b38] rounded-xl border border-cyan-500/30 shadow-sm">{selectedMission.flag}</span>
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <h3 className="text-xs font-black text-white truncate">
+                  <h3 className="text-xs sm:text-sm font-black text-white truncate">
                     {lang === 'ar' ? selectedMission.countryAr : selectedMission.countryEn}
                   </h3>
-                  <span className="text-[9px] font-mono text-cyan-300 bg-blue-950 px-1.5 py-0.5 rounded border border-cyan-500/30 shrink-0">
+                  <span className="text-[9.5px] font-mono font-bold text-cyan-300 bg-blue-950/90 px-1.5 py-0.5 rounded border border-cyan-500/30 shrink-0">
                     #{selectedMission.code}
                   </span>
                 </div>
-                <p className="text-[10px] text-cyan-300 font-bold truncate">
+                <p className="text-[10px] text-cyan-300 font-bold truncate mt-0.5">
                   {lang === 'ar' ? selectedMission.titleAr : selectedMission.titleEn}
                 </p>
               </div>
             </div>
 
-            {/* Prev / Next Arrows */}
+            {/* Prev / Next Mission Arrows */}
             <div className="flex items-center gap-1 shrink-0">
               <button
                 onClick={handlePrevMission}
-                className="w-7 h-7 bg-[#0a1e3f] border border-cyan-400/50 rounded-lg flex items-center justify-center text-cyan-300 active:scale-90"
+                className="w-8 h-8 bg-[#0a1e3f] hover:bg-[#122e5e] border border-cyan-400/50 rounded-xl flex items-center justify-center text-cyan-300 font-black active:scale-90 transition-all cursor-pointer shadow-sm"
+                title={lang === 'ar' ? 'المهمة السابقة' : 'Previous Mission'}
               >
                 ◀
               </button>
               <button
                 onClick={handleNextMission}
-                className="w-7 h-7 bg-[#0a1e3f] border border-cyan-400/50 rounded-lg flex items-center justify-center text-cyan-300 active:scale-90"
+                className="w-8 h-8 bg-[#0a1e3f] hover:bg-[#122e5e] border border-cyan-400/50 rounded-xl flex items-center justify-center text-cyan-300 font-black active:scale-90 transition-all cursor-pointer shadow-sm"
+                title={lang === 'ar' ? 'المهمة التالية' : 'Next Mission'}
               >
                 ▶
               </button>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
+          {/* Row 2: Action Buttons (Two full, distinct, non-overlapping buttons) */}
+          <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setMobileView('details')}
-              className="flex-1 py-2 bg-[#081f42] border border-cyan-400/40 rounded-xl text-[11px] font-black text-cyan-200 transition-all text-center"
+              className="py-2.5 px-2 bg-[#092247] hover:bg-[#0e2f60] border border-cyan-400/40 rounded-xl text-xs font-black text-cyan-200 transition-all text-center active:scale-95 shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              📋 {lang === 'ar' ? 'التفاصيل' : 'Details'}
+              <span>📋</span>
+              <span>{lang === 'ar' ? 'التفاصيل' : 'Details'}</span>
             </button>
             <button
               onClick={onStartMission}
-              className="flex-1 py-2 px-3 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white rounded-xl text-[11px] font-black shadow-lg shadow-blue-500/40 transition-all active:scale-95 text-center flex items-center justify-center gap-1"
+              className="py-2.5 px-3 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-500 hover:from-blue-500 hover:to-teal-400 text-white rounded-xl text-xs font-black shadow-lg shadow-cyan-500/30 border border-cyan-300/50 transition-all active:scale-95 text-center flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              <span>{lang === 'ar' ? '🚀 ابدأ المهمة' : '🚀 Start Mission'}</span>
+              <span>🚀</span>
+              <span>{lang === 'ar' ? 'ابدأ المهمة' : 'Start Mission'}</span>
             </button>
           </div>
+
         </div>
       </div>
 

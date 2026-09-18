@@ -149,10 +149,10 @@ export default function Navbar({ activeTab = 'map', setActiveTab, onGoHome }) {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          MOBILE NAVBAR — REDESIGNED: Single compact bar
+          MOBILE NAVBAR — Ultra-Clean & Non-overlapping
           ═══════════════════════════════════════════════════════════ */}
-      <div className="md:hidden relative z-10 px-2 py-1.5">
-        <div className="flex items-center gap-2">
+      <div className="md:hidden relative z-10 px-2 py-1.5 bg-[#030914]/98">
+        <div className="flex items-center gap-1.5">
 
           {/* Logo */}
           <div
@@ -166,27 +166,27 @@ export default function Navbar({ activeTab = 'map', setActiveTab, onGoHome }) {
             />
           </div>
 
-          {/* Nav Tabs — takes remaining space */}
-          <div className="flex-1 grid grid-cols-4 gap-0.5 bg-[#041220]/90 border border-cyan-500/25 p-0.5 rounded-xl backdrop-blur-md">
+          {/* Nav Tabs — 4 items strictly distributed */}
+          <div className="flex-1 grid grid-cols-4 gap-1 bg-[#041220]/90 border border-cyan-500/25 p-0.5 rounded-xl backdrop-blur-md min-w-0">
             {[
-              { id: 'map',         label: t.navMap,         icon: Home },
-              { id: 'agriBank',    label: t.navAgriBank,    icon: Database },
-              { id: 'gameGuide',   label: t.navGameGuide,   icon: BookOpen },
-              { id: 'leaderboard', label: t.navLeaderboard, icon: Trophy },
+              { id: 'map',         label: lang === 'ar' ? 'الخريطة' : 'Map',         icon: Home },
+              { id: 'agriBank',    label: lang === 'ar' ? 'البنك' : 'Bank',          icon: Database },
+              { id: 'gameGuide',   label: lang === 'ar' ? 'الدليل' : 'Guide',        icon: BookOpen },
+              { id: 'leaderboard', label: lang === 'ar' ? 'الأوائل' : 'Leaders',      icon: Trophy },
             ].map(({ id, label, icon: Icon }) => {
               const isActive = activeTab === id;
               return (
                 <button
                   key={id}
                   onClick={() => { setActiveTab(id); if (id === 'map') onGoHome?.(); }}
-                  className={`flex flex-col items-center justify-center py-1.5 px-0.5 rounded-lg transition-all duration-200 cursor-pointer active:scale-95 ${
+                  className={`flex flex-col items-center justify-center py-1.5 px-0.5 rounded-lg transition-all duration-200 cursor-pointer active:scale-95 min-w-0 ${
                     isActive
                       ? 'bg-gradient-to-b from-blue-500 to-cyan-600 text-white shadow-[0_0_10px_rgba(0,180,256,0.5)]'
                       : 'text-slate-400 hover:text-white hover:bg-white/8'
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 mb-0.5 ${isActive ? 'text-white drop-shadow' : 'text-slate-400'}`} />
-                  <span className={`text-[8.5px] font-black truncate w-full text-center leading-none ${isActive ? 'text-white' : 'text-slate-400'}`}>
+                  <Icon className={`w-3.5 h-3.5 mb-0.5 shrink-0 ${isActive ? 'text-white drop-shadow' : 'text-slate-400'}`} />
+                  <span className={`text-[9px] font-black truncate max-w-full text-center leading-none ${isActive ? 'text-white' : 'text-slate-400'}`}>
                     {label}
                   </span>
                 </button>
@@ -197,10 +197,10 @@ export default function Navbar({ activeTab = 'map', setActiveTab, onGoHome }) {
           {/* Language Toggle */}
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-0.5 px-2 py-1.5 bg-[#0a1e3f] border border-cyan-400/40 text-[9px] font-black text-cyan-300 rounded-lg shrink-0 active:scale-90 transition-transform cursor-pointer"
+            className="flex items-center gap-1 px-2 py-1.5 bg-[#0a1e3f] hover:bg-[#112d5c] border border-cyan-400/40 text-[9.5px] font-black text-cyan-300 rounded-lg shrink-0 active:scale-90 transition-transform cursor-pointer shadow-sm"
           >
-            <Languages className="w-3 h-3 text-cyan-400" />
-            <span>{lang === 'ar' ? 'EN' : 'ع'}</span>
+            <Languages className="w-3 h-3 text-cyan-400 shrink-0" />
+            <span>{lang === 'ar' ? 'EN' : 'عربي'}</span>
           </button>
 
         </div>
