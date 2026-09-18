@@ -10,7 +10,7 @@ export default function MissionBriefingScreen({ mission, onBack, onContinue }) {
   const [mobileTab, setMobileTab] = React.useState('dialogue'); // 'dialogue' | 'telemetry' | 'story'
 
   return (
-    <div className="w-full max-w-[1650px] mx-auto px-2 sm:px-6 py-2 sm:py-2 flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden">
+    <div className="w-full max-w-[1650px] mx-auto px-2 sm:px-6 py-2 flex flex-col gap-2 flex-1 h-full min-h-0 overflow-y-auto lg:overflow-hidden">
 
       {/* 1. Stepper Header at Top */}
       <div className="shrink-0">

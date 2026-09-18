@@ -149,7 +149,7 @@ export default function BriefingDialogue({ mission, onContinue }) {
   const isNasaActive = !revealedAll && activeMessage.sender === 'nasa';
 
   return (
-    <div className="lg:col-span-6 flex flex-col gap-2.5 min-h-0 overflow-hidden">
+    <div className="w-full h-full flex flex-col gap-2.5 min-h-0 overflow-hidden flex-1">
       
       {/* Top Panorama View */}
       <div
