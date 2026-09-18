@@ -21,7 +21,7 @@ export default function ResultsSidebar({ mission, activeSideTab, setActiveSideTa
   return (
     <>
       {/* Mobile Horizontal Tabs Switcher (Visible on < lg screens) */}
-      <div className="lg:hidden p-1.5 bg-[#061633]/95 border border-cyan-500/30 rounded-xl flex items-center gap-1.5 shrink-0 overflow-x-auto no-scrollbar">
+      <div className="lg:hidden p-1 bg-[#061633]/95 border border-cyan-500/30 rounded-xl grid grid-cols-5 gap-1 shrink-0">
         {navTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeSideTab === tab.id;
@@ -29,14 +29,14 @@ export default function ResultsSidebar({ mission, activeSideTab, setActiveSideTa
             <button
               key={tab.id}
               onClick={() => setActiveSideTab(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-black whitespace-nowrap transition-all rounded-lg cursor-pointer shrink-0 ${
+              className={`flex flex-col items-center gap-0.5 py-1.5 px-0.5 text-[9px] font-black transition-all rounded-lg cursor-pointer ${
                 isActive
-                  ? 'bg-blue-600 text-white shadow-md border border-cyan-400/40'
+                  ? 'bg-blue-600 text-white shadow-md'
                   : 'text-slate-300 hover:text-white bg-white/5'
               }`}
             >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{tab.label}</span>
+              <Icon className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate w-full text-center leading-none">{tab.label}</span>
             </button>
           );
         })}

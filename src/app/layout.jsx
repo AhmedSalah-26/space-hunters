@@ -14,15 +14,23 @@ export const metadata = {
   },
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+};
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="ar" dir="rtl" className="h-full">
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="shortcut icon" href="/favicon.svg" />
         <link rel="apple-touch-icon" href="/space_hunters_badge.jpg" />
       </head>
-      <body className="bg-[#050c1b] text-slate-100 min-h-screen overflow-x-hidden selection:bg-blue-600 selection:text-white">
+      <body className="bg-[#050c1b] text-slate-100 h-full overflow-hidden selection:bg-blue-600 selection:text-white">
         <LanguageProvider>
           {children}
         </LanguageProvider>

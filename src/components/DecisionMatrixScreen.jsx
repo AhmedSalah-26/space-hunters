@@ -102,15 +102,15 @@ export default function DecisionMatrixScreen({ mission, onBack, onDecisionSubmit
       </div>
 
       {/* Mobile Tab Switcher (Visible on < lg screens) */}
-      <div className="lg:hidden p-1.5 bg-[#061633]/95 border border-cyan-500/30 rounded-xl flex items-center gap-1 shrink-0 overflow-x-auto no-scrollbar">
+      <div className="lg:hidden p-1 bg-[#061633]/95 border border-cyan-500/30 rounded-xl grid grid-cols-2 gap-1 shrink-0">
         {[
-          { id: 'matrix', label: '🌾 خطة الدورة الزراعية' },
-          { id: 'telemetry', label: '🛰️ بيانات الحقل وناسا' },
+          { id: 'matrix', label: '🌾 خطة الدورة' },
+          { id: 'telemetry', label: '🛰️ بيانات الحقل' },
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setMobileTab(tab.id)}
-            className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-black whitespace-nowrap transition-all cursor-pointer ${
+            className={`py-1.5 px-2 rounded-lg text-[11px] font-black whitespace-nowrap transition-all cursor-pointer text-center ${
               mobileTab === tab.id
                 ? 'bg-blue-600 text-white shadow-md'
                 : 'text-slate-300 hover:text-white bg-white/5'

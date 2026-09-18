@@ -10,7 +10,7 @@ export default function MissionBriefingScreen({ mission, onBack, onContinue }) {
   const [mobileTab, setMobileTab] = React.useState('dialogue'); // 'dialogue' | 'telemetry' | 'story'
 
   return (
-    <div className="w-full max-w-[1650px] mx-auto px-2 sm:px-6 py-1.5 sm:py-2 flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden">
+    <div className="w-full max-w-[1650px] mx-auto px-2 sm:px-6 py-2 sm:py-2 flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden">
 
       {/* 1. Stepper Header at Top */}
       <div className="shrink-0">
@@ -18,16 +18,16 @@ export default function MissionBriefingScreen({ mission, onBack, onContinue }) {
       </div>
 
       {/* Mobile Tab Switcher (Visible on < lg screens) */}
-      <div className="lg:hidden p-1.5 bg-[#061633]/95 border border-cyan-500/30 rounded-xl flex items-center gap-1 shrink-0 overflow-x-auto no-scrollbar">
+      <div className="lg:hidden p-1 bg-[#061633]/95 border border-cyan-500/30 rounded-xl grid grid-cols-3 gap-1 shrink-0">
         {[
-          { id: 'dialogue', label: '💬 المحادثة والتشخيص' },
+          { id: 'dialogue', label: '💬 المحادثة' },
           { id: 'telemetry', label: '🛰️ بيانات ناسا' },
-          { id: 'story', label: '📋 قصة المهمة والأهداف' },
+          { id: 'story', label: '📋 القصة' },
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setMobileTab(tab.id)}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-black whitespace-nowrap transition-all cursor-pointer ${
+            className={`py-1.5 px-1 rounded-lg text-[10.5px] font-black whitespace-nowrap transition-all cursor-pointer text-center ${
               mobileTab === tab.id
                 ? 'bg-blue-600 text-white shadow-md'
                 : 'text-slate-300 hover:text-white bg-white/5'

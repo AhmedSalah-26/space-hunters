@@ -13,14 +13,42 @@
   --accent-emerald: #10b981;
 }
 
+html {
+  height: 100%;
+  height: 100dvh;
+}
+
 body {
   background-color: var(--bg-deep);
   color: #e2e8f0;
   font-family: 'Cairo', 'Inter', sans-serif;
   overflow-x: hidden;
+  overflow-y: hidden;
   margin: 0;
   padding: 0;
   user-select: none;
+  height: 100%;
+  height: 100dvh;
+}
+
+/* Touch improvements */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, [role="button"] {
+  touch-action: manipulation;
+}
+
+/* Mobile safe area support */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Ensure proper scrolling in nested scroll containers on mobile */
+.mobile-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -94,23 +122,35 @@ body {
   box-shadow: 0 0 20px rgba(239, 68, 68, 0.45);
 }
 
-/* Custom Futuristic Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* Custom Futuristic Scrollbar - hide on mobile */
+@media (min-width: 1024px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(6, 13, 29, 0.8);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.4);
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.8);
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: rgba(6, 13, 29, 0.8);
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.4);
-  border-radius: 2px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.8);
+/* Mobile - no scrollbar */
+@media (max-width: 1023px) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  * {
+    scrollbar-width: none;
+  }
 }
 
 /* Pulse Animation for Map Hotspots */

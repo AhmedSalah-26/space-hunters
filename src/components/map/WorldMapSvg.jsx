@@ -85,10 +85,13 @@ export default function WorldMapSvg({
 
   /* Build projection + path generator */
   const { countries, pathGen } = useMemo(() => {
-    const scale = isMobile ? 145 : 118;
+    const scale = isMobile ? 155 : 118;
+    // On mobile use a vertically centered translate so map fills portrait view
+    const tx = isMobile ? width / 2 + 25 : width / 2 + 55;
+    const ty = isMobile ? height / 2 - 30 : height / 2 - 95;
     const proj = geoNaturalEarth1()
       .scale(scale)
-      .translate([width / 2 + 55, height / 2 - 95]);
+      .translate([tx, ty]);
     const pg = geoPath(proj);
     const countries = feature(worldData, worldData.objects.countries);
     return { countries, pathGen: pg };

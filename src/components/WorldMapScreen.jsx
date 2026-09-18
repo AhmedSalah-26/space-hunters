@@ -47,10 +47,12 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
 
   /* ── build projection (dynamic scale for mobile) ── */
   const project = useMemo(() => {
-    const scale = isMobile ? 145 : 118;
+    const scale = isMobile ? 155 : 118;
+    const tx = isMobile ? W / 2 + 25 : W / 2 + 55;
+    const ty = isMobile ? H / 2 - 30 : H / 2 - 95;
     return geoNaturalEarth1()
       .scale(scale)
-      .translate([W / 2 + 55, H / 2 - 95]);
+      .translate([tx, ty]);
   }, [isMobile]);
 
   /* ── mission beacon projected pixel positions ── */
@@ -67,11 +69,13 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
   /* ── Calculate Pan offset to center map perfectly on selected mission ── */
   const recenterMap = (targetMission) => {
     const m = targetMission || selectedMission;
+    const cx = isMobile ? W / 2 + 25 : W / 2 + 55;
+    const cy = isMobile ? H / 2 - 30 : H / 2 - 95;
     if (m && beaconPositions[m.id]) {
       const pos = beaconPositions[m.id];
       if (pos && !isNaN(pos.x) && !isNaN(pos.y)) {
-        const targetX = (W / 2 + 55) - pos.x;
-        const targetY = (H / 2 - 95) - pos.y;
+        const targetX = cx - pos.x;
+        const targetY = cy - pos.y;
         const clampedX = Math.max(-360, Math.min(360, targetX));
         const clampedY = Math.max(-260, Math.min(180, targetY));
         setPan({ x: clampedX, y: clampedY });
@@ -83,15 +87,18 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
 
   /* Auto-recenter when selectedMission changes */
   useEffect(() => {
+    const cx = isMobile ? W / 2 + 25 : W / 2 + 55;
+    const cy = isMobile ? H / 2 - 30 : H / 2 - 95;
     if (selectedMission?.id && beaconPositions[selectedMission.id]) {
       const pos = beaconPositions[selectedMission.id];
       if (pos && !isNaN(pos.x)) {
-        const targetX = Math.max(-360, Math.min(360, (W / 2 + 55) - pos.x));
-        const targetY = Math.max(-260, Math.min(180, (H / 2 - 95) - pos.y));
+        const targetX = Math.max(-360, Math.min(360, cx - pos.x));
+        const targetY = Math.max(-260, Math.min(180, cy - pos.y));
         setPan({ x: targetX, y: targetY });
       }
     }
-  }, [selectedMission, beaconPositions]);
+  }, [selectedMission, beaconPositions, isMobile]);
+
 
   const handleMouseDown = (e) => {
     if (e.button !== 0) return;
@@ -158,15 +165,15 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
 
   return (
     <div
-      className="relative w-full max-w-[1600px] mx-auto h-full max-h-full min-h-[520px] sm:min-h-0 overflow-hidden border border-cyan-500/30 bg-[#040c1a] shadow-2xl flex flex-col justify-between"
+      className="relative w-full max-w-[1600px] mx-auto h-full overflow-hidden bg-[#040c1a] shadow-2xl flex flex-col"
       style={{
-        clipPath: 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)',
+        clipPath: isMobile ? 'none' : 'polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px)',
       }}
     >
       {/* ═══════════════════════════════════════════════════════════
           MOBILE TOP HUD TAB SWITCHER (Visible on screens < lg)
           ═══════════════════════════════════════════════════════════ */}
-      <div className="lg:hidden z-30 p-2 bg-[#051329]/95 border-b border-cyan-500/30 flex items-center justify-between gap-1.5 shrink-0 overflow-x-auto no-scrollbar">
+      <div className="lg:hidden z-30 px-2 pt-1.5 pb-1.5 bg-[#051329]/98 border-b border-cyan-500/30 grid grid-cols-4 gap-1 shrink-0">
         {[
           { id: 'map', label: lang === 'ar' ? '🗺️ الخريطة' : '🗺️ Map' },
           { id: 'details', label: lang === 'ar' ? '📋 التفاصيل' : '📋 Details' },
@@ -176,10 +183,10 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
           <button
             key={tab.id}
             onClick={() => setMobileView(tab.id)}
-            className={`flex-1 py-1.5 px-2 rounded-xl text-[11px] font-black whitespace-nowrap transition-all cursor-pointer ${
+            className={`py-1.5 px-1 rounded-lg text-[10px] font-black whitespace-nowrap transition-all cursor-pointer text-center ${
               mobileView === tab.id
                 ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md'
-                : 'bg-[#081838] border border-white/10 text-slate-300 hover:text-white'
+                : 'bg-[#081838] border border-white/10 text-slate-300'
             }`}
           >
             {tab.label}
@@ -216,7 +223,7 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
         {/* Compass Widget / Recenter Selected Mission Button */}
         <div
           onClick={(e) => { e.stopPropagation(); recenterMap(); }}
-          className="absolute top-12 lg:top-3 left-3 lg:left-[250px] z-30 flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-[#061633]/95 border border-cyan-400/50 hover:border-cyan-300 text-cyan-300 hover:text-white rounded-lg backdrop-blur-md shadow-xl pointer-events-auto cursor-pointer transition-all active:scale-95 group"
+          className="absolute top-3 left-3 lg:left-[250px] z-30 flex items-center gap-1.5 px-2.5 py-1 bg-[#061633]/95 border border-cyan-400/50 hover:border-cyan-300 text-cyan-300 hover:text-white rounded-lg backdrop-blur-md shadow-xl pointer-events-auto cursor-pointer transition-all active:scale-95 group"
           title={lang === 'ar' ? mapControlsData.recenterTooltipAr : mapControlsData.recenterTooltipEn}
         >
           <Compass className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-300 transition-transform group-hover:rotate-45 ${isDragging ? 'animate-spin' : ''}`} />
@@ -245,65 +252,63 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
       {/* ═══════════════════════════════════════════════════════════
           MOBILE FLOATING BOTTOM HUD BAR (Visible on Mobile Map mode)
           ═══════════════════════════════════════════════════════════ */}
-      <div className="lg:hidden absolute bottom-2 left-2 right-2 z-30 pointer-events-auto">
-        {mobileView === 'map' && (
-          <div className="p-2.5 bg-[#051329]/96 border border-cyan-400/50 rounded-2xl shadow-[0_0_30px_rgba(0,0,0,0.9)] backdrop-blur-xl flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-2">
-              {/* Mission Flag & Name */}
-              <div
-                onClick={() => setMobileView('details')}
-                className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
-              >
-                <span className="text-2xl">{selectedMission.flag}</span>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="text-xs sm:text-sm font-black text-white truncate">
-                      {lang === 'ar' ? selectedMission.countryAr : selectedMission.countryEn}
-                    </h3>
-                    <span className="text-[10px] font-mono text-cyan-300 bg-blue-950 px-1.5 py-0.2 rounded border border-cyan-500/30">
-                      #{selectedMission.code}
-                    </span>
-                  </div>
-                  <p className="text-[10.5px] text-cyan-300 font-bold truncate">
-                    {lang === 'ar' ? selectedMission.titleAr : selectedMission.titleEn}
-                  </p>
+      <div className={`lg:hidden absolute bottom-0 left-0 right-0 z-30 pointer-events-auto transition-transform duration-300 ${mobileView !== 'map' ? 'translate-y-full' : 'translate-y-0'}`}>
+        <div className="p-2 bg-[#051329]/97 border-t border-cyan-400/50 shadow-[0_-4px_30px_rgba(0,0,0,0.8)] backdrop-blur-xl flex flex-col gap-1.5">
+          <div className="flex items-center justify-between gap-2">
+            {/* Mission Flag & Name */}
+            <div
+              onClick={() => setMobileView('details')}
+              className="flex items-center gap-2 cursor-pointer flex-1 min-w-0 active:scale-95 transition-transform"
+            >
+              <span className="text-xl shrink-0">{selectedMission.flag}</span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <h3 className="text-xs font-black text-white truncate">
+                    {lang === 'ar' ? selectedMission.countryAr : selectedMission.countryEn}
+                  </h3>
+                  <span className="text-[9px] font-mono text-cyan-300 bg-blue-950 px-1.5 py-0.5 rounded border border-cyan-500/30 shrink-0">
+                    #{selectedMission.code}
+                  </span>
                 </div>
-              </div>
-
-              {/* Prev / Next Arrows */}
-              <div className="flex items-center gap-1 shrink-0">
-                <button
-                  onClick={handlePrevMission}
-                  className="w-7 h-7 bg-[#0a1e3f] border border-cyan-400/50 rounded-lg flex items-center justify-center text-cyan-300 active:scale-90"
-                >
-                  ◀
-                </button>
-                <button
-                  onClick={handleNextMission}
-                  className="w-7 h-7 bg-[#0a1e3f] border border-cyan-400/50 rounded-lg flex items-center justify-center text-cyan-300 active:scale-90"
-                >
-                  ▶
-                </button>
+                <p className="text-[10px] text-cyan-300 font-bold truncate">
+                  {lang === 'ar' ? selectedMission.titleAr : selectedMission.titleEn}
+                </p>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-2">
+            {/* Prev / Next Arrows */}
+            <div className="flex items-center gap-1 shrink-0">
               <button
-                onClick={() => setMobileView('details')}
-                className="flex-1 py-2 px-2.5 bg-[#081f42] hover:bg-[#0c2a5c] border border-cyan-400/40 rounded-xl text-xs font-black text-cyan-200 transition-all text-center"
+                onClick={handlePrevMission}
+                className="w-7 h-7 bg-[#0a1e3f] border border-cyan-400/50 rounded-lg flex items-center justify-center text-cyan-300 active:scale-90"
               >
-                📋 {lang === 'ar' ? 'عرض التفاصيل' : 'View Details'}
+                ◀
               </button>
               <button
-                onClick={onStartMission}
-                className="flex-1 py-2 px-3 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white rounded-xl text-xs font-black shadow-lg shadow-blue-500/40 transition-all active:scale-95 text-center flex items-center justify-center gap-1"
+                onClick={handleNextMission}
+                className="w-7 h-7 bg-[#0a1e3f] border border-cyan-400/50 rounded-lg flex items-center justify-center text-cyan-300 active:scale-90"
               >
-                <span>{lang === 'ar' ? '🚀 ابدأ المهمة' : '🚀 Start Mission'}</span>
+                ▶
               </button>
             </div>
           </div>
-        )}
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setMobileView('details')}
+              className="flex-1 py-2 bg-[#081f42] border border-cyan-400/40 rounded-xl text-[11px] font-black text-cyan-200 transition-all text-center"
+            >
+              📋 {lang === 'ar' ? 'التفاصيل' : 'Details'}
+            </button>
+            <button
+              onClick={onStartMission}
+              className="flex-1 py-2 px-3 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white rounded-xl text-[11px] font-black shadow-lg shadow-blue-500/40 transition-all active:scale-95 text-center flex items-center justify-center gap-1"
+            >
+              <span>{lang === 'ar' ? '🚀 ابدأ المهمة' : '🚀 Start Mission'}</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
