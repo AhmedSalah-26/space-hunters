@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { 
   Rocket, Sprout, RotateCcw, 
   BookOpen, Trophy, Languages, 
-  ArrowLeft, ArrowRight
+  ArrowLeft, ArrowRight, Satellite, Globe2
 } from 'lucide-react';
 import { startScreenData } from '../data/startScreenData';
 
@@ -19,153 +19,188 @@ export default function StartScreen({
   const { lang, isRtl, toggleLanguage } = useLanguage();
 
   return (
-    <div className="relative w-full min-h-full h-full flex flex-col items-center justify-between p-3 sm:p-6 overflow-y-auto lg:overflow-hidden select-none">
+    <div className="relative w-full h-full flex flex-col items-center overflow-y-auto select-none">
       
-      {/* ── CINEMATIC SPACE BACKGROUND IMAGE ── */}
+      {/* ── CINEMATIC SPACE BACKGROUND ── */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         <img
           src="/start_screen_bg.jpg"
           alt="Space Earth Background"
-          className="w-full h-full object-cover object-center transform scale-[1.02] transition-transform duration-1000"
+          className="w-full h-full object-cover object-center scale-[1.05]"
         />
-        {/* Sleek Cinematic Contrast Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#030914]/80 via-[#050c1b]/65 to-[#02050c]/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_30%,_#020614_95%)] opacity-85" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#020a1a]/85 via-[#050c1b]/60 to-[#02050c]/95" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_20%,_#010510_90%)] opacity-90" />
+        {/* Animated scan line */}
+        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent animate-[scanline_4s_ease-in-out_infinite]" style={{animation: 'none'}} />
       </div>
-      
-      {/* ── TOP LUXURY NAV BAR ── */}
-      <div className="w-full max-w-4xl flex flex-wrap items-center justify-between gap-2 shrink-0 z-20">
-        <div className="flex items-center gap-2">
-          <span className="px-2.5 sm:px-3 py-1 bg-[#061530]/80 border border-cyan-400/30 rounded-full text-[10px] sm:text-[11px] font-mono font-bold text-cyan-300 shadow-sm backdrop-blur-md">
-            {lang === 'ar' ? startScreenData.badgeAr : startScreenData.badgeEn}
-          </span>
-        </div>
+
+      {/* ── TOP NAV STRIP ── */}
+      <div className="w-full flex items-center justify-between px-3 sm:px-6 pt-3 sm:pt-4 pb-2 shrink-0 z-20">
+        {/* Badge */}
+        <span className="px-2.5 py-1 bg-[#061530]/90 border border-cyan-400/35 rounded-full text-[10px] sm:text-[11px] font-mono font-bold text-cyan-300 shadow-sm backdrop-blur-md">
+          {lang === 'ar' ? startScreenData.badgeAr : startScreenData.badgeEn}
+        </span>
 
         {/* Action Pills */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={onOpenGameGuide}
-            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 bg-[#061530]/80 hover:bg-[#0c2858] border border-cyan-500/25 hover:border-cyan-400 text-[11px] sm:text-xs font-bold text-slate-300 hover:text-white rounded-full transition-all cursor-pointer backdrop-blur-md"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#061530]/90 hover:bg-[#0c2858] border border-white/10 hover:border-cyan-400/60 text-[10px] sm:text-xs font-bold text-slate-300 hover:text-white rounded-lg transition-all cursor-pointer backdrop-blur-md active:scale-95"
           >
-            <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
-            <span>{lang === 'ar' ? startScreenData.guideBtnAr : startScreenData.guideBtnEn}</span>
+            <BookOpen className="w-3 h-3 text-cyan-400" />
+            <span className="hidden sm:inline">{lang === 'ar' ? startScreenData.guideBtnAr : startScreenData.guideBtnEn}</span>
           </button>
 
           <button
             onClick={onOpenLeaderboard}
-            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 bg-[#061530]/80 hover:bg-[#0c2858] border border-amber-500/25 hover:border-amber-400 text-[11px] sm:text-xs font-bold text-slate-300 hover:text-white rounded-full transition-all cursor-pointer backdrop-blur-md"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#1a1200]/90 hover:bg-[#2e2000] border border-amber-500/30 hover:border-amber-400/60 text-[10px] sm:text-xs font-bold text-amber-300 hover:text-amber-100 rounded-lg transition-all cursor-pointer backdrop-blur-md active:scale-95"
           >
-            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+            <Trophy className="w-3 h-3 text-amber-400" />
             <span className="hidden sm:inline">{lang === 'ar' ? startScreenData.leaderboardBtnAr : startScreenData.leaderboardBtnEn}</span>
           </button>
 
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 bg-[#082046]/90 hover:bg-[#103672] border border-cyan-400/40 text-[11px] sm:text-xs font-bold text-cyan-300 rounded-full transition-all shadow-sm cursor-pointer backdrop-blur-md"
+            className="flex items-center gap-1 px-2.5 py-1.5 bg-[#082046]/90 hover:bg-[#103672] border border-cyan-400/40 text-[10px] sm:text-xs font-bold text-cyan-300 rounded-lg transition-all cursor-pointer backdrop-blur-md active:scale-95"
           >
-            <Languages className="w-3.5 h-3.5 text-cyan-400" />
-            <span>{lang === 'ar' ? 'English' : 'عربي'}</span>
+            <Languages className="w-3 h-3 text-cyan-400" />
+            <span>{lang === 'ar' ? 'EN' : 'ع'}</span>
           </button>
         </div>
       </div>
 
-      {/* ── CENTER MINIMALIST LUXURY HERO HUB ── */}
-      <div className="my-auto py-4 flex flex-col items-center text-center z-10 space-y-4 sm:space-y-5 max-w-lg w-full">
+      {/* ── HERO SECTION ── */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 z-10 py-2 sm:py-4 w-full max-w-lg mx-auto">
         
-        {/* LOGO BADGE (Refined, Elegant Glow) */}
-        <div className="relative group">
-          <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500/30 via-blue-600/30 to-emerald-500/30 rounded-full blur-xl opacity-75 group-hover:opacity-100 transition-opacity" />
-          
-          <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-2 border-cyan-400/80 shadow-[0_0_35px_rgba(0,180,216,0.6)] bg-[#041026] flex items-center justify-center">
-            <img
-              src="/space_hunters_badge.jpg"
-              alt="Space Hunters Logo"
-              className="w-full h-full object-cover scale-[2.1] object-center transition-transform duration-500 group-hover:scale-[2.25]"
-            />
+        {/* Logo + Title group */}
+        <div className="flex flex-col items-center text-center mb-6 sm:mb-8">
+          {/* Outer glow ring */}
+          <div className="relative mb-4 sm:mb-5 group">
+            <div className="absolute -inset-3 bg-gradient-to-r from-cyan-500/25 via-blue-600/25 to-emerald-500/20 rounded-full blur-2xl animate-pulse" />
+            <div className="absolute -inset-1 bg-gradient-to-br from-cyan-400/40 to-blue-600/40 rounded-full blur-md" />
+            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-2 border-cyan-400/90 shadow-[0_0_40px_rgba(0,180,216,0.7),inset_0_0_20px_rgba(0,0,0,0.5)] bg-[#041026] transition-transform duration-500 group-hover:scale-105">
+              <img
+                src="/space_hunters_badge.jpg"
+                alt="Space Hunters Logo"
+                className="w-full h-full object-cover scale-[2.1] object-center"
+              />
+            </div>
+            {/* NASA badge */}
+            <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[#0b3d91] border-2 border-cyan-300/50 shadow-[0_0_8px_rgba(11,61,145,0.8)] flex items-center justify-center overflow-hidden">
+              <span className="text-[7px] font-black text-white z-10 relative">NASA</span>
+            </div>
           </div>
-        </div>
 
-        {/* TITLES */}
-        <div className="space-y-1.5 max-w-md px-2">
-          <h1 className="text-3xl sm:text-4xl font-black tracking-wider text-white font-sans drop-shadow-[0_2px_15px_rgba(0,0,0,0.8)]">
-            <span>{startScreenData.titlePrefix}</span>
-            <span className="text-[#00b4d8] ml-2 drop-shadow-[0_0_20px_rgba(0,180,216,0.8)]">
-              {startScreenData.titleSuffix}
-            </span>
+          {/* Title */}
+          <h1 className="text-4xl sm:text-5xl font-black tracking-wider text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.9)] mb-2 leading-none">
+            <span>SPACE</span>
+            <span className="text-[#00b4d8] ml-2 drop-shadow-[0_0_24px_rgba(0,180,216,0.9)]">HUNTERS</span>
           </h1>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-cyan-400/60" />
+            <Satellite className="w-3 h-3 text-cyan-400" />
+            <span className="text-[10px] text-[#38bdf8] font-black tracking-[0.2em] uppercase">NASA Space Apps 2026</span>
+            <Satellite className="w-3 h-3 text-cyan-400 scale-x-[-1]" />
+            <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-cyan-400/60" />
+          </div>
 
-          <p className="text-xs sm:text-[13px] font-medium text-cyan-100/80 leading-relaxed drop-shadow-md">
+          <p className="text-xs sm:text-sm font-medium text-cyan-100/75 leading-relaxed max-w-sm drop-shadow-md">
             {lang === 'ar' ? startScreenData.taglineAr : startScreenData.taglineEn}
           </p>
         </div>
 
-        {/* ── 3 COMPACT LUXURY ACTION BUTTONS ── */}
-        <div className="w-full max-w-sm space-y-2.5 pt-1">
+        {/* ── ACTION BUTTONS ── */}
+        <div className="w-full space-y-2.5">
           
-          {/* BUTTON 1: ابدأ اللعب */}
+          {/* MAIN CTA — Start Game */}
           <button
             onClick={onStartGame}
-            className="w-full p-2.5 sm:p-3 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white rounded-xl shadow-[0_0_20px_rgba(0,180,216,0.4)] flex items-center justify-between transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer border border-cyan-300/40 group"
+            className="w-full py-3.5 sm:py-4 px-5 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white rounded-2xl shadow-[0_0_30px_rgba(0,120,220,0.5),0_8px_20px_rgba(0,0,0,0.4)] flex items-center justify-between transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer border border-cyan-300/30 group relative overflow-hidden"
           >
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center text-white shrink-0 group-hover:rotate-6 transition-transform">
-                <Rocket className="w-4 h-4" />
+            {/* Shimmer */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+            <div className="flex items-center gap-3 z-10">
+              <div className="w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0 group-hover:rotate-12 transition-transform duration-300">
+                <Rocket className="w-5 h-5 text-white" />
               </div>
-              <span className="text-sm font-black tracking-wide">
-                {lang === 'ar' ? startScreenData.buttons.startGame.labelAr : startScreenData.buttons.startGame.labelEn}
-              </span>
+              <div className="text-left">
+                <div className="text-sm sm:text-base font-black tracking-wide leading-tight">
+                  {lang === 'ar' ? startScreenData.buttons.startGame.labelAr : startScreenData.buttons.startGame.labelEn}
+                </div>
+                <div className="text-[10px] text-cyan-100/80 font-medium">
+                  {lang === 'ar' ? '٦ مهمات زراعية عالمية' : '6 Global Farm Missions'}
+                </div>
+              </div>
             </div>
-
-            <div className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center shrink-0">
-              {isRtl ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0 z-10">
+              {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
             </div>
           </button>
 
-          {/* BUTTON 2: بنك المحاصيل */}
-          <button
-            onClick={onOpenAgriBank}
-            className="w-full p-2.5 sm:p-3 bg-[#061a33]/80 hover:bg-[#0a284e] text-slate-100 hover:text-white rounded-xl border border-emerald-500/40 hover:border-emerald-400 flex items-center justify-between transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm group backdrop-blur-md"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center text-emerald-300 shrink-0 group-hover:rotate-6 transition-transform">
+          {/* Secondary Buttons Row */}
+          <div className="grid grid-cols-2 gap-2">
+            
+            {/* AgriBank */}
+            <button
+              onClick={onOpenAgriBank}
+              className="py-3 px-3.5 bg-[#061a33]/85 hover:bg-[#0a284e] border border-emerald-500/35 hover:border-emerald-400/70 rounded-xl flex items-center gap-2.5 transition-all active:scale-[0.97] cursor-pointer group backdrop-blur-sm"
+            >
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center text-emerald-300 shrink-0 group-hover:scale-110 transition-transform">
                 <Sprout className="w-4 h-4" />
               </div>
-              <span className="text-xs sm:text-sm font-bold tracking-wide text-emerald-200">
-                {lang === 'ar' ? startScreenData.buttons.cropBank.labelAr : startScreenData.buttons.cropBank.labelEn}
-              </span>
-            </div>
+              <div className="text-left min-w-0">
+                <div className="text-[11px] font-black text-emerald-200 truncate leading-tight">
+                  {lang === 'ar' ? startScreenData.buttons.cropBank.labelAr : startScreenData.buttons.cropBank.labelEn}
+                </div>
+                <div className="text-[9px] text-emerald-400/70 font-medium truncate">
+                  {lang === 'ar' ? 'قاعدة البيانات' : 'Database'}
+                </div>
+              </div>
+            </button>
 
-            <div className="w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-300 flex items-center justify-center shrink-0">
-              {isRtl ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
-            </div>
-          </button>
-
-          {/* BUTTON 3: صانع تسلسل الدورات */}
-          <button
-            onClick={onOpenSequenceBuilder}
-            className="w-full p-2.5 sm:p-3 bg-[#091530]/80 hover:bg-[#11234c] text-slate-100 hover:text-white rounded-xl border border-cyan-500/35 hover:border-cyan-400 flex items-center justify-between transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm group backdrop-blur-md"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shrink-0 group-hover:-rotate-12 transition-transform">
+            {/* Sequence Builder */}
+            <button
+              onClick={onOpenSequenceBuilder}
+              className="py-3 px-3.5 bg-[#061a33]/85 hover:bg-[#0a1e50] border border-cyan-500/30 hover:border-cyan-400/70 rounded-xl flex items-center gap-2.5 transition-all active:scale-[0.97] cursor-pointer group backdrop-blur-sm"
+            >
+              <div className="w-8 h-8 rounded-lg bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shrink-0 group-hover:rotate-180 transition-transform duration-500">
                 <RotateCcw className="w-4 h-4" />
               </div>
-              <span className="text-xs sm:text-sm font-bold tracking-wide text-cyan-200">
-                {lang === 'ar' ? startScreenData.buttons.sequenceBuilder.labelAr : startScreenData.buttons.sequenceBuilder.labelEn}
-              </span>
-            </div>
+              <div className="text-left min-w-0">
+                <div className="text-[11px] font-black text-cyan-200 truncate leading-tight">
+                  {lang === 'ar' ? startScreenData.buttons.sequenceBuilder.labelAr : startScreenData.buttons.sequenceBuilder.labelEn}
+                </div>
+                <div className="text-[9px] text-cyan-400/70 font-medium truncate">
+                  {lang === 'ar' ? 'المحاكاة' : 'Simulation'}
+                </div>
+              </div>
+            </button>
 
-            <div className="w-6 h-6 rounded-full bg-cyan-500/15 text-cyan-300 flex items-center justify-center shrink-0">
-              {isRtl ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
-            </div>
-          </button>
+          </div>
+        </div>
 
+        {/* ── STATS STRIP ── */}
+        <div className="mt-5 sm:mt-6 w-full grid grid-cols-3 gap-2">
+          {[
+            { icon: Globe2, val: '6', labelAr: 'دول', labelEn: 'Countries', color: 'text-cyan-400', border: 'border-cyan-500/25' },
+            { icon: Satellite, val: '3', labelAr: 'أقمار', labelEn: 'Satellites', color: 'text-blue-400', border: 'border-blue-500/25' },
+            { icon: Sprout, val: '12+', labelAr: 'محصول', labelEn: 'Crops', color: 'text-emerald-400', border: 'border-emerald-500/25' },
+          ].map((stat, i) => (
+            <div key={i} className={`flex flex-col items-center p-2 bg-[#051020]/70 border ${stat.border} rounded-xl backdrop-blur-sm`}>
+              <stat.icon className={`w-3.5 h-3.5 ${stat.color} mb-1`} />
+              <span className={`text-lg font-black ${stat.color} leading-none`}>{stat.val}</span>
+              <span className="text-[9px] text-slate-400 font-bold mt-0.5">{lang === 'ar' ? stat.labelAr : stat.labelEn}</span>
+            </div>
+          ))}
         </div>
 
       </div>
 
-      {/* ── BOTTOM MINIMAL SIGNATURE ── */}
-      <div className="text-[11px] font-mono text-slate-400 shrink-0 z-10 py-1">
-        {startScreenData.teamSignature}
+      {/* ── BOTTOM SIGNATURE ── */}
+      <div className="w-full flex items-center justify-center gap-2 pb-2 shrink-0 z-10">
+        <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-white/10 max-w-[60px]" />
+        <span className="text-[10px] font-mono text-slate-500">{startScreenData.teamSignature}</span>
+        <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-white/10 max-w-[60px]" />
       </div>
 
     </div>

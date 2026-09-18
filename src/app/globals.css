@@ -172,3 +172,73 @@ button, [role="button"] {
 .pulse-ring {
   animation: pulseRing 2.5s infinite cubic-bezier(0.45, 0, 0.55, 1);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   PREMIUM MOBILE ANIMATIONS & ENHANCEMENTS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Shimmer sweep for buttons */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  animation: shimmer 2.5s infinite;
+}
+
+/* Float animation for hero logo */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+.float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Fade in up for mobile screens */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* Mobile card active feedback */
+@media (max-width: 1023px) {
+  .mobile-card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .mobile-card:active {
+    transform: scale(0.97);
+    box-shadow: none;
+  }
+}
+
+/* Scan line animation for sci-fi effect */
+@keyframes scanline {
+  0%   { top: 0%; opacity: 0.8; }
+  100% { top: 100%; opacity: 0; }
+}
+.scanline {
+  animation: scanline 6s linear infinite;
+}
+
+/* Neon glow text */
+.glow-text-cyan {
+  text-shadow: 0 0 10px rgba(0,180,216,0.8), 0 0 20px rgba(0,180,216,0.5);
+}
+.glow-text-blue {
+  text-shadow: 0 0 10px rgba(59,130,246,0.8), 0 0 20px rgba(59,130,246,0.4);
+}
+
+/* Mobile button tap highlight */
+@media (max-width: 1023px) {
+  button {
+    -webkit-tap-highlight-color: rgba(0,180,216,0.15);
+  }
+}
