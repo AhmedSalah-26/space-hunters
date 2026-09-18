@@ -47,10 +47,14 @@
 ### Prerequisites
 - Node.js 18+ installed
 
+### Live Demo & Links
+- 🌐 **Live Website (Vercel):** [https://space-hunters-five.vercel.app](https://space-hunters-five.vercel.app)
+- 📂 **GitHub Repository:** [https://github.com/AhmedSalah-26/field-shift-nasa](https://github.com/AhmedSalah-26/field-shift-nasa)
+
 ### Installation
 ```bash
 # Clone repository
-git clone https://github.com/<your-username>/field-shift-nasa.git
+git clone https://github.com/AhmedSalah-26/field-shift-nasa.git
 
 # Navigate to directory
 cd field-shift-nasa
