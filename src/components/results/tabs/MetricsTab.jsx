@@ -129,23 +129,38 @@ export default function MetricsTab({ dynamicResults }) {
           </div>
         </div>
 
-        {/* Mini Bar Comparison */}
-        <div className="flex items-end justify-between h-12 pt-1 border-b border-white/10 px-3">
-          <div className="flex gap-1 items-end">
-            <div className="w-3.5 bg-slate-500 h-4 rounded-t-sm" />
-            <div className="w-3.5 bg-emerald-400 h-9 rounded-t-sm" />
+        {/* Mini Bar Comparison with Labels */}
+        <div className="flex items-end justify-around h-14 pt-1 border-b border-white/10 px-2">
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex gap-1 items-end h-8">
+              <div className="w-3.5 bg-slate-500 h-4 rounded-t-sm" />
+              <div className="w-3.5 bg-emerald-400 h-8 rounded-t-sm" />
+            </div>
+            <span className="text-[10px] text-slate-300 font-bold">{t.cropYieldResult}</span>
           </div>
-          <div className="flex gap-1 items-end">
-            <div className="w-3.5 bg-slate-500 h-10 rounded-t-sm" />
-            <div className="w-3.5 bg-cyan-400 h-5 rounded-t-sm" />
+
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex gap-1 items-end h-8">
+              <div className="w-3.5 bg-slate-500 h-8 rounded-t-sm" />
+              <div className="w-3.5 bg-cyan-400 h-4 rounded-t-sm" />
+            </div>
+            <span className="text-[10px] text-slate-300 font-bold">{t.waterConsumptionResult}</span>
           </div>
-          <div className="flex gap-1 items-end">
-            <div className="w-3.5 bg-slate-500 h-5 rounded-t-sm" />
-            <div className="w-3.5 bg-emerald-400 h-10 rounded-t-sm" />
+
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex gap-1 items-end h-8">
+              <div className="w-3.5 bg-slate-500 h-4 rounded-t-sm" />
+              <div className="w-3.5 bg-emerald-400 h-8 rounded-t-sm" />
+            </div>
+            <span className="text-[10px] text-slate-300 font-bold">{t.soilHealthResult}</span>
           </div>
-          <div className="flex gap-1 items-end">
-            <div className="w-3.5 bg-slate-500 h-9 rounded-t-sm" />
-            <div className="w-3.5 bg-emerald-400 h-4 rounded-t-sm" />
+
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex gap-1 items-end h-8">
+              <div className="w-3.5 bg-slate-500 h-8 rounded-t-sm" />
+              <div className="w-3.5 bg-emerald-400 h-3 rounded-t-sm" />
+            </div>
+            <span className="text-[10px] text-slate-300 font-bold">{t.climateRiskResult}</span>
           </div>
         </div>
       </div>
