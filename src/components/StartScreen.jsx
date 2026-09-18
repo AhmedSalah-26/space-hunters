@@ -86,15 +86,15 @@ export default function StartScreen({
         </div>
 
         {/* TITLES */}
-        <div className="space-y-1">
-          <h1 className="text-3xl sm:text-4xl font-black tracking-wider text-white font-sans">
+        <div className="space-y-1.5 max-w-md px-2">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-wider text-white font-sans drop-shadow-[0_2px_15px_rgba(0,0,0,0.8)]">
             <span>{startScreenData.titlePrefix}</span>
-            <span className="text-[#00b4d8] ml-2 drop-shadow-[0_0_15px_rgba(0,180,216,0.7)]">
+            <span className="text-[#00b4d8] ml-2 drop-shadow-[0_0_20px_rgba(0,180,216,0.8)]">
               {startScreenData.titleSuffix}
             </span>
           </h1>
 
-          <p className="text-xs sm:text-sm font-mono font-black text-cyan-400 tracking-[0.25em] uppercase drop-shadow-[0_0_10px_rgba(0,180,216,0.6)]">
+          <p className="text-xs sm:text-[13px] font-medium text-cyan-100/80 leading-relaxed drop-shadow-md">
             {lang === 'ar' ? startScreenData.taglineAr : startScreenData.taglineEn}
           </p>
         </div>

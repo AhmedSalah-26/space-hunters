@@ -2,7 +2,7 @@ import './globals.css';
 import { LanguageProvider } from '../context/LanguageContext';
 
 export const metadata = {
-  title: 'Field Shift 🌱 | NASA Space Apps Challenge 2026',
+  title: 'Space Hunters 🌱 | NASA Space Apps Challenge 2026',
   description: 'Adapting Farms with NASA Data - An interactive climate strategy game by Team Space Hunters',
   icons: {
     icon: [

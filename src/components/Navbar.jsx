@@ -40,8 +40,8 @@ export default function Navbar({ activeTab = 'map', setActiveTab, onGoHome }) {
           <div className="hidden sm:flex flex-col justify-center">
             <div className="flex items-center gap-1.5">
               <h1 className="text-xl sm:text-2xl lg:text-[26px] font-black tracking-wider leading-none font-sans">
-                <span className="text-white drop-shadow-md">FIELD</span>
-                <span className="text-[#00b4d8] ml-1 drop-shadow-[0_0_12px_rgba(0,180,216,0.8)]">SHIFT</span>
+                <span className="text-white drop-shadow-md">SPACE</span>
+                <span className="text-[#00b4d8] ml-1 drop-shadow-[0_0_12px_rgba(0,180,216,0.8)]">HUNTERS</span>
               </h1>
               <span className="text-emerald-400 text-lg sm:text-xl shrink-0 animate-pulse">🌱</span>
             </div>

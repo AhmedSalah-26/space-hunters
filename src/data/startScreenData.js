@@ -9,10 +9,10 @@ export const startScreenData = {
   editionBadgeAr: "الإصدار الميداني الفضائي 2.0",
   editionBadgeEn: "Space-Calibrated Field Edition 2.0",
   
-  titlePrefix: "FIELD",
-  titleSuffix: "SHIFT",
-  taglineAr: "SPACE HUNTERS",
-  taglineEn: "SPACE HUNTERS",
+  titlePrefix: "SPACE",
+  titleSuffix: "HUNTERS",
+  taglineAr: "محاكاة التكيف الزراعي وإدارة الدورات المحصولية ببيانات أقمار NASA الفضائية",
+  taglineEn: "Agricultural Adaptation & Crop Rotation System Powered by NASA Earth Data",
 
   descAr: "انضم إلى فريق Space Hunters في مهمة عالمية لمساعدة المزارعين على التكيف مع التغير المناخي، ترشيد مياه الري، واستعادة خصوبة التربة بالاعتماد على رصد الأقمار الصناعية (SMAP, Landsat, ECOSTRESS).",
   descEn: "Join Team Space Hunters on a global mission to help farmers adapt to climate stress, conserve water, and restore soil fertility using NASA Earth observations.",
