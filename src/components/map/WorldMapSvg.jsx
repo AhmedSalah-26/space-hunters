@@ -78,19 +78,21 @@ export default function WorldMapSvg({
   selectedMission,
   setSelectedMission,
   beaconPositions,
-  project
+  project,
+  isMobile = false
 }) {
   const { lang } = useLanguage();
 
   /* Build projection + path generator */
   const { countries, pathGen } = useMemo(() => {
+    const scale = isMobile ? 145 : 118;
     const proj = geoNaturalEarth1()
-      .scale(118)
+      .scale(scale)
       .translate([width / 2 + 55, height / 2 - 95]);
     const pg = geoPath(proj);
     const countries = feature(worldData, worldData.objects.countries);
     return { countries, pathGen: pg };
-  }, [width, height]);
+  }, [width, height, isMobile]);
 
   /* Pre-compute SVG paths per country */
   const countryPaths = useMemo(() =>
@@ -105,7 +107,7 @@ export default function WorldMapSvg({
     <svg
       viewBox={`0 0 ${width} ${height}`}
       className="w-full h-full select-none"
-      preserveAspectRatio="xMidYMid meet"
+      preserveAspectRatio={isMobile ? "xMidYMid slice" : "xMidYMid meet"}
     >
       <defs>
         {Object.entries(PALETTE).map(([key, pal]) => (
@@ -190,8 +192,8 @@ export default function WorldMapSvg({
           if (!pos || isNaN(pos.x)) return null;
           const isSel = selectedMission.id === m.id;
           const mc = CRISIS_COLOR[m.crisisType] || CRISIS_COLOR.temp;
-          const R = isSel ? 11 : 9;
-          const P = isSel ? 18 : 14;
+          const R = isSel ? (isMobile ? 13 : 11) : (isMobile ? 10.5 : 9);
+          const P = isSel ? (isMobile ? 22 : 18) : (isMobile ? 17 : 14);
           return (
             <g key={m.id}
               transform={`translate(${pos.x},${pos.y})`}
@@ -199,25 +201,28 @@ export default function WorldMapSvg({
               style={{ cursor: 'pointer' }}
               filter="url(#beacon-glow)"
             >
+              {/* Invisible large touch target for mobile fingertips */}
+              <circle r="28" fill="transparent" />
+
               {/* Outer animated pulse ring */}
-              <circle r={P} fill={mc} fillOpacity="0.1" stroke={mc} strokeWidth="0.7">
+              <circle r={P} fill={mc} fillOpacity="0.12" stroke={mc} strokeWidth="0.8">
                 <animate attributeName="r" values={`${P - 2};${P + 6};${P - 2}`} dur="2.4s" repeatCount="indefinite" />
-                <animate attributeName="fill-opacity" values="0.18;0.02;0.18" dur="2.4s" repeatCount="indefinite" />
-                <animate attributeName="stroke-opacity" values="0.6;0.08;0.6" dur="2.4s" repeatCount="indefinite" />
+                <animate attributeName="fill-opacity" values="0.22;0.03;0.22" dur="2.4s" repeatCount="indefinite" />
+                <animate attributeName="stroke-opacity" values="0.7;0.1;0.7" dur="2.4s" repeatCount="indefinite" />
               </circle>
               {/* Mid ring */}
-              <circle r={R + 3} fill={mc} fillOpacity="0.15" stroke={mc} strokeWidth="0.6" />
+              <circle r={R + 3.5} fill={mc} fillOpacity="0.18" stroke={mc} strokeWidth="0.7" />
               {/* Inner circle */}
-              <circle r={R} fill={isSel ? 'rgba(255,255,255,0.92)' : 'rgba(7, 22, 44, 0.65)'} stroke={mc} strokeWidth={isSel ? 2.5 : 1.6} fillOpacity={isSel ? 0.95 : 0.75} />
+              <circle r={R} fill={isSel ? 'rgba(255,255,255,0.95)' : 'rgba(7, 22, 44, 0.75)'} stroke={mc} strokeWidth={isSel ? 2.6 : 1.7} fillOpacity={isSel ? 0.98 : 0.8} />
               {/* Flag emoji */}
               <text x="0" y={R * 0.35} textAnchor="middle" dominantBaseline="middle"
                 fontSize={R * 1.05} style={{ pointerEvents: 'none', userSelect: 'none' }}>
                 {m.flag}
               </text>
               {/* Country label */}
-              <text x="0" y={R + 10} textAnchor="middle" fontSize="6.5"
-                fontWeight="800" fontFamily="Cairo, sans-serif" fill={mc}
-                style={{ pointerEvents: 'none', userSelect: 'none', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.95))' }}>
+              <text x="0" y={R + 10} textAnchor="middle" fontSize={isMobile ? "8" : "6.5"}
+                fontWeight="900" fontFamily="Cairo, sans-serif" fill={mc}
+                style={{ pointerEvents: 'none', userSelect: 'none', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.98))' }}>
                 {lang === 'ar' ? m.countryAr : m.countryEn}
               </text>
             </g>

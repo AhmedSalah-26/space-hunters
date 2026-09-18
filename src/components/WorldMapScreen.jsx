@@ -25,6 +25,18 @@ const W = 960, H = 520;
 export default function WorldMapScreen({ missions, selectedMission, setSelectedMission, onStartMission }) {
   const { lang, isRtl } = useLanguage();
 
+  /* ── Responsive Screen Width Detection ── */
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   /* ── Mobile View State: 'map' | 'details' | 'missions' | 'legend' ── */
   const [mobileView, setMobileView] = useState('map');
 
@@ -33,12 +45,13 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
 
-  /* ── build projection once ── */
+  /* ── build projection (dynamic scale for mobile) ── */
   const project = useMemo(() => {
+    const scale = isMobile ? 145 : 118;
     return geoNaturalEarth1()
-      .scale(118)
+      .scale(scale)
       .translate([W / 2 + 55, H / 2 - 95]);
-  }, []);
+  }, [isMobile]);
 
   /* ── mission beacon projected pixel positions ── */
   const beaconPositions = useMemo(() =>
@@ -59,8 +72,8 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
       if (pos && !isNaN(pos.x) && !isNaN(pos.y)) {
         const targetX = (W / 2 + 55) - pos.x;
         const targetY = (H / 2 - 95) - pos.y;
-        const clampedX = Math.max(-280, Math.min(280, targetX));
-        const clampedY = Math.max(-220, Math.min(100, targetY));
+        const clampedX = Math.max(-360, Math.min(360, targetX));
+        const clampedY = Math.max(-260, Math.min(180, targetY));
         setPan({ x: clampedX, y: clampedY });
       }
     } else {
@@ -73,8 +86,8 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
     if (selectedMission?.id && beaconPositions[selectedMission.id]) {
       const pos = beaconPositions[selectedMission.id];
       if (pos && !isNaN(pos.x)) {
-        const targetX = Math.max(-280, Math.min(280, (W / 2 + 55) - pos.x));
-        const targetY = Math.max(-220, Math.min(100, (H / 2 - 95) - pos.y));
+        const targetX = Math.max(-360, Math.min(360, (W / 2 + 55) - pos.x));
+        const targetY = Math.max(-260, Math.min(180, (H / 2 - 95) - pos.y));
         setPan({ x: targetX, y: targetY });
       }
     }
@@ -222,12 +235,10 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
           selectedMission={selectedMission}
           setSelectedMission={(m) => {
             setSelectedMission(m);
-            if (window.innerWidth < 1024) {
-              // On mobile, tapping a country beacon can stay on map or open details
-            }
           }}
           beaconPositions={beaconPositions}
           project={project}
+          isMobile={isMobile}
         />
       </div>
 
