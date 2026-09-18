@@ -21,6 +21,18 @@ export default function StartScreen({
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-between p-4 sm:p-6 overflow-hidden select-none">
       
+      {/* ── CINEMATIC SPACE BACKGROUND IMAGE ── */}
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+        <img
+          src="/start_screen_bg.jpg"
+          alt="Space Earth Background"
+          className="w-full h-full object-cover object-center transform scale-[1.02] transition-transform duration-1000"
+        />
+        {/* Sleek Cinematic Contrast Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#030914]/80 via-[#050c1b]/65 to-[#02050c]/90" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_30%,_#020614_95%)] opacity-85" />
+      </div>
+      
       {/* ── TOP LUXURY NAV BAR ── */}
       <div className="w-full max-w-4xl flex items-center justify-between gap-3 shrink-0 z-20">
         <div className="flex items-center gap-2">
