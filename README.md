@@ -49,15 +49,15 @@
 
 ### Live Demo & Links
 - 🌐 **Live Website (Vercel):** [https://space-hunters-five.vercel.app](https://space-hunters-five.vercel.app)
-- 📂 **GitHub Repository:** [https://github.com/AhmedSalah-26/field-shift-nasa](https://github.com/AhmedSalah-26/field-shift-nasa)
+- 📂 **GitHub Repository:** [https://github.com/AhmedSalah-26/space-hunters](https://github.com/AhmedSalah-26/space-hunters)
 
 ### Installation
 ```bash
 # Clone repository
-git clone https://github.com/AhmedSalah-26/field-shift-nasa.git
+git clone https://github.com/AhmedSalah-26/space-hunters.git
 
 # Navigate to directory
-cd field-shift-nasa
+cd space-hunters
 
 # Install dependencies
 npm install
