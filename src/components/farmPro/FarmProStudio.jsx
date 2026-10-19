@@ -7,7 +7,7 @@ import {
   Sparkles, Scan, ArrowLeft, ArrowRight, Bookmark, 
   MapPin, Check, Globe, X, Sprout, Droplets, Sun, CheckCircle2,
   Search, Compass, Navigation, Loader2, CloudRain, Thermometer,
-  ShieldAlert, Printer, RefreshCw, FileText
+  ShieldAlert, Printer, RefreshCw, FileText, Eye, EyeOff
 } from 'lucide-react';
 
 // Dynamic import for Leaflet map to ensure 100% Client-Side rendering
@@ -48,6 +48,8 @@ export default function FarmProStudio({ onBackToHome, onOpenGame }) {
   const [locationName, setLocationName] = useState(lang === 'ar' ? 'مركز أجا وميت غمر، محافظة الدقهلية' : 'Aga & Mit Ghamr, Dakahlia');
   const [isScanning, setIsScanning] = useState(false);
   const [selectedPlanTab, setSelectedPlanTab] = useState('water'); // 'water' | 'soil' | 'economic'
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
+  const [showTechDetails, setShowTechDetails] = useState(false);
 
   // Search Bar State
   const [searchQuery, setSearchQuery] = useState('');
@@ -439,181 +441,226 @@ export default function FarmProStudio({ onBackToHome, onOpenGame }) {
           isScanning={isScanning}
         />
 
-        {/* ── LEFT FLOATING PANEL: NASA WEATHER & RECOMMENDED ROTATIONS (100% SOLID OPAQUE) ── */}
-        <div 
-          style={{ backgroundColor: '#07152b', opacity: 1 }}
-          className="absolute top-4 left-4 z-20 w-[92%] sm:w-[420px] max-w-[440px] border-2 border-indigo-500/60 text-white rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] p-4 sm:p-5 flex flex-col gap-3.5 max-h-[calc(100vh-130px)] overflow-y-auto animate-in fade-in zoom-in-95"
-        >
-          
-          {/* Selected Location Title & Coordinates */}
-          <div className="p-3 bg-[#030914] rounded-2xl border border-cyan-500/30 flex items-center justify-between">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-400 shrink-0">
-                <MapPin className="w-4 h-4 text-cyan-400" />
+        {/* ── LEFT FLOATING PANEL: NASA WEATHER & RECOMMENDED ROTATIONS (COLLAPSIBLE, 100% SOLID OPAQUE) ── */}
+        {isPanelCollapsed ? (
+          <button
+            onClick={() => setIsPanelCollapsed(false)}
+            style={{ backgroundColor: '#07152b', opacity: 1 }}
+            className="absolute top-4 left-4 z-20 border-2 border-cyan-400 text-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.85)] px-4 py-3 flex items-center gap-2.5 font-black text-xs hover:bg-[#0c2242] transition-all cursor-pointer animate-in fade-in"
+          >
+            <Eye className="w-4 h-4 text-cyan-400" />
+            <span>{lang === 'ar' ? '🛰️ فتح روشتة الأرض وبيانات ناسا' : '🛰️ Open NASA Earth Advisory'}</span>
+          </button>
+        ) : (
+          <div 
+            style={{ backgroundColor: '#07152b', opacity: 1 }}
+            className="absolute top-4 left-4 z-20 w-[92%] sm:w-[420px] max-w-[440px] border-2 border-indigo-500/60 text-white rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] p-4 sm:p-5 flex flex-col gap-3.5 max-h-[calc(100vh-130px)] overflow-y-auto animate-in fade-in zoom-in-95"
+          >
+            
+            {/* Selected Location Title & Coordinates + Minimize button */}
+            <div className="p-3 bg-[#030914] rounded-2xl border border-cyan-500/30 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-400 shrink-0">
+                  <MapPin className="w-4 h-4 text-cyan-400" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[10px] text-slate-400 font-bold">{lang === 'ar' ? 'أرضك اللي اخترتها:' : 'Target Farm Location:'}</div>
+                  <div className="text-xs font-black text-white truncate">{locationName}</div>
+                </div>
               </div>
-              <div className="min-w-0">
-                <div className="text-[10px] text-slate-400 font-bold">{lang === 'ar' ? 'أرضك اللي اخترتها:' : 'Target Farm Location:'}</div>
-                <div className="text-xs font-black text-white truncate">{locationName}</div>
-              </div>
-            </div>
-            <span className="text-[9px] font-mono text-cyan-300 bg-cyan-950 px-2 py-1 rounded border border-cyan-500/30 shrink-0">
-              {selectedLocation[0].toFixed(3)}°, {selectedLocation[1].toFixed(3)}°
-            </span>
-          </div>
-
-          {/* 🛰️ 1. NASA WEATHER & EARTH TELEMETRY CARDS 🛰️ */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-1.5 text-xs font-black text-cyan-300">
-                <Sun className="w-4 h-4 text-amber-400" />
-                <span>{lang === 'ar' ? 'حالة الجو والأرض من أقمار ناسا' : 'NASA Satellite Weather & Soil Status'}</span>
-              </div>
-              {isNasaLoading ? (
-                <span className="text-[9px] font-mono text-cyan-300 font-bold flex items-center gap-1 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-500/40">
-                  <Loader2 className="w-2.5 h-2.5 animate-spin text-cyan-400" />
-                  <span>{lang === 'ar' ? 'بنقيس من أقمار ناسا حالاً...' : 'FETCHING NASA...'}</span>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[9px] font-mono text-cyan-300 bg-cyan-950 px-2 py-1 rounded border border-cyan-500/30">
+                  {selectedLocation[0].toFixed(3)}°, {selectedLocation[1].toFixed(3)}°
                 </span>
-              ) : telemetry.isLiveNasa ? (
-                <span className="text-[9px] font-mono text-emerald-300 font-bold flex items-center gap-1.5 bg-emerald-950/90 px-2 py-0.5 rounded border border-emerald-400/50 shadow-[0_0_8px_rgba(16,185,129,0.3)]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
-                  <span>{lang === 'ar' ? '🛰️ مباشر من أقمار ناسا' : '🛰️ NASA POWER LIVE'}</span>
-                </span>
-              ) : (
-                <span className="text-[9px] font-mono text-emerald-400 font-bold">✓ LIVE CALIBRATED</span>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              {/* LST Temperature */}
-              <div className="p-2.5 bg-[#030d1d] border border-amber-500/30 rounded-xl">
-                <div className="flex items-center justify-between text-slate-400 text-[10px] mb-1">
-                  <span>{lang === 'ar' ? 'حرارة التربة والأرض' : 'Land Temp (LST)'}</span>
-                  <Thermometer className="w-3.5 h-3.5 text-amber-400" />
-                </div>
-                <div className="text-base font-black text-amber-300 font-mono">{telemetry.lst}</div>
-                <div className="text-[9.5px] text-slate-300 mt-0.5 truncate">{lang === 'ar' ? telemetry.heatStressAr : telemetry.heatStressEn}</div>
-              </div>
-
-              {/* SMAP Soil Moisture */}
-              <div className="p-2.5 bg-[#030d1d] border border-sky-500/30 rounded-xl">
-                <div className="flex items-center justify-between text-slate-400 text-[10px] mb-1">
-                  <span>{lang === 'ar' ? 'مية ورطوبة الجذور' : 'Soil Moisture'}</span>
-                  <Droplets className="w-3.5 h-3.5 text-sky-400" />
-                </div>
-                <div className="text-base font-black text-sky-300 font-mono">{telemetry.smap}</div>
-                <div className="text-[9.5px] text-slate-300 mt-0.5 truncate">{lang === 'ar' ? telemetry.waterStatusAr : telemetry.waterStatusEn}</div>
-              </div>
-
-              {/* GPM Rain */}
-              <div className="p-2.5 bg-[#030d1d] border border-cyan-500/30 rounded-xl">
-                <div className="flex items-center justify-between text-slate-400 text-[10px] mb-1">
-                  <span>{lang === 'ar' ? 'المطر المتوقع' : 'Rainfall (GPM)'}</span>
-                  <CloudRain className="w-3.5 h-3.5 text-cyan-400" />
-                </div>
-                <div className="text-base font-black text-cyan-300 font-mono">{telemetry.gpmRain}</div>
-                <div className="text-[9.5px] text-slate-300 mt-0.5">{lang === 'ar' ? 'معدل المطر في منطقتك' : 'Seasonal Trend'}</div>
-              </div>
-
-              {/* MODIS NDVI */}
-              <div className="p-2.5 bg-[#030d1d] border border-emerald-500/30 rounded-xl">
-                <div className="flex items-center justify-between text-slate-400 text-[10px] mb-1">
-                  <span>{lang === 'ar' ? 'صحة وخضار الزرع' : 'Canopy Health'}</span>
-                  <Sprout className="w-3.5 h-3.5 text-emerald-400" />
-                </div>
-                <div className="text-base font-black text-emerald-300 font-mono">{telemetry.ndvi}</div>
-                <div className="text-[9.5px] text-slate-300 mt-0.5">{lang === 'ar' ? 'الزرع مورّق وخضرته كويسة' : 'Vigorous Green'}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* 🔄 2. RECOMMENDED CROP ROTATIONS FOR THIS SITE 🔄 */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-1.5 text-xs font-black text-emerald-300">
-                <RefreshCw className="w-4 h-4 text-emerald-400" />
-                <span>{lang === 'ar' ? 'أحسن دورات زراعية لأرضك (تزرع إيه بعد إيه؟)' : 'Recommended Crop Rotations'}</span>
-              </div>
-            </div>
-
-            {/* Rotation Selector Pills */}
-            <div className="grid grid-cols-3 gap-1 bg-[#020814] p-1 rounded-xl border border-white/10 mb-2.5">
-              {[
-                { id: 'water', labelAr: '💧 توفير مية', labelEn: '💧 Water' },
-                { id: 'soil', labelAr: '🌱 راحة التربة', labelEn: '🌱 Soil' },
-                { id: 'economic', labelAr: '💰 أعلى مكسب', labelEn: '💰 Profit' }
-              ].map(tab => (
                 <button
-                  key={tab.id}
-                  onClick={() => setSelectedPlanTab(tab.id)}
-                  className={`py-1.5 px-1 rounded-lg text-[10px] font-black transition-all cursor-pointer text-center ${
-                    selectedPlanTab === tab.id ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'
-                  }`}
+                  onClick={() => setIsPanelCollapsed(true)}
+                  title={lang === 'ar' ? 'تصغير اللوحة لرؤية الخريطة كاملة' : 'Collapse panel to view full map'}
+                  className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
                 >
-                  {lang === 'ar' ? tab.labelAr : tab.labelEn}
+                  <EyeOff className="w-4 h-4" />
                 </button>
-              ))}
+              </div>
             </div>
 
-            {/* Selected Plan Details Card */}
-            {(() => {
-              const plan = rotationPlans.find(p => p.id === selectedPlanTab) || rotationPlans[0];
-              return (
-                <div className="p-3 bg-[#030c1d] border-2 border-indigo-500/40 rounded-2xl space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-white">{lang === 'ar' ? plan.titleAr : plan.titleEn}</span>
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
-                      {plan.badge}
-                    </span>
-                  </div>
-
-                  {/* 3 Seasons Sequence */}
-                  <div className="grid grid-cols-3 gap-1.5 text-center">
-                    {plan.seasons.map((s, idx) => (
-                      <div key={idx} className="p-2 bg-[#020712] rounded-xl border border-white/10">
-                        <span className="text-[9px] text-slate-400 block">{lang === 'ar' ? s.sAr : s.sEn}</span>
-                        <span className="text-xs font-black text-cyan-200 block mt-0.5">{lang === 'ar' ? s.cropAr : s.cropEn}</span>
-                        <span className="text-[8.5px] text-emerald-400 block mt-0.5">{lang === 'ar' ? s.noteAr : s.noteEn}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Projected Benefits */}
-                  <div className="pt-2 border-t border-white/10 space-y-1 text-[10.5px]">
-                    <div className="text-sky-300 font-bold flex items-center gap-1.5">
-                      <Droplets className="w-3.5 h-3.5" />
-                      <span>{lang === 'ar' ? plan.waterSavedAr : plan.waterSavedEn}</span>
-                    </div>
-                    <div className="text-emerald-300 font-bold flex items-center gap-1.5">
-                      <Sprout className="w-3.5 h-3.5" />
-                      <span>{lang === 'ar' ? plan.nitrogenBenefitAr : plan.nitrogenBenefitEn}</span>
-                    </div>
-                  </div>
+            {/* 🛰️ 1. NASA WEATHER & EARTH TELEMETRY CARDS 🛰️ */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center gap-1.5 text-xs font-black text-cyan-300">
+                  <Sun className="w-4 h-4 text-amber-400" />
+                  <span>{lang === 'ar' ? 'حالة الجو والأرض من ناسا' : 'NASA Satellite & Soil Status'}</span>
                 </div>
-              );
-            })()}
+                {isNasaLoading ? (
+                  <span className="text-[9px] font-mono text-cyan-300 font-bold flex items-center gap-1 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-500/40">
+                    <Loader2 className="w-2.5 h-2.5 animate-spin text-cyan-400" />
+                    <span>{lang === 'ar' ? 'بنقيس حالاً...' : 'FETCHING...'}</span>
+                  </span>
+                ) : telemetry.isLiveNasa ? (
+                  <span className="text-[9px] font-mono text-emerald-300 font-bold flex items-center gap-1.5 bg-emerald-950/90 px-2 py-0.5 rounded border border-emerald-400/50 shadow-[0_0_8px_rgba(16,185,129,0.3)]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
+                    <span>{lang === 'ar' ? '🛰️ قمر ناسا مباشر' : '🛰️ NASA POWER LIVE'}</span>
+                  </span>
+                ) : (
+                  <span className="text-[9px] font-mono text-emerald-400 font-bold">✓ LIVE CALIBRATED</span>
+                )}
+              </div>
+
+              {/* Satellite Instruments Toggle */}
+              <div className="flex justify-end mb-2">
+                <button
+                  type="button"
+                  onClick={() => setShowTechDetails(!showTechDetails)}
+                  className="text-[9.5px] text-cyan-400 hover:text-cyan-300 underline underline-offset-2 cursor-pointer transition-colors"
+                >
+                  {showTechDetails 
+                    ? (lang === 'ar' ? '✕ إخفاء الرموز العلمية' : '✕ Hide scientific acronyms') 
+                    : (lang === 'ar' ? '🔬 عرض تفاصيل ناسا التقنية' : '🔬 Show satellite instruments')}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {/* Temperature */}
+                <div className="p-2.5 bg-[#030d1d] border border-amber-500/30 rounded-xl">
+                  <div className="flex items-center justify-between text-slate-400 text-[10px] mb-1">
+                    <span>
+                      {lang === 'ar' ? 'حرارة التربة والأرض' : 'Land Temperature'}
+                      {showTechDetails && <span className="text-[8.5px] font-mono text-amber-400 block">(Landsat LST)</span>}
+                    </span>
+                    <Thermometer className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  </div>
+                  <div className="text-base font-black text-amber-300 font-mono">{telemetry.lst}</div>
+                  <div className="text-[9.5px] text-slate-300 mt-0.5 truncate">{lang === 'ar' ? telemetry.heatStressAr : telemetry.heatStressEn}</div>
+                </div>
+
+                {/* Soil Moisture */}
+                <div className="p-2.5 bg-[#030d1d] border border-sky-500/30 rounded-xl">
+                  <div className="flex items-center justify-between text-slate-400 text-[10px] mb-1">
+                    <span>
+                      {lang === 'ar' ? 'مية ورطوبة الجذور' : 'Root Soil Moisture'}
+                      {showTechDetails && <span className="text-[8.5px] font-mono text-sky-400 block">(NASA SMAP)</span>}
+                    </span>
+                    <Droplets className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                  </div>
+                  <div className="text-base font-black text-sky-300 font-mono">{telemetry.smap}</div>
+                  <div className="text-[9.5px] text-slate-300 mt-0.5 truncate">{lang === 'ar' ? telemetry.waterStatusAr : telemetry.waterStatusEn}</div>
+                </div>
+
+                {/* Rain */}
+                <div className="p-2.5 bg-[#030d1d] border border-cyan-500/30 rounded-xl">
+                  <div className="flex items-center justify-between text-slate-400 text-[10px] mb-1">
+                    <span>
+                      {lang === 'ar' ? 'المطر المتوقع' : 'Rainfall'}
+                      {showTechDetails && <span className="text-[8.5px] font-mono text-cyan-400 block">(NASA GPM)</span>}
+                    </span>
+                    <CloudRain className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                  </div>
+                  <div className="text-base font-black text-cyan-300 font-mono">{telemetry.gpmRain}</div>
+                  <div className="text-[9.5px] text-slate-300 mt-0.5">{lang === 'ar' ? 'معدل المطر في منطقتك' : 'Seasonal Trend'}</div>
+                </div>
+
+                {/* Vegetation Health */}
+                <div className="p-2.5 bg-[#030d1d] border border-emerald-500/30 rounded-xl">
+                  <div className="flex items-center justify-between text-slate-400 text-[10px] mb-1">
+                    <span>
+                      {lang === 'ar' ? 'صحة وخضار الزرع' : 'Canopy Health'}
+                      {showTechDetails && <span className="text-[8.5px] font-mono text-emerald-400 block">(MODIS NDVI)</span>}
+                    </span>
+                    <Sprout className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  </div>
+                  <div className="text-base font-black text-emerald-300 font-mono">{telemetry.ndvi}</div>
+                  <div className="text-[9.5px] text-slate-300 mt-0.5">{lang === 'ar' ? 'الزرع مورّق وصحته ممتازة' : 'Vigorous Green'}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* 🔄 2. RECOMMENDED CROP ROTATIONS FOR THIS SITE 🔄 */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-1.5 text-xs font-black text-emerald-300">
+                  <RefreshCw className="w-4 h-4 text-emerald-400" />
+                  <span>{lang === 'ar' ? 'أحسن دورات زراعية لأرضك (تزرع إيه بعد إيه؟)' : 'Recommended Crop Rotations'}</span>
+                </div>
+              </div>
+
+              {/* Rotation Selector Pills */}
+              <div className="grid grid-cols-3 gap-1 bg-[#020814] p-1 rounded-xl border border-white/10 mb-2.5">
+                {[
+                  { id: 'water', labelAr: '💧 توفير مية', labelEn: '💧 Save Water' },
+                  { id: 'soil', labelAr: '🌱 راحة التربة', labelEn: '🌱 Soil Health' },
+                  { id: 'economic', labelAr: '💰 أعلى مكسب', labelEn: '💰 Max Profit' }
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSelectedPlanTab(tab.id)}
+                    className={`py-1.5 px-1 rounded-lg text-[10px] font-black transition-all cursor-pointer text-center ${
+                      selectedPlanTab === tab.id ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {lang === 'ar' ? tab.labelAr : tab.labelEn}
+                  </button>
+                ))}
+              </div>
+
+              {/* Selected Plan Details Card */}
+              {(() => {
+                const plan = rotationPlans.find(p => p.id === selectedPlanTab) || rotationPlans[0];
+                return (
+                  <div className="p-3 bg-[#030c1d] border-2 border-indigo-500/40 rounded-2xl space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black text-white">{lang === 'ar' ? plan.titleAr : plan.titleEn}</span>
+                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
+                        {plan.badge}
+                      </span>
+                    </div>
+
+                    {/* 3 Seasons Sequence */}
+                    <div className="grid grid-cols-3 gap-1.5 text-center">
+                      {plan.seasons.map((s, idx) => (
+                        <div key={idx} className="p-2 bg-[#020712] rounded-xl border border-white/10">
+                          <span className="text-[9px] text-slate-400 block">{lang === 'ar' ? s.sAr : s.sEn}</span>
+                          <span className="text-xs font-black text-cyan-200 block mt-0.5">{lang === 'ar' ? s.cropAr : s.cropEn}</span>
+                          <span className="text-[8.5px] text-emerald-400 block mt-0.5">{lang === 'ar' ? s.noteAr : s.noteEn}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Projected Benefits */}
+                    <div className="pt-2 border-t border-white/10 space-y-1 text-[10.5px]">
+                      <div className="text-sky-300 font-bold flex items-center gap-1.5">
+                        <Droplets className="w-3.5 h-3.5" />
+                        <span>{lang === 'ar' ? plan.waterSavedAr : plan.waterSavedEn}</span>
+                      </div>
+                      <div className="text-emerald-300 font-bold flex items-center gap-1.5">
+                        <Sprout className="w-3.5 h-3.5" />
+                        <span>{lang === 'ar' ? plan.nitrogenBenefitAr : plan.nitrogenBenefitEn}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={handleScanLocation}
+                disabled={isScanning}
+                className="py-2.5 px-3 bg-[#10b981] hover:bg-[#059669] text-white text-xs font-black rounded-xl shadow-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              >
+                <Scan className={`w-4 h-4 ${isScanning ? 'animate-spin' : ''}`} />
+                <span>{isScanning ? (lang === 'ar' ? 'بنقيس من الأقمار...' : 'Scanning...') : (lang === 'ar' ? 'تحديث قراءات ناسا' : 'Rescan NASA')}</span>
+              </button>
+
+              <button
+                onClick={() => window.print()}
+                className="flex-1 py-2.5 px-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 text-white text-xs font-black rounded-xl shadow-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              >
+                <Printer className="w-4 h-4" />
+                <span>{lang === 'ar' ? 'طباعة روشتة الأرض والتوصيات' : 'Print NASA Advisory'}</span>
+              </button>
+            </div>
+
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-2 pt-1">
-            <button
-              onClick={handleScanLocation}
-              disabled={isScanning}
-              className="py-2.5 px-3 bg-[#10b981] hover:bg-[#059669] text-white text-xs font-black rounded-xl shadow-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-            >
-              <Scan className={`w-4 h-4 ${isScanning ? 'animate-spin' : ''}`} />
-              <span>{isScanning ? (lang === 'ar' ? 'بنقيس من الأقمار...' : 'Scanning...') : (lang === 'ar' ? 'تحديث قراءات ناسا' : 'Rescan NASA')}</span>
-            </button>
-
-            <button
-              onClick={() => window.print()}
-              className="flex-1 py-2.5 px-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 text-white text-xs font-black rounded-xl shadow-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-            >
-              <Printer className="w-4 h-4" />
-              <span>{lang === 'ar' ? 'طباعة روشتة الأرض والتوصيات' : 'Print NASA Advisory'}</span>
-            </button>
-          </div>
-
-        </div>
+        )}
 
         {/* ── MAP INSTRUCTION BADGE AT BOTTOM RIGHT ── */}
         <div className="absolute bottom-6 right-6 z-20 flex flex-col items-end gap-1.5 pointer-events-none">

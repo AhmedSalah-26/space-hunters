@@ -45,6 +45,14 @@ export default function StartScreen({
         {/* Action Pills */}
         <div className="flex items-center gap-1.5">
           <button
+            onClick={onOpenAgriBank}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#061a33]/90 hover:bg-[#0a284e] border border-emerald-500/35 hover:border-emerald-400/60 text-[10px] sm:text-xs font-bold text-emerald-300 hover:text-white rounded-lg transition-all cursor-pointer backdrop-blur-md active:scale-95"
+          >
+            <Sprout className="w-3 h-3 text-emerald-400" />
+            <span className="hidden sm:inline">{lang === 'ar' ? 'موسوعة المحاصيل' : 'Crops Guide'}</span>
+          </button>
+
+          <button
             onClick={onOpenGameGuide}
             className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#061530]/90 hover:bg-[#0c2858] border border-white/10 hover:border-cyan-400/60 text-[10px] sm:text-xs font-bold text-slate-300 hover:text-white rounded-lg transition-all cursor-pointer backdrop-blur-md active:scale-95"
           >
@@ -97,108 +105,67 @@ export default function StartScreen({
             <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-cyan-400/60" />
           </div>
 
-          <p className="text-xs sm:text-sm font-medium text-cyan-100/75 leading-relaxed max-w-sm drop-shadow-md">
+          <p className="text-xs sm:text-sm font-bold text-cyan-100/90 leading-relaxed max-w-sm drop-shadow-md">
             {lang === 'ar' ? startScreenData.taglineAr : startScreenData.taglineEn}
           </p>
         </div>
 
-        {/* ── ACTION BUTTONS ── */}
-        <div className="w-full space-y-2.5">
+        {/* ── 2 BIG PRIMARY ACTION CARDS (ULTRA-CLEAN & INTUITIVE) ── */}
+        <div className="w-full space-y-3">
           
-          {/* MAIN CTA — Start Game */}
-          <button
-            onClick={onStartGame}
-            className="w-full py-3.5 sm:py-4 px-5 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white rounded-2xl shadow-[0_0_30px_rgba(0,120,220,0.5),0_8px_20px_rgba(0,0,0,0.4)] flex items-center justify-between transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer border border-cyan-300/30 group relative overflow-hidden"
-          >
-            {/* Shimmer */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-            <div className="flex items-center gap-3 z-10">
-              <div className="w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0 group-hover:rotate-12 transition-transform duration-300">
-                <Rocket className="w-5 h-5 text-white" />
-              </div>
-              <div className="text-left">
-                <div className="text-sm sm:text-base font-black tracking-wide leading-tight">
-                  {lang === 'ar' ? startScreenData.buttons.startGame.labelAr : startScreenData.buttons.startGame.labelEn}
-                </div>
-                <div className="text-[10px] text-cyan-100/80 font-medium">
-                  {lang === 'ar' ? '٦ مهمات زراعية حول العالم • العب واكسب' : '6 Global Missions • Interactive Game Mode'}
-                </div>
-              </div>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0 z-10">
-              {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-            </div>
-          </button>
-
-          {/* 🌟 PRO FARM STUDIO CTA — Outside Game Mode 🌟 */}
+          {/* PRIMARY 1: FARM PRO STUDIO (TARGET YOUR FARM) */}
           <button
             onClick={onOpenFarmPro}
-            className="w-full py-3.5 sm:py-4 px-5 bg-gradient-to-r from-indigo-700 via-purple-700 to-cyan-600 hover:from-indigo-600 hover:to-cyan-500 text-white rounded-2xl shadow-[0_0_35px_rgba(99,102,241,0.5),0_8px_20px_rgba(0,0,0,0.5)] flex items-center justify-between transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer border border-indigo-400/50 group relative overflow-hidden"
+            className="w-full py-4 px-5 bg-gradient-to-r from-indigo-700 via-purple-700 to-cyan-600 hover:from-indigo-600 hover:to-cyan-500 text-white rounded-2xl shadow-[0_0_35px_rgba(99,102,241,0.5),0_8px_20px_rgba(0,0,0,0.5)] flex items-center justify-between transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer border border-indigo-400/50 group relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-            <div className="flex items-center gap-3 z-10">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/30 border border-indigo-300/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-inner">
-                <Scan className="w-5 h-5 text-indigo-200" />
+            <div className="flex items-center gap-3.5 z-10">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-500/30 border border-indigo-300/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-inner">
+                <Scan className="w-6 h-6 text-cyan-300" />
               </div>
               <div className="text-left">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm sm:text-base font-black tracking-wide leading-tight text-white">
-                    {lang === 'ar' ? 'استوديو المزارع الذكي' : 'Farm Pro Decision Studio'}
+                  <span className="text-base sm:text-lg font-black tracking-wide leading-tight text-white">
+                    {lang === 'ar' ? 'حدد أرضك على الخريطة' : 'Target Your Farm'}
                   </span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-400/20 text-cyan-200 border border-cyan-400/40 font-mono font-bold">
+                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-200 border border-cyan-400/40 font-mono font-bold">
                     PRO
                   </span>
                 </div>
-                <div className="text-[10px] text-indigo-200/90 font-medium">
-                  {lang === 'ar' ? 'حدد أرضك على الخريطة • واعرف طقسها وأحسن زرعة ليها من ناسا' : 'Target Any Farm • Real NASA Weather & Smart Crop Rotations'}
+                <div className="text-xs text-indigo-200 font-medium mt-0.5">
+                  {lang === 'ar' ? 'خريطة أقمار ناسا • اعرف حالة أرضك وأحسن زرعة ليها' : 'Real NASA Satellite Tiles • Smart Crop Advisory'}
                 </div>
               </div>
             </div>
-            <div className="w-8 h-8 rounded-full bg-indigo-500/30 border border-indigo-300/30 flex items-center justify-center shrink-0 z-10">
-              {isRtl ? <ArrowLeft className="w-4 h-4 text-indigo-200" /> : <ArrowRight className="w-4 h-4 text-indigo-200" />}
+            <div className="w-9 h-9 rounded-full bg-indigo-500/30 border border-indigo-300/30 flex items-center justify-center shrink-0 z-10 group-hover:translate-x-1 transition-transform">
+              {isRtl ? <ArrowLeft className="w-5 h-5 text-indigo-200" /> : <ArrowRight className="w-5 h-5 text-indigo-200" />}
             </div>
           </button>
 
-          {/* Secondary Buttons Row */}
-          <div className="grid grid-cols-2 gap-2">
-            
-            {/* AgriBank */}
-            <button
-              onClick={onOpenAgriBank}
-              className="py-3 px-3.5 bg-[#061a33]/85 hover:bg-[#0a284e] border border-emerald-500/35 hover:border-emerald-400/70 rounded-xl flex items-center gap-2.5 transition-all active:scale-[0.97] cursor-pointer group backdrop-blur-sm"
-            >
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center text-emerald-300 shrink-0 group-hover:scale-110 transition-transform">
-                <Sprout className="w-4 h-4" />
+          {/* PRIMARY 2: GAME MODE (PLAY & LEARN) */}
+          <button
+            onClick={onStartGame}
+            className="w-full py-4 px-5 bg-gradient-to-r from-blue-700 via-blue-600 to-teal-600 hover:from-blue-600 hover:to-teal-500 text-white rounded-2xl shadow-[0_0_30px_rgba(0,120,220,0.4),0_8px_20px_rgba(0,0,0,0.4)] flex items-center justify-between transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer border border-cyan-400/30 group relative overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+            <div className="flex items-center gap-3.5 z-10">
+              <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0 group-hover:rotate-12 transition-transform duration-300">
+                <Rocket className="w-6 h-6 text-white" />
               </div>
-              <div className="text-left min-w-0">
-                <div className="text-[11px] font-black text-emerald-200 truncate leading-tight">
-                  {lang === 'ar' ? startScreenData.buttons.cropBank.labelAr : startScreenData.buttons.cropBank.labelEn}
+              <div className="text-left">
+                <div className="text-base sm:text-lg font-black tracking-wide leading-tight">
+                  {lang === 'ar' ? 'العب واتعلم (تحديات زراعية)' : 'Play & Learn (Field Missions)'}
                 </div>
-                <div className="text-[9px] text-emerald-400/70 font-medium truncate">
-                  {lang === 'ar' ? 'موسوعة الزرع' : 'Crop Encyclopedia'}
+                <div className="text-xs text-cyan-100 font-medium mt-0.5">
+                  {lang === 'ar' ? '٦ مهمات ممتعة لحل مشاكل الفلاحين حول العالم' : '6 Global Missions to solve real farm challenges'}
                 </div>
               </div>
-            </button>
+            </div>
+            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0 z-10 group-hover:translate-x-1 transition-transform">
+              {isRtl ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+            </div>
+          </button>
 
-            {/* Sequence Builder */}
-            <button
-              onClick={onOpenSequenceBuilder}
-              className="py-3 px-3.5 bg-[#061a33]/85 hover:bg-[#0a1e50] border border-cyan-500/30 hover:border-cyan-400/70 rounded-xl flex items-center gap-2.5 transition-all active:scale-[0.97] cursor-pointer group backdrop-blur-sm"
-            >
-              <div className="w-8 h-8 rounded-lg bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shrink-0 group-hover:rotate-180 transition-transform duration-500">
-                <RotateCcw className="w-4 h-4" />
-              </div>
-              <div className="text-left min-w-0">
-                <div className="text-[11px] font-black text-cyan-200 truncate leading-tight">
-                  {lang === 'ar' ? startScreenData.buttons.sequenceBuilder.labelAr : startScreenData.buttons.sequenceBuilder.labelEn}
-                </div>
-                <div className="text-[9px] text-cyan-400/70 font-medium truncate">
-                  {lang === 'ar' ? 'احسب وفر المية' : 'Water Calculator'}
-                </div>
-              </div>
-            </button>
-
-          </div>
         </div>
 
       </div>
