@@ -22,18 +22,18 @@ export default function StartScreen({
   return (
     <div className="relative w-full h-full flex flex-col items-center overflow-y-auto select-none">
       
-      {/* ── CINEMATIC SPACE BACKGROUND ── */}
-      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-        <img
-          src="/start_screen_bg.jpg"
-          alt="Space Earth Background"
-          className="w-full h-full object-cover object-center scale-[1.05]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#020a1a]/85 via-[#050c1b]/60 to-[#02050c]/95" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_20%,_#010510_90%)] opacity-90" />
-        {/* Animated scan line */}
-        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent animate-[scanline_4s_ease-in-out_infinite]" style={{animation: 'none'}} />
-      </div>
+      {/* ── CINEMATIC SPACE BACKGROUND (Fixed, GPU Composited, Zero-glitch on RTL/LTR toggle) ── */}
+      <div 
+        className="fixed inset-0 pointer-events-none -z-10 overflow-hidden select-none"
+        style={{
+          backgroundImage: "radial-gradient(ellipse at center, rgba(1,5,16,0.3) 20%, #010510 92%), linear-gradient(to bottom, rgba(2,10,26,0.85), rgba(5,12,27,0.6), rgba(2,5,12,0.95)), url('/start_screen_bg.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          transform: 'translateZ(0)',
+          willChange: 'transform'
+        }}
+      />
 
       {/* ── TOP NAV STRIP ── */}
       <div className="w-full flex items-center justify-between px-3 sm:px-6 pt-3 sm:pt-4 pb-2 shrink-0 z-20">

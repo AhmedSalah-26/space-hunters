@@ -50,9 +50,16 @@
   border: none !important;
 }
 
+.leaflet-container {
+  direction: ltr !important;
+}
+
 html {
   height: 100%;
   height: 100dvh;
+  scrollbar-gutter: stable;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 body {
@@ -66,6 +73,22 @@ body {
   user-select: none;
   height: 100%;
   height: 100dvh;
+}
+
+/* Custom sleek scrollbar that prevents layout shift */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(2, 7, 18, 0.6);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.55);
 }
 
 /* Touch improvements */

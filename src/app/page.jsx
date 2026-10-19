@@ -161,9 +161,15 @@ export default function Home() {
   return (
     <main className="h-full bg-[#040915] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#0d1e3d] via-[#050c1b] to-[#02050c] flex flex-col relative overflow-hidden selection:bg-cyan-500 selection:text-black">
       
-      {/* Background Starfield Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[350px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-0 right-10 w-[600px] h-[300px] bg-cyan-600/5 rounded-full blur-[120px] pointer-events-none" />
+      {/* Background Starfield Glow (Fixed & GPU-accelerated) */}
+      <div 
+        className="fixed top-0 left-1/2 w-[1000px] h-[350px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none" 
+        style={{ transform: 'translate3d(-50%, 0, 0)' }}
+      />
+      <div 
+        className="fixed bottom-0 right-10 w-[600px] h-[300px] bg-cyan-600/5 rounded-full blur-[120px] pointer-events-none" 
+        style={{ transform: 'translateZ(0)' }}
+      />
 
       {/* Global Navbar (Shown on Map view, with home button returning to start screen) */}
       {currentScreen === 'map' && (
