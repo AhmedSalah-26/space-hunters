@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from '../components/Navbar';
 import StartScreen from '../components/StartScreen';
 import UniversalRotationScreen from '../components/UniversalRotationScreen';
@@ -8,71 +8,154 @@ import WorldMapScreen from '../components/WorldMapScreen';
 import MissionBriefingScreen from '../components/MissionBriefingScreen';
 import DecisionMatrixScreen from '../components/DecisionMatrixScreen';
 import ResultsDashboardScreen from '../components/ResultsDashboardScreen';
+import FarmProStudio from '../components/farmPro/FarmProStudio';
 import AgriBankModal from '../components/AgriBankModal';
 import GameGuideModal from '../components/GameGuideModal';
-import LeaderboardModal from '../components/LeaderboardModal';
 import { missionsData } from '../data/missionsData';
 import { useLanguage } from '../context/LanguageContext';
 
+const VALID_SCREENS = ['start', 'map', 'briefing', 'decision', 'results', 'universalBuilder', 'farmPro'];
+
 export default function Home() {
   const { lang } = useLanguage();
-  const [activeNavTab, setActiveNavTab] = useState(null); // 'agriBank' | 'gameGuide' | 'leaderboard' | null
-  const [currentScreen, setCurrentScreen] = useState('start'); // 'start' | 'map' | 'briefing' | 'decision' | 'results' | 'universalBuilder'
+  const [activeNavTab, setActiveNavTab] = useState(null); // 'agriBank' | 'gameGuide' | null
+  const [currentScreen, setCurrentScreen] = useState('start'); // 'start' | 'map' | 'briefing' | 'decision' | 'results' | 'universalBuilder' | 'farmPro'
   const [selectedMission, setSelectedMission] = useState(missionsData[0]);
   const [playerChoice, setPlayerChoice] = useState(null);
   const [playerCustomSequence, setPlayerCustomSequence] = useState(null);
 
+  // Navigate to screen with full Browser History & URL Hash support
+  const navigateToScreen = useCallback((screenName, replace = false) => {
+    setCurrentScreen(screenName);
+    setActiveNavTab(null);
+    if (typeof window !== 'undefined') {
+      const hash = `#${screenName}`;
+      if (window.location.hash !== hash) {
+        if (replace) {
+          window.history.replaceState({ screen: screenName, modal: null }, '', hash);
+        } else {
+          window.history.pushState({ screen: screenName, modal: null }, '', hash);
+        }
+      }
+    }
+  }, []);
+
+  // Modal open with history push so browser back closes modal first
+  const handleOpenModal = useCallback((modalName) => {
+    setActiveNavTab(modalName);
+    if (typeof window !== 'undefined') {
+      const current = window.location.hash.split('?')[0] || `#${currentScreen}`;
+      window.history.pushState({ screen: currentScreen, modal: modalName }, '', `${current}?modal=${modalName}`);
+    }
+  }, [currentScreen]);
+
+  const handleCloseModal = useCallback(() => {
+    setActiveNavTab(null);
+    if (typeof window !== 'undefined' && window.location.hash.includes('?modal=')) {
+      window.history.back();
+    }
+  }, []);
+
+  // Sync with Browser History Back/Forward (popstate)
+  useEffect(() => {
+    const parseUrl = () => {
+      const raw = window.location.hash.replace('#', '') || 'start';
+      const [screenPart, queryPart] = raw.split('?');
+      const screen = VALID_SCREENS.includes(screenPart) ? screenPart : 'start';
+      
+      let modal = null;
+      if (queryPart && queryPart.includes('modal=')) {
+        const m = queryPart.replace('modal=', '');
+        if (['agriBank', 'gameGuide'].includes(m)) modal = m;
+      }
+      return { screen, modal };
+    };
+
+    const initial = parseUrl();
+    setCurrentScreen(initial.screen);
+    if (initial.modal) setActiveNavTab(initial.modal);
+
+    // Initial state record
+    window.history.replaceState(
+      { screen: initial.screen, modal: initial.modal },
+      '',
+      initial.modal ? `#${initial.screen}?modal=${initial.modal}` : `#${initial.screen}`
+    );
+
+    const onPopState = (e) => {
+      if (e.state && e.state.screen && VALID_SCREENS.includes(e.state.screen)) {
+        setCurrentScreen(e.state.screen);
+        setActiveNavTab(e.state.modal || null);
+      } else {
+        const parsed = parseUrl();
+        setCurrentScreen(parsed.screen);
+        setActiveNavTab(parsed.modal);
+      }
+    };
+
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, []);
+
   // Transitions from Start Screen
   const handleStartGame = () => {
-    setCurrentScreen('map');
+    navigateToScreen('map');
+  };
+
+  const handleOpenFarmPro = () => {
+    navigateToScreen('farmPro');
   };
 
   const handleOpenAgriBank = () => {
-    setActiveNavTab('agriBank');
+    handleOpenModal('agriBank');
   };
 
   const handleOpenSequenceBuilder = () => {
-    setCurrentScreen('universalBuilder');
+    navigateToScreen('universalBuilder');
   };
 
   const handleOpenGameGuide = () => {
-    setActiveNavTab('gameGuide');
-  };
-
-  const handleOpenLeaderboard = () => {
-    setActiveNavTab('leaderboard');
+    handleOpenModal('gameGuide');
   };
 
   // Game flow Transitions
   const handleStartMission = () => {
-    setCurrentScreen('briefing');
+    navigateToScreen('briefing');
   };
 
   const handleContinueToDecision = () => {
-    setCurrentScreen('decision');
+    navigateToScreen('decision');
   };
 
   const handleDecisionSubmit = (rotationId, customSequence) => {
     setPlayerChoice(rotationId);
     setPlayerCustomSequence(customSequence);
-    setCurrentScreen('results');
+    navigateToScreen('results');
   };
 
   const handleBackToMap = () => {
-    setCurrentScreen('map');
-    setActiveNavTab(null);
+    if (typeof window !== 'undefined' && window.location.hash.includes('briefing')) {
+      window.history.back();
+    } else {
+      navigateToScreen('map');
+    }
   };
 
   const handleGoHome = () => {
-    setCurrentScreen('start');
-    setActiveNavTab(null);
+    if (typeof window !== 'undefined' && (window.location.hash.includes('farmPro') || window.location.hash.includes('map') || window.location.hash.includes('universalBuilder'))) {
+      window.history.back();
+    } else {
+      navigateToScreen('start');
+    }
   };
 
   const handleNextMission = () => {
     const currentIndex = missionsData.findIndex(m => m.id === selectedMission.id);
     const nextIndex = (currentIndex + 1) % missionsData.length;
     setSelectedMission(missionsData[nextIndex]);
-    setCurrentScreen('briefing');
+    navigateToScreen('briefing', true);
   };
 
   return (
@@ -88,9 +171,11 @@ export default function Home() {
           activeTab="map"
           setActiveTab={(tab) => {
             if (tab === 'map') handleBackToMap();
-            else setActiveNavTab(tab);
+            else if (tab === 'farmPro') handleOpenFarmPro();
+            else handleOpenModal(tab);
           }}
           onGoHome={handleGoHome}
+          onOpenFarmPro={handleOpenFarmPro}
         />
       )}
 
@@ -103,21 +188,29 @@ export default function Home() {
         {currentScreen === 'start' && (
           <StartScreen
             onStartGame={handleStartGame}
+            onOpenFarmPro={handleOpenFarmPro}
             onOpenAgriBank={handleOpenAgriBank}
             onOpenSequenceBuilder={handleOpenSequenceBuilder}
             onOpenGameGuide={handleOpenGameGuide}
-            onOpenLeaderboard={handleOpenLeaderboard}
           />
         )}
 
-        {/* 🔬 2. UNIVERSAL CROP ROTATION SANDBOX (ALL CROPS DATABASE) 🔬 */}
+        {/* 🛰️ 2. FARM PRO DECISION STUDIO & FIELD BOUNDARY DETECTOR 🛰️ */}
+        {currentScreen === 'farmPro' && (
+          <FarmProStudio
+            onBackToHome={handleGoHome}
+            onOpenGame={handleStartGame}
+          />
+        )}
+
+        {/* 🔬 3. UNIVERSAL CROP ROTATION SANDBOX (ALL CROPS DATABASE) 🔬 */}
         {currentScreen === 'universalBuilder' && (
           <UniversalRotationScreen
             onBack={handleGoHome}
           />
         )}
 
-        {/* 🗺️ 3. WORLD MISSIONS MAP 🗺️ */}
+        {/* 🗺️ 4. WORLD MISSIONS MAP 🗺️ */}
         {currentScreen === 'map' && (
           <WorldMapScreen
             missions={missionsData}
@@ -127,7 +220,7 @@ export default function Home() {
           />
         )}
 
-        {/* 📋 4. MISSION BRIEFING & DIALOGUE 📋 */}
+        {/* 📋 5. MISSION BRIEFING & DIALOGUE 📋 */}
         {currentScreen === 'briefing' && (
           <MissionBriefingScreen
             mission={selectedMission}
@@ -136,28 +229,28 @@ export default function Home() {
           />
         )}
 
-        {/* 🔄 5. COUNTRY MISSION CROP ROTATION DECISION & BUILDER 🔄 */}
+        {/* 🔄 6. COUNTRY MISSION CROP ROTATION DECISION & BUILDER 🔄 */}
         {currentScreen === 'decision' && (
           <DecisionMatrixScreen
             mission={selectedMission}
             onBack={() => {
-              if (currentScreen === 'decision' && !playerChoice) {
-                handleBackToMap();
+              if (typeof window !== 'undefined' && window.location.hash.includes('decision')) {
+                window.history.back();
               } else {
-                setCurrentScreen('briefing');
+                navigateToScreen('briefing');
               }
             }}
             onDecisionSubmit={handleDecisionSubmit}
           />
         )}
 
-        {/* 🏆 6. RESULTS & CERTIFICATION DASHBOARD 🏆 */}
+        {/* 🏆 7. RESULTS & CERTIFICATION DASHBOARD 🏆 */}
         {currentScreen === 'results' && (
           <ResultsDashboardScreen
             mission={selectedMission}
             playerChoice={playerChoice}
             playerCustomSequence={playerCustomSequence}
-            onBackToMap={handleBackToMap}
+            onBackToMap={() => navigateToScreen('map')}
             onNextMission={handleNextMission}
           />
         )}
@@ -181,17 +274,12 @@ export default function Home() {
       {/* Top Modals (Available on all screens) */}
       <AgriBankModal
         isOpen={activeNavTab === 'agriBank'}
-        onClose={() => setActiveNavTab(null)}
+        onClose={handleCloseModal}
       />
 
       <GameGuideModal
         isOpen={activeNavTab === 'gameGuide'}
-        onClose={() => setActiveNavTab(null)}
-      />
-
-      <LeaderboardModal
-        isOpen={activeNavTab === 'leaderboard'}
-        onClose={() => setActiveNavTab(null)}
+        onClose={handleCloseModal}
       />
 
     </main>

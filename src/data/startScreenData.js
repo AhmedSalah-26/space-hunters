@@ -11,10 +11,10 @@ export const startScreenData = {
   
   titlePrefix: "SPACE",
   titleSuffix: "HUNTERS",
-  taglineAr: "محاكاة التكيف الزراعي وإدارة الدورات المحصولية ببيانات أقمار NASA الفضائية",
+  taglineAr: "ازرع صح ووفّر ميتك وفلوسك ببيانات أقمار ناسا الفضائية",
   taglineEn: "Agricultural Adaptation & Crop Rotation System Powered by NASA Earth Data",
 
-  descAr: "انضم إلى فريق Space Hunters في مهمة عالمية لمساعدة المزارعين على التكيف مع التغير المناخي، ترشيد مياه الري، واستعادة خصوبة التربة بالاعتماد على رصد الأقمار الصناعية (SMAP, Landsat, ECOSTRESS).",
+  descAr: "ساعد الفلاحين يزرعوا صح، ويوفروا مية الري، ويرجعوا عافية أرضهم وتزيد غلتهم باستخدام أقمار ناسا الفضائية.",
   descEn: "Join Team Space Hunters on a global mission to help farmers adapt to climate stress, conserve water, and restore soil fertility using NASA Earth observations.",
 
   buttons: {
@@ -22,25 +22,25 @@ export const startScreenData = {
       id: "start",
       labelAr: "ابدأ اللعب",
       labelEn: "Start Game",
-      subAr: "استكشف خريطة الأزمات العالمية والمهام",
+      subAr: "مهمات وتحديات فلاحين حول العالم",
       subEn: "Explore Global Crisis Map & Field Missions",
       icon: "Rocket",
       glowColor: "cyan"
     },
     cropBank: {
       id: "agriBank",
-      labelAr: "بنك المحاصيل والتربة",
+      labelAr: "دليل المحاصيل والأرض",
       labelEn: "Agri-Bank Vault",
-      subAr: "مستودع المحاصيل وخصائص التربة ومستشعرات NASA",
+      subAr: "اعرف كل زرعة ومواصفاتها واحتياجاتها",
       subEn: "Crops Database, Soil Profiles & Satellite Specs",
       icon: "Sprout",
       glowColor: "emerald"
     },
     sequenceBuilder: {
       id: "builder",
-      labelAr: "صانع تسلسل الدورات",
+      labelAr: "جرّب دورتك الزراعية",
       labelEn: "Rotation Sequence Builder",
-      subAr: "صمم واختبر دورتك الزراعية لـ 3 مواسم فوراً",
+      subAr: "احسب وفر المية والمكسب المتوقع فوراً",
       subEn: "Simulate & Build 3-Season Rotations Instantly",
       icon: "RotateCcw",
       glowColor: "purple"
@@ -51,26 +51,24 @@ export const startScreenData = {
     {
       id: "missions",
       value: "5",
-      labelAr: "مهام عالمية حقيقية",
+      labelAr: "مهمات زراعية عالمية",
       labelEn: "Global Field Missions"
     },
     {
       id: "satellites",
       value: "4",
-      labelAr: "أقمار ومستشعرات NASA",
+      labelAr: "أقمار رصد من ناسا",
       labelEn: "NASA Space Sensors"
     },
     {
       id: "accuracy",
       value: "99.4%",
-      labelAr: "دقة المعايرة الفضائية",
+      labelAr: "دقة بيانات ناسا",
       labelEn: "Calibrated Accuracy"
     }
   ],
 
-  guideBtnAr: "دليل اللعبة والتعليمات",
+  guideBtnAr: "ازاي تلعب؟",
   guideBtnEn: "Game Guide & Manual",
-  leaderboardBtnAr: "لوحة المتصدرين",
-  leaderboardBtnEn: "Leaderboard",
   teamSignature: "NASA Space Apps 2026 • Space Hunters"
 };

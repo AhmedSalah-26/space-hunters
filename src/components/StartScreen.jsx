@@ -4,17 +4,18 @@ import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { 
   Rocket, Sprout, RotateCcw, 
-  BookOpen, Trophy, Languages, 
-  ArrowLeft, ArrowRight, Satellite, Globe2
+  BookOpen, Languages, 
+  ArrowLeft, ArrowRight, Satellite,
+  Scan, Compass
 } from 'lucide-react';
 import { startScreenData } from '../data/startScreenData';
 
 export default function StartScreen({ 
   onStartGame, 
+  onOpenFarmPro,
   onOpenAgriBank, 
   onOpenSequenceBuilder,
-  onOpenGameGuide,
-  onOpenLeaderboard
+  onOpenGameGuide
 }) {
   const { lang, isRtl, toggleLanguage } = useLanguage();
 
@@ -49,14 +50,6 @@ export default function StartScreen({
           >
             <BookOpen className="w-3 h-3 text-cyan-400" />
             <span className="hidden sm:inline">{lang === 'ar' ? startScreenData.guideBtnAr : startScreenData.guideBtnEn}</span>
-          </button>
-
-          <button
-            onClick={onOpenLeaderboard}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#1a1200]/90 hover:bg-[#2e2000] border border-amber-500/30 hover:border-amber-400/60 text-[10px] sm:text-xs font-bold text-amber-300 hover:text-amber-100 rounded-lg transition-all cursor-pointer backdrop-blur-md active:scale-95"
-          >
-            <Trophy className="w-3 h-3 text-amber-400" />
-            <span className="hidden sm:inline">{lang === 'ar' ? startScreenData.leaderboardBtnAr : startScreenData.leaderboardBtnEn}</span>
           </button>
 
           <button
@@ -128,12 +121,41 @@ export default function StartScreen({
                   {lang === 'ar' ? startScreenData.buttons.startGame.labelAr : startScreenData.buttons.startGame.labelEn}
                 </div>
                 <div className="text-[10px] text-cyan-100/80 font-medium">
-                  {lang === 'ar' ? '٦ مهمات زراعية عالمية' : '6 Global Farm Missions'}
+                  {lang === 'ar' ? '٦ مهمات زراعية حول العالم • العب واكسب' : '6 Global Missions • Interactive Game Mode'}
                 </div>
               </div>
             </div>
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0 z-10">
               {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+            </div>
+          </button>
+
+          {/* 🌟 PRO FARM STUDIO CTA — Outside Game Mode 🌟 */}
+          <button
+            onClick={onOpenFarmPro}
+            className="w-full py-3.5 sm:py-4 px-5 bg-gradient-to-r from-indigo-700 via-purple-700 to-cyan-600 hover:from-indigo-600 hover:to-cyan-500 text-white rounded-2xl shadow-[0_0_35px_rgba(99,102,241,0.5),0_8px_20px_rgba(0,0,0,0.5)] flex items-center justify-between transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer border border-indigo-400/50 group relative overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+            <div className="flex items-center gap-3 z-10">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/30 border border-indigo-300/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-inner">
+                <Scan className="w-5 h-5 text-indigo-200" />
+              </div>
+              <div className="text-left">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm sm:text-base font-black tracking-wide leading-tight text-white">
+                    {lang === 'ar' ? 'استوديو المزارع الذكي' : 'Farm Pro Decision Studio'}
+                  </span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-400/20 text-cyan-200 border border-cyan-400/40 font-mono font-bold">
+                    PRO
+                  </span>
+                </div>
+                <div className="text-[10px] text-indigo-200/90 font-medium">
+                  {lang === 'ar' ? 'حدد أرضك على الخريطة • واعرف طقسها وأحسن زرعة ليها من ناسا' : 'Target Any Farm • Real NASA Weather & Smart Crop Rotations'}
+                </div>
+              </div>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-indigo-500/30 border border-indigo-300/30 flex items-center justify-center shrink-0 z-10">
+              {isRtl ? <ArrowLeft className="w-4 h-4 text-indigo-200" /> : <ArrowRight className="w-4 h-4 text-indigo-200" />}
             </div>
           </button>
 
@@ -153,7 +175,7 @@ export default function StartScreen({
                   {lang === 'ar' ? startScreenData.buttons.cropBank.labelAr : startScreenData.buttons.cropBank.labelEn}
                 </div>
                 <div className="text-[9px] text-emerald-400/70 font-medium truncate">
-                  {lang === 'ar' ? 'قاعدة البيانات' : 'Database'}
+                  {lang === 'ar' ? 'موسوعة الزرع' : 'Crop Encyclopedia'}
                 </div>
               </div>
             </button>
@@ -171,27 +193,12 @@ export default function StartScreen({
                   {lang === 'ar' ? startScreenData.buttons.sequenceBuilder.labelAr : startScreenData.buttons.sequenceBuilder.labelEn}
                 </div>
                 <div className="text-[9px] text-cyan-400/70 font-medium truncate">
-                  {lang === 'ar' ? 'المحاكاة' : 'Simulation'}
+                  {lang === 'ar' ? 'احسب وفر المية' : 'Water Calculator'}
                 </div>
               </div>
             </button>
 
           </div>
-        </div>
-
-        {/* ── STATS STRIP ── */}
-        <div className="mt-5 sm:mt-6 w-full grid grid-cols-3 gap-2">
-          {[
-            { icon: Globe2, val: '6', labelAr: 'دول', labelEn: 'Countries', color: 'text-cyan-400', border: 'border-cyan-500/25' },
-            { icon: Satellite, val: '3', labelAr: 'أقمار', labelEn: 'Satellites', color: 'text-blue-400', border: 'border-blue-500/25' },
-            { icon: Sprout, val: '12+', labelAr: 'محصول', labelEn: 'Crops', color: 'text-emerald-400', border: 'border-emerald-500/25' },
-          ].map((stat, i) => (
-            <div key={i} className={`flex flex-col items-center p-2 bg-[#051020]/70 border ${stat.border} rounded-xl backdrop-blur-sm`}>
-              <stat.icon className={`w-3.5 h-3.5 ${stat.color} mb-1`} />
-              <span className={`text-lg font-black ${stat.color} leading-none`}>{stat.val}</span>
-              <span className="text-[9px] text-slate-400 font-bold mt-0.5">{lang === 'ar' ? stat.labelAr : stat.labelEn}</span>
-            </div>
-          ))}
         </div>
 
       </div>

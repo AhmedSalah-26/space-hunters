@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;800&display=swap');
+@import 'leaflet/dist/leaflet.css';
 
 @tailwind base;
 @tailwind components;
@@ -11,6 +12,42 @@
   --accent-cyan: #06b6d4;
   --accent-blue: #3b82f6;
   --accent-emerald: #10b981;
+}
+
+/* 🌟 Professional Neon Boundary Glow for Leaflet Polygons (NASA Space Apps) 🌟 */
+.leaflet-neon-polygon {
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.4)) !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+}
+
+.leaflet-neon-polygon-selected {
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+  filter: drop-shadow(0 0 4px #818cf8) drop-shadow(0 0 12px rgba(129, 140, 248, 0.9)) drop-shadow(0 0 24px rgba(99, 102, 241, 0.6)) !important;
+  cursor: pointer !important;
+}
+
+.leaflet-neon-polygon:hover, .leaflet-neon-polygon-selected:hover {
+  filter: drop-shadow(0 0 6px #38bdf8) drop-shadow(0 0 16px rgba(56, 189, 248, 1)) drop-shadow(0 0 32px rgba(56, 189, 248, 0.8)) !important;
+}
+
+/* Pulsing radar ring */
+@keyframes beaconPulse {
+  0% { transform: scale(0.9); opacity: 0.9; }
+  50% { transform: scale(1.3); opacity: 0.4; }
+  100% { transform: scale(0.9); opacity: 0.9; }
+}
+
+.beacon-pulse-ring {
+  animation: beaconPulse 2.5s infinite ease-in-out;
+}
+
+.custom-neon-beacon {
+  background: transparent !important;
+  border: none !important;
 }
 
 html {

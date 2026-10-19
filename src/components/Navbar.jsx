@@ -3,12 +3,12 @@
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { 
-  Home, Database, BookOpen, Trophy, 
-  Languages 
+  Home, Database, BookOpen, 
+  Languages, Scan 
 } from 'lucide-react';
 import { mapControlsData } from '../data/worldMapData';
 
-export default function Navbar({ activeTab = 'map', setActiveTab, onGoHome }) {
+export default function Navbar({ activeTab = 'map', setActiveTab, onGoHome, onOpenFarmPro }) {
   const { t, lang, toggleLanguage } = useLanguage();
 
   return (
@@ -71,16 +71,19 @@ export default function Navbar({ activeTab = 'map', setActiveTab, onGoHome }) {
           >
             <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-0.5">
               {[
-                { id: 'map',         label: t.navMap,         icon: Home },
-                { id: 'agriBank',    label: t.navAgriBank,    icon: Database },
-                { id: 'gameGuide',   label: t.navGameGuide,   icon: BookOpen },
-                { id: 'leaderboard', label: t.navLeaderboard, icon: Trophy },
+                { id: 'map',         label: t.navMap,                                           icon: Home },
+                { id: 'farmPro',     label: lang === 'ar' ? 'استوديو المزارع Pro' : 'Farm Pro', icon: Scan },
+                { id: 'agriBank',    label: t.navAgriBank,                                      icon: Database },
+                { id: 'gameGuide',   label: t.navGameGuide,                                     icon: BookOpen },
               ].map(({ id, label, icon: Icon }) => {
                 const isActive = activeTab === id;
                 return (
                   <button
                     key={id}
-                    onClick={() => { setActiveTab(id); if (id === 'map') onGoHome?.(); }}
+                    onClick={() => { 
+                      if (id === 'farmPro') onOpenFarmPro ? onOpenFarmPro() : setActiveTab('farmPro');
+                      else { setActiveTab(id); if (id === 'map') onGoHome?.(); }
+                    }}
                     className={`relative flex flex-col items-center justify-center px-3 sm:px-5 py-1.5 transition-all duration-300 shrink-0 cursor-pointer ${
                       isActive
                         ? 'text-white scale-[1.03]'
@@ -166,19 +169,22 @@ export default function Navbar({ activeTab = 'map', setActiveTab, onGoHome }) {
             />
           </div>
 
-          {/* Nav Tabs — 4 items strictly distributed */}
-          <div className="flex-1 grid grid-cols-4 gap-1 bg-[#041220]/90 border border-cyan-500/25 p-0.5 rounded-xl backdrop-blur-md min-w-0">
+          {/* Nav Tabs — 4 items cleanly distributed */}
+          <div className="flex-1 grid grid-cols-4 gap-0.5 bg-[#041220]/90 border border-cyan-500/25 p-0.5 rounded-xl backdrop-blur-md min-w-0">
             {[
               { id: 'map',         label: lang === 'ar' ? 'الخريطة' : 'Map',         icon: Home },
+              { id: 'farmPro',     label: lang === 'ar' ? 'المزارع' : 'Pro',         icon: Scan },
               { id: 'agriBank',    label: lang === 'ar' ? 'البنك' : 'Bank',          icon: Database },
               { id: 'gameGuide',   label: lang === 'ar' ? 'الدليل' : 'Guide',        icon: BookOpen },
-              { id: 'leaderboard', label: lang === 'ar' ? 'الأوائل' : 'Leaders',      icon: Trophy },
             ].map(({ id, label, icon: Icon }) => {
               const isActive = activeTab === id;
               return (
                 <button
                   key={id}
-                  onClick={() => { setActiveTab(id); if (id === 'map') onGoHome?.(); }}
+                  onClick={() => { 
+                    if (id === 'farmPro') onOpenFarmPro ? onOpenFarmPro() : setActiveTab('farmPro');
+                    else { setActiveTab(id); if (id === 'map') onGoHome?.(); }
+                  }}
                   className={`flex flex-col items-center justify-center py-1.5 px-0.5 rounded-lg transition-all duration-200 cursor-pointer active:scale-95 min-w-0 ${
                     isActive
                       ? 'bg-gradient-to-b from-blue-500 to-cyan-600 text-white shadow-[0_0_10px_rgba(0,180,256,0.5)]'
