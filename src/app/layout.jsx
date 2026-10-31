@@ -5,6 +5,7 @@ export const metadata = {
   title: 'Space Hunters 🌱 | NASA Space Apps Challenge 2026',
   description: 'Adapting Farms with NASA Data - An interactive climate strategy game by Team Space Hunters',
   icons: {
+    icon: '/icon.png',
     apple: '/space_hunters_badge.jpg',
   },
 };
