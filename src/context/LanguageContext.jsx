@@ -6,13 +6,13 @@ import { translations } from '../data/translations';
 const LanguageContext = createContext();
 
 export function LanguageProvider({ children }) {
-  const [lang, setLang] = useState('ar');
+  const [lang, setLang] = useState('en');
 
   const toggleLanguage = () => {
     setLang((prev) => (prev === 'ar' ? 'en' : 'ar'));
   };
 
-  const t = translations[lang] || translations.ar;
+  const t = translations[lang] || translations.en;
   const isRtl = lang === 'ar';
 
   useEffect(() => {

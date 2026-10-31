@@ -6,10 +6,10 @@ export const metadata = {
   description: 'Adapting Farms with NASA Data - An interactive climate strategy game by Team Space Hunters',
   icons: {
     icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icon.png', type: 'image/png' },
       { url: '/space_hunters_badge.jpg', type: 'image/jpeg' }
     ],
-    shortcut: '/favicon.svg',
+    shortcut: '/icon.png',
     apple: '/space_hunters_badge.jpg',
   },
 };
@@ -24,10 +24,10 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ar" dir="rtl" className="h-full">
+    <html lang="en" dir="ltr" className="h-full">
       <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="shortcut icon" href="/favicon.svg" />
+        <link rel="icon" href="/icon.png" type="image/png" />
+        <link rel="shortcut icon" href="/icon.png" />
         <link rel="apple-touch-icon" href="/space_hunters_badge.jpg" />
       </head>
       <body className="bg-[#050c1b] text-slate-100 h-full overflow-hidden selection:bg-blue-600 selection:text-white">
