@@ -38,7 +38,7 @@ const priorityDescriptions = {
 };
 const formatPercent = (value) => `${Math.round(value)}%`;
 
-export default function RotationStrategyWorkbench({ mission = null, onBack, onDecisionSubmit, focusSection = null }) {
+export default function RotationStrategyWorkbench({ mission = null, onBack, onDecisionSubmit }) {
   const { lang, isRtl } = useLanguage();
   const { session, updateSession } = useWorkingSession();
   const ar = lang === 'ar';
@@ -62,11 +62,6 @@ export default function RotationStrategyWorkbench({ mission = null, onBack, onDe
     setBaselineConfirmed(Boolean(session.analysisResults?.rotationEvaluation?.farmInputs?.baselineConfirmed));
     setSelectedId(session.analysisResults?.selectedStrategyId || 'strategy-0');
   }, [starter, catalog]);
-
-  useEffect(() => {
-    if (!focusSection) return;
-    document.getElementById(`rotation-${focusSection}`)?.scrollIntoView({ block: 'start' });
-  }, [focusSection]);
 
   const strategies = useMemo(() => sequences.map((sequence, index) => ({
     id: `strategy-${index}`, name: ar ? labelAr[index] : labels[index], isBaseline: index === 0, sequence,
@@ -112,15 +107,44 @@ export default function RotationStrategyWorkbench({ mission = null, onBack, onDe
       ? (ar ? 'نقطة مرجعية ومساحة مدخلة' : 'Reference point and entered area')
       : (ar ? 'لم تُسجل طريقة القياس' : 'Measurement method unavailable');
 
-  return <div dir={isRtl ? 'rtl' : 'ltr'} className="mobile-scroll w-full h-full min-h-0 max-w-[1500px] mx-auto px-3 sm:px-6 py-4 text-slate-100 space-y-4 overflow-y-auto">
+  return <div dir={isRtl ? 'rtl' : 'ltr'} className="w-full shrink-0 max-w-[1500px] mx-auto px-3 sm:px-6 py-4 text-slate-100 space-y-4 overflow-visible">
     <header className="flex items-center justify-between gap-3">
       <div><p className="text-[10px] uppercase tracking-[.2em] text-cyan-300">Field Shift · Decision Support</p><h1 className="text-xl sm:text-2xl font-black">{ar ? 'مقارنة استراتيجيات الدورة الزراعية' : 'Crop Rotation Strategy Comparison'}</h1><p className="mt-1 max-w-3xl text-xs text-slate-400">{ar ? 'قارن خط الأساس مع بديلين باستخدام صفات منشورة وأوزان تحددها أنت.' : 'Compare an existing-rotation baseline with two alternatives using sourced crop traits and priorities you control.'}</p></div>
       {onBack && <button onClick={onBack} className="shrink-0 rounded-lg border border-slate-600 px-3 py-2 text-xs">{ar ? 'رجوع' : 'Back'}</button>}
     </header>
 
-    <section className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
-      <div className="lg:col-span-2"><h2 className="text-sm font-bold"><span className="me-2 text-cyan-300">01</span>{ar ? 'مقارنة الدورات الزراعية' : 'Module 01 · Compare Rotations'}</h2></div>
-      <div id="rotation-comparison" className="grid min-w-0 scroll-mt-3 gap-3 xl:grid-cols-3">
+    <div className="flex min-w-0 flex-col gap-4">
+      <aside id="workflow-section-2" className="min-w-0 scroll-mt-4 rounded-xl border border-slate-700 bg-[#07152b] p-3 space-y-4">
+        <h2 className="text-base font-bold">{ar ? '٣. معلومات المزرعة والمحاصيل' : '3. Farm Information & Crops'}</h2>
+        <section aria-labelledby="selected-farm-context-title" className="rounded-lg border border-cyan-900/70 bg-[#030914] p-3">
+          <h3 id="selected-farm-context-title" className="text-sm font-bold text-cyan-100">{ar ? 'ملخص المزرعة المحددة' : 'Selected Farm Context'}</h3>
+          <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
+            <div className="min-w-0"><dt className="text-slate-400">{ar ? 'الموقع' : 'Location'}</dt><dd className="break-words font-semibold">{locationLabel}</dd></div>
+            <div className="min-w-0"><dt className="text-slate-400">{ar ? 'الإحداثيات' : 'Coordinates'}</dt><dd className="break-words font-mono text-xs">{Number.isFinite(farmLocation?.latitude) && Number.isFinite(farmLocation?.longitude) ? `${farmLocation.latitude.toFixed(5)}, ${farmLocation.longitude.toFixed(5)}` : (ar ? 'غير متاحة' : 'Unavailable')}</dd></div>
+            <div><dt className="text-slate-400">{ar ? 'مساحة المزرعة' : 'Farm area'}</dt><dd className="font-semibold">{areaLabel}</dd></div>
+            <div className="min-w-0"><dt className="text-slate-400">{ar ? 'طريقة القياس' : 'Area measurement method'}</dt><dd className="break-words">{methodLabel}</dd></div>
+          </dl>
+        </section>
+
+        <details className="rounded-lg border border-slate-700 bg-[#030914]">
+          <summary className="cursor-pointer px-3 py-3 text-sm font-bold text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">{ar ? 'معلومات إضافية عن المزرعة (اختياري)' : 'Additional Farm Information (Optional)'}</summary>
+          <div className="space-y-4 border-t border-slate-700 p-3">
+            <p className="text-xs leading-relaxed text-slate-400">{ar ? 'هذه معلومات يشاركها المزارع للسياق فقط. لا تُقاس بالأقمار الصناعية ولا تغيّر درجات المقارنة.' : 'These are farmer-provided context only. They are not satellite measurements and do not change comparison scores.'}</p>
+            <label className="block space-y-1.5 text-sm text-slate-200"><span>{ar ? 'نوع التربة (اختياري)' : 'Soil type (optional)'}</span><input className={fieldClass} value={farm.soilType || ''} onChange={(e) => setFarm({ ...farm, soilType: e.target.value })} placeholder={ar ? 'معلومة يقدّمها المزارع' : 'Farmer-provided information'} /><span className="block text-xs leading-relaxed text-slate-400">{ar ? 'لا يُستدل على نوع التربة من الإحداثيات، ولا يدخل هذا الحقل في الدرجة.' : 'Soil type is not inferred from coordinates and does not affect the score.'}</span></label>
+            <label className="block space-y-1.5 text-sm text-slate-200"><span>{ar ? 'تقدير المزارع لتوفر المياه (اختياري)' : 'Farmer assessment of water availability (optional)'}</span><select className={fieldClass} value={farm.waterAvailability === 'Adequate' ? 'Sufficient' : farm.waterAvailability || ''} onChange={(e) => setFarm({ ...farm, waterAvailability: e.target.value })}><option value="">{ar ? 'غير معروف' : 'Unknown'}</option><option value="Limited">{ar ? 'محدود' : 'Limited'}</option><option value="Moderate">{ar ? 'متوسط' : 'Moderate'}</option><option value="Sufficient">{ar ? 'كافٍ' : 'Sufficient'}</option></select><span className="block text-xs leading-relaxed text-slate-400">{ar ? 'تقدير ذاتي للسياق؛ لا يمثل قياساً للأمطار أو رطوبة التربة أو المياه الجوفية ولا يؤثر في الدرجة.' : 'A self-reported context value, not a measure of rainfall, soil moisture, or groundwater; it does not affect the score.'}</span></label>
+          </div>
+        </details>
+
+        <div className="border-t border-slate-700 pt-3">
+          <h3 className="text-sm font-bold">{ar ? 'أولويات المزارع' : 'Farmer Priorities'}</h3>
+          <p className="mt-1 text-xs leading-relaxed text-slate-400">{ar ? 'تحدد هذه الأوزان مدى تأثير الصفات الزراعية المدعومة في درجة المقارنة النسبية. تُستبعد الصفات التي لا تتوفر لها بيانات قابلة للمقارنة، وتُعاد موازنة الأوزان المتبقية.' : 'These weights set how supported crop traits influence the relative comparison score. Traits without comparable data are excluded, and remaining weights are renormalized.'}</p>
+          <div className="mt-3 space-y-4">{Object.entries(DEFAULT_ROTATION_PRIORITIES).map(([key]) => <label key={key} className="block space-y-1.5 text-sm text-slate-200"><span className="flex items-start justify-between gap-3"><span>{priorityLabels[key][ar ? 1 : 0]}</span><b className="shrink-0 text-cyan-300">{priorities[key]}</b></span><span className="block text-xs leading-relaxed text-slate-400">{priorityDescriptions[key][ar ? 1 : 0]}</span><input className="w-full accent-cyan-400" type="range" min="0" max="100" value={priorities[key]} aria-label={ar ? priorityAria[key] : priorityLabels[key][0]} onChange={(e) => setPriorities({ ...priorities, [key]: Number(e.target.value) })} /></label>)}</div>
+        </div>
+      </aside>
+
+      <section id="workflow-section-3" className="scroll-mt-4 space-y-3">
+      <h2 className="text-sm font-bold"><span className="me-2 text-cyan-300">04</span>{ar ? 'مقارنة استراتيجيات الدورة' : '4. Rotation Strategy Comparison'}</h2>
+      <div id="rotation-comparison" className="grid min-w-0 scroll-mt-4 gap-3 xl:grid-cols-3">
         {strategies.map((strategy, si) => {
           const result = evaluation.strategies[si];
           const strengths = si === 0 ? (ar ? 'مرجع المقارنة.' : 'Comparison reference.') : (evaluation.scoredCriteria.filter((key) => result.metrics[key] > evaluation.strategies[0].metrics[key]).map((key) => ar ? ROTATION_CRITERIA[key].labelAr : ROTATION_CRITERIA[key].labelEn).join(', ') || (ar ? 'لا توجد ميزة أعلى وفق المعايير المدعومة.' : 'No higher supported criterion score.'));
@@ -148,34 +172,6 @@ export default function RotationStrategyWorkbench({ mission = null, onBack, onDe
           </article>;
         })}
       </div>
-      <aside id="rotation-inputs" className="min-w-0 scroll-mt-3 rounded-xl border border-slate-700 bg-[#07152b] p-3 space-y-4 lg:col-start-2 lg:row-start-2">
-        <h2 className="text-base font-bold">{ar ? 'معلومات المزرعة والأولويات' : 'Farm Information & Priorities'}</h2>
-        <section aria-labelledby="selected-farm-context-title" className="rounded-lg border border-cyan-900/70 bg-[#030914] p-3">
-          <h3 id="selected-farm-context-title" className="text-sm font-bold text-cyan-100">{ar ? 'ملخص المزرعة المحددة' : 'Selected Farm Context'}</h3>
-          <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
-            <div className="min-w-0"><dt className="text-slate-400">{ar ? 'الموقع' : 'Location'}</dt><dd className="break-words font-semibold">{locationLabel}</dd></div>
-            <div className="min-w-0"><dt className="text-slate-400">{ar ? 'الإحداثيات' : 'Coordinates'}</dt><dd className="break-words font-mono text-xs">{Number.isFinite(farmLocation?.latitude) && Number.isFinite(farmLocation?.longitude) ? `${farmLocation.latitude.toFixed(5)}, ${farmLocation.longitude.toFixed(5)}` : (ar ? 'غير متاحة' : 'Unavailable')}</dd></div>
-            <div><dt className="text-slate-400">{ar ? 'مساحة المزرعة' : 'Farm area'}</dt><dd className="font-semibold">{areaLabel}</dd></div>
-            <div className="min-w-0"><dt className="text-slate-400">{ar ? 'طريقة القياس' : 'Area measurement method'}</dt><dd className="break-words">{methodLabel}</dd></div>
-          </dl>
-        </section>
-
-        <details className="rounded-lg border border-slate-700 bg-[#030914]">
-          <summary className="cursor-pointer px-3 py-3 text-sm font-bold text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">{ar ? 'معلومات إضافية عن المزرعة (اختياري)' : 'Additional Farm Information (Optional)'}</summary>
-          <div className="space-y-4 border-t border-slate-700 p-3">
-            <p className="text-xs leading-relaxed text-slate-400">{ar ? 'هذه معلومات يشاركها المزارع للسياق فقط. لا تُقاس بالأقمار الصناعية ولا تغيّر درجات المقارنة.' : 'These are farmer-provided context only. They are not satellite measurements and do not change comparison scores.'}</p>
-            <label className="block space-y-1.5 text-sm text-slate-200"><span>{ar ? 'نوع التربة (اختياري)' : 'Soil type (optional)'}</span><input className={fieldClass} value={farm.soilType || ''} onChange={(e) => setFarm({ ...farm, soilType: e.target.value })} placeholder={ar ? 'معلومة يقدّمها المزارع' : 'Farmer-provided information'} /><span className="block text-xs leading-relaxed text-slate-400">{ar ? 'لا يُستدل على نوع التربة من الإحداثيات، ولا يدخل هذا الحقل في الدرجة.' : 'Soil type is not inferred from coordinates and does not affect the score.'}</span></label>
-            <label className="block space-y-1.5 text-sm text-slate-200"><span>{ar ? 'تقدير المزارع لتوفر المياه (اختياري)' : 'Farmer assessment of water availability (optional)'}</span><select className={fieldClass} value={farm.waterAvailability === 'Adequate' ? 'Sufficient' : farm.waterAvailability || ''} onChange={(e) => setFarm({ ...farm, waterAvailability: e.target.value })}><option value="">{ar ? 'غير معروف' : 'Unknown'}</option><option value="Limited">{ar ? 'محدود' : 'Limited'}</option><option value="Moderate">{ar ? 'متوسط' : 'Moderate'}</option><option value="Sufficient">{ar ? 'كافٍ' : 'Sufficient'}</option></select><span className="block text-xs leading-relaxed text-slate-400">{ar ? 'تقدير ذاتي للسياق؛ لا يمثل قياساً للأمطار أو رطوبة التربة أو المياه الجوفية ولا يؤثر في الدرجة.' : 'A self-reported context value, not a measure of rainfall, soil moisture, or groundwater; it does not affect the score.'}</span></label>
-          </div>
-        </details>
-
-        <div className="border-t border-slate-700 pt-3">
-          <h3 className="text-sm font-bold">{ar ? 'أولويات المزارع' : 'Farmer Priorities'}</h3>
-          <p className="mt-1 text-xs leading-relaxed text-slate-400">{ar ? 'تحدد هذه الأوزان مدى تأثير الصفات الزراعية المدعومة في درجة المقارنة النسبية. تُستبعد الصفات التي لا تتوفر لها بيانات قابلة للمقارنة، وتُعاد موازنة الأوزان المتبقية.' : 'These weights set how supported crop traits influence the relative comparison score. Traits without comparable data are excluded, and remaining weights are renormalized.'}</p>
-          <div className="mt-3 space-y-4">{Object.entries(DEFAULT_ROTATION_PRIORITIES).map(([key]) => <label key={key} className="block space-y-1.5 text-sm text-slate-200"><span className="flex items-start justify-between gap-3"><span>{priorityLabels[key][ar ? 1 : 0]}</span><b className="shrink-0 text-cyan-300">{priorities[key]}</b></span><span className="block text-xs leading-relaxed text-slate-400">{priorityDescriptions[key][ar ? 1 : 0]}</span><input className="w-full accent-cyan-400" type="range" min="0" max="100" value={priorities[key]} aria-label={ar ? priorityAria[key] : priorityLabels[key][0]} onChange={(e) => setPriorities({ ...priorities, [key]: Number(e.target.value) })} /></label>)}</div>
-        </div>
-      </aside>
-    </section>
 
     <section className="grid lg:grid-cols-2 gap-3">
       <div className="rounded-xl border border-cyan-800/60 bg-[#07152b] p-3"><h2 className="text-sm font-bold">{ar ? 'لماذا تتصدر هذه الاستراتيجية؟' : 'Strategy explanation'}</h2><p className="mt-2 text-xs text-slate-300">{selected.metrics.overallScore == null ? (ar ? 'لا تتوفر بيانات كافية لحساب درجة مشتركة.' : 'There is not enough comparable crop data for a combined score.') : (ar ? `الدرجة ${selected.metrics.overallScore}/100 تقيس الملاءمة النسبية للأوزان المحددة فقط.` : `Score ${selected.metrics.overallScore}/100 reflects relative fit to the selected priorities only.`)}</p><p className="mt-1 text-[10px] text-slate-400">{ar ? 'المياه تعني احتياج المحصول لا كفاءة الري. إمكانات تثبيت النيتروجين لا تضمن كمية مضافة. الأرقام ليست توصية زراعية مضمونة.' : 'Water means crop evapotranspiration need, not irrigation efficiency. Legume potential is not a guaranteed nitrogen quantity. Scores are not guaranteed recommendations.'}</p>
@@ -185,8 +181,10 @@ export default function RotationStrategyWorkbench({ mission = null, onBack, onDe
         {selected.crops.map((crop) => crop?.cropWaterNeed && <p className="mt-1 text-[9px] text-slate-400" key={crop.id}>{cropName(crop)}: {crop.cropWaterNeed.scope}</p>)}
       </div>
     </section>
-    <section id="rotation-tradeoffs" className="scroll-mt-3 rounded-xl border border-amber-700/40 bg-[#07152b] p-3">
-      <h2 className="text-sm font-bold"><span className="me-2 text-cyan-300">02</span>{ar ? 'كشف المقايضات بين الاستراتيجيات' : 'Module 02 · Reveal Trade-offs'}</h2>
+      </section>
+    </div>
+    <section id="workflow-section-4" className="scroll-mt-4 rounded-xl border border-amber-700/40 bg-[#07152b] p-3">
+      <h2 className="text-sm font-bold"><span className="me-2 text-cyan-300">05</span>{ar ? 'المخاطر والمقايضات' : '5. Risks & Trade-offs'}</h2>
       <p className="mt-1 text-[10px] text-slate-400">{ar ? 'المخطط يقارن درجات الصفات المدعومة بخط الأساس. لا يمثل غلة أو ربحاً.' : 'Bars compare supported trait scores with the baseline. They do not represent yield or profit.'}</p>
       <div className="mt-3 grid gap-3 lg:grid-cols-3">{tradeoffs.map((item, si) => <article key={item.strategyId} className="rounded-lg border border-slate-700 bg-[#030914] p-2.5"><h3 className="text-xs font-bold">{ar ? labelAr[si] : labels[si]}</h3>
         <div className="mt-2 space-y-2">{item.changes.map((change) => <div key={change.criterion}><div className="flex justify-between text-[9px]"><span>{ar ? change.labelAr : change.label}</span><span>{change.value} <span className="text-slate-500">({change.delta > 0 ? '+' : ''}{change.delta})</span></span></div><div className="mt-1 h-1.5 overflow-hidden rounded bg-slate-700"><div className={`h-full ${change.delta < 0 ? 'bg-amber-400' : 'bg-cyan-400'}`} style={{ width: `${change.value}%` }} /></div></div>)}</div>
@@ -196,8 +194,8 @@ export default function RotationStrategyWorkbench({ mission = null, onBack, onDe
       <p className="mt-2 text-[9px] text-amber-200">{ar ? 'الملاءمة السوقية، تغطية التربة، قيود الإنتاج، والتوافق مع موسم النمو غير متاحة؛ لذلك لا يمكن تقييم تلك المقايضات أو الاستدلال على الإنتاجية.' : 'Market fit, soil cover, production constraints, and growing-season fit are unavailable, so those trade-offs and production outcomes cannot be evaluated.'}</p>
       <details className="mt-3 border-t border-slate-700 pt-2"><summary className="min-h-11 cursor-pointer py-2 text-xs font-bold text-amber-100"><span className="me-2 text-cyan-300">03</span>{ar ? 'المخاطر البيئية (غير مصنفة)' : 'Environmental risks (unclassified)'}</summary><p className="mt-1 text-xs text-slate-400">{ar ? 'تعرضات الحرارة والأمطار مناخية مرجعية؛ لا تُصنف كمخاطر دون حدود محلية موثقة. لا توجد تنبؤات.' : 'Temperature and rainfall are climatological context; hazards are not classified without local thresholds. No forecasts are generated.'}</p><div className="mt-2 grid gap-2 sm:grid-cols-2">{riskAssessment.risks.map((item) => <div key={item.id} className="rounded bg-[#030914] p-2"><div className="flex justify-between gap-2 text-xs"><span>{ar ? item.labelAr : item.label}</span><b className="text-amber-200">{ar ? 'غير مصنف' : 'Unclassified'}</b></div><p className="mt-1 text-xs text-slate-400">{ar ? item.reasonAr : item.reason}</p></div>)}</div><p className="mt-2 text-xs text-amber-200">{riskAssessment.spatial.explanation}</p></details>
     </section>
-    <section id="rotation-uncertainty" className="scroll-mt-3 rounded-xl border border-violet-500/30 bg-[#07152b] p-3">
-      <h2 className="text-sm font-bold"><span className="me-2 text-cyan-300">04</span>{ar ? 'إظهار عدم اليقين واكتمال الأدلة' : 'Module 04 · Make Uncertainty Visible'}</h2>
+    <section id="workflow-section-5" className="scroll-mt-4 rounded-xl border border-violet-500/30 bg-[#07152b] p-3">
+      <h2 className="text-sm font-bold"><span className="me-2 text-cyan-300">06</span>{ar ? 'عدم اليقين والقيود' : '6. Uncertainty & Limitations'}</h2>
       <p className="mt-2 text-sm text-violet-200">{ar ? uncertainty.overallAr : uncertainty.cropEvidence.status}</p>
       <details className="mt-2"><summary className="min-h-11 cursor-pointer py-2 text-xs font-bold text-violet-200">{ar ? 'عرض مصدر البيانات والقيود التفصيلية' : 'View evidence sources and detailed limits'}</summary><div className="mt-2 grid gap-3 md:grid-cols-3">
         <div className="rounded-lg bg-[#030914] p-2.5"><b className="text-xs text-violet-200">{ar ? 'المقارنة الزراعية' : 'Crop-trait comparison'}</b><p className="mt-1 text-[10px] text-cyan-200">{ar ? uncertainty.overallAr : uncertainty.cropEvidence.status}</p><p className="text-[9px] text-slate-400">{ar ? `${uncertainty.cropEvidence.sourcedTraitCount} صفة موثقة من أصل ${uncertainty.cropEvidence.expectedTraitCount} صفة مطلوبة. هذا مقياس اكتمال وليس ثقة.` : `${uncertainty.cropEvidence.sourcedTraitCount} sourced trait entries across ${uncertainty.cropEvidence.expectedTraitCount} expected entries. Completeness label only, not confidence.`}</p></div>

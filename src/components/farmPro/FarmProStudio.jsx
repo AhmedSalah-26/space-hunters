@@ -68,7 +68,7 @@ function localizeGeometryError(error, lang) {
   return messages[error] || error || '';
 }
 
-export default function FarmProStudio({ onContinue, onEditFarm, focusEnvironmental = false }) {
+export default function FarmProStudio({ onContinue, onEditFarm }) {
   const { lang, isRtl } = useLanguage();
   const { session, updateSession } = useWorkingSession();
   const farmDraft = session.farmInformation?.farmSelectionDraft || {};
@@ -109,11 +109,11 @@ export default function FarmProStudio({ onContinue, onEditFarm, focusEnvironment
 
   useEffect(() => {
     const mobile = window.matchMedia('(max-width: 639px)');
-    const syncMapPanel = (event) => setIsPanelCollapsed(event.matches && !focusEnvironmental);
+    const syncMapPanel = (event) => setIsPanelCollapsed(event.matches);
     syncMapPanel(mobile);
     mobile.addEventListener('change', syncMapPanel);
     return () => mobile.removeEventListener('change', syncMapPanel);
-  }, [focusEnvironmental]);
+  }, []);
 
   useEffect(() => {
     updateSession({ farmInformation: { ...(session.farmInformation || {}), farmSelectionDraft: { selectedLocation, locationName, selectionMode, areaUnit, areaInput, latitudeInput, longitudeInput, boundaryPoints } } });
@@ -126,10 +126,6 @@ export default function FarmProStudio({ onContinue, onEditFarm, focusEnvironment
     // Store display choices only when the choices change; preserve other analysis results.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [analysisMonth, activeEnvironmentalLayers, updateSession]);
-
-  useEffect(() => {
-    if (focusEnvironmental) document.getElementById('environmental-analysis')?.scrollIntoView({ block: 'start' });
-  }, [focusEnvironmental]);
 
   const boundaryValidation = useMemo(() => validateFarmPolygon(boundaryPoints), [boundaryPoints]);
   const polygonCentroid = useMemo(() => boundaryValidation.valid ? getPolygonCentroid(boundaryPoints) : null, [boundaryPoints, boundaryValidation.valid]);
@@ -363,10 +359,11 @@ export default function FarmProStudio({ onContinue, onEditFarm, focusEnvironment
   };
 
   return (
-    <div className="relative w-full h-full min-h-0 flex flex-col bg-[#050c18] overflow-hidden font-sans">
+    <div className="relative w-full min-h-[calc(100dvh-9rem)] shrink-0 flex flex-col bg-[#050c18] font-sans">
       
       {/* ── TOP HEADER & LIVE SEARCH BAR ── */}
-      <div className="w-full bg-[#0a1827]/95 backdrop-blur-md border-b border-white/10 px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2.5 text-sm z-30">
+      <div id="workflow-section-0" className="scroll-mt-4 w-full bg-[#0a1827]/95 backdrop-blur-md border-b border-white/10 px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2.5 text-sm z-30">
+        <h2 className="w-full text-sm font-bold text-slate-100">{lang === 'ar' ? '١. موقع المزرعة ومساحتها' : '1. Farm Location & Area'}</h2>
         {/* 🔍 LIVE SEARCH BAR 🔍 */}
         <div className="relative flex-1 max-w-xl min-w-0">
           <form onSubmit={handlePerformOnlineSearch} className="relative">
@@ -507,7 +504,7 @@ export default function FarmProStudio({ onContinue, onEditFarm, focusEnvironment
                   <MapPin className="w-4 h-4 text-cyan-400" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[10px] text-slate-400 font-bold">{focusEnvironmental ? (lang === 'ar' ? 'الموقع المحدد:' : 'Selected farm:') : (lang === 'ar' ? 'أرضك اللي اخترتها:' : 'Target Farm Location:')}</div>
+                  <div className="text-[10px] text-slate-400 font-bold">{lang === 'ar' ? 'أرضك اللي اخترتها:' : 'Selected farm:'}</div>
                   <div className="text-xs font-black text-white truncate">{selectionMode === 'boundary' && polygonCentroid ? (lang === 'ar' ? 'مركز المضلع' : 'Polygon centroid') : locationName}</div>
                 </div>
               </div>
@@ -526,9 +523,9 @@ export default function FarmProStudio({ onContinue, onEditFarm, focusEnvironment
             </div>
 
             {/* Farm location and area selection */}
-            {!focusEnvironmental && <section className="p-3 bg-[#030914] rounded-2xl border border-indigo-400/40 space-y-3" aria-label={lang === 'ar' ? 'تحديد موقع ومساحة المزرعة' : 'Farm location and area selection'}>
+            <section className="p-3 bg-[#030914] rounded-2xl border border-indigo-400/40 space-y-3" aria-label={lang === 'ar' ? 'تحديد موقع ومساحة المزرعة' : 'Farm location and area selection'}>
               <div className="flex items-center justify-between gap-2">
-                <h2 className="text-xs font-black text-white">{lang === 'ar' ? 'حدد موقع ومساحة المزرعة' : 'Define Farm Location & Area'}</h2>
+                <h2 className="text-sm font-black text-white">{lang === 'ar' ? '١. موقع المزرعة ومساحتها' : '1. Farm Location & Area'}</h2>
                 <span className="text-[9px] text-cyan-300 font-mono">{lang === 'ar' ? 'اختياري' : 'WORKING SESSION'}</span>
               </div>
 
@@ -622,30 +619,10 @@ export default function FarmProStudio({ onContinue, onEditFarm, focusEnvironment
                   : (lang === 'ar' ? `الطريقة: حدود مرسومة (${boundaryPoints.length} نقاط)` : `Method: drawn polygon (${boundaryPoints.length} vertices)`)}</div>
                 {selectionMode === 'boundary' && boundaryValidation.valid && <div className="text-[9px] text-emerald-300">{lang === 'ar' ? 'هندسة GeoJSON جاهزة للتحليل المكاني لاحقاً.' : 'GeoJSON polygon geometry is ready for future spatial analysis.'}</div>}
               </div>
-            </section>}
+            </section>
 
-            {!focusEnvironmental && <button type="button" disabled={selectionMode === 'point-area' ? !pointAreaIsValid : !boundaryValidation.valid} onClick={onContinue} className="app-nav-button min-h-11 w-full rounded-xl bg-cyan-700 px-4 text-sm font-bold text-white hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-45">{lang === 'ar' ? 'تأكيد الموقع والمتابعة' : 'Confirm farm and continue'}</button>}
+            <button type="button" disabled={selectionMode === 'point-area' ? !pointAreaIsValid : !boundaryValidation.valid} onClick={onContinue} className="app-nav-button min-h-11 w-full rounded-xl bg-cyan-700 px-4 text-sm font-bold text-white hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-45">{lang === 'ar' ? 'تأكيد الموقع والمتابعة' : 'Confirm farm and continue'}</button>
 
-            {focusEnvironmental && <>
-            <div className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-[#030914] px-3 py-2 text-xs">
-              <span className="text-slate-300">{lang === 'ar' ? 'البيانات البيئية مرتبطة بالموقع والنقطة المرجعية المحددين.' : 'Environmental data use the selected farm location and reference point.'}</span>
-              <button type="button" onClick={onEditFarm} className="min-h-11 shrink-0 rounded-lg border border-white/10 px-3 text-slate-200 hover:bg-white/5">{lang === 'ar' ? 'تعديل الموقع' : 'Edit farm'}</button>
-            </div>
-            <EnvironmentalAnalysisDashboard
-              id="environmental-analysis"
-              observations={powerObservations}
-              farmLocation={farmSelection.valid ? farmSelection.farmLocation : null}
-              lang={lang}
-              isLoading={isNasaLoading}
-              requestError={nasaError}
-              selectedMonth={analysisMonth}
-              onSelectedMonthChange={setAnalysisMonth}
-              activeLayers={activeEnvironmentalLayers}
-              onToggleLayer={(variable) => setActiveEnvironmentalLayers((current) => ({ ...current, [variable]: !current[variable] }))}
-              fusionGroups={environmentalFusion}
-            />
-            <button type="button" onClick={onContinue} className="app-nav-button min-h-11 w-full rounded-xl bg-cyan-700 px-4 text-sm font-bold text-white hover:bg-cyan-600">{lang === 'ar' ? 'متابعة إلى معلومات المحاصيل' : 'Continue to crop information'}</button>
-            </>}
             {/* Action Buttons */}
             <div className="flex gap-2 pt-1">
               <button
@@ -689,6 +666,23 @@ export default function FarmProStudio({ onContinue, onEditFarm, focusEnvironment
         </div>
 
       </div>
+
+      <section id="workflow-section-1" className="scroll-mt-4 mx-auto w-full max-w-6xl shrink-0 space-y-3 p-3 text-slate-100 sm:p-5" aria-labelledby="environmental-overview-heading">
+        <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs text-cyan-300">{lang === 'ar' ? 'الخطوة ٢ من ٧' : 'Step 2 of 7'}</p><h2 id="environmental-overview-heading" className="type-section-title font-black">{lang === 'ar' ? 'نظرة بيئية' : 'Environmental Overview'}</h2></div><button type="button" onClick={onEditFarm} className="app-nav-button min-h-11 rounded-lg border border-white/10 px-3 text-sm text-slate-200 hover:bg-white/5">{lang === 'ar' ? 'تعديل الموقع' : 'Edit farm location'}</button></div>
+        <EnvironmentalAnalysisDashboard
+          id="environmental-analysis"
+          observations={powerObservations}
+          farmLocation={farmSelection.valid ? farmSelection.farmLocation : null}
+          lang={lang}
+          isLoading={isNasaLoading}
+          requestError={nasaError}
+          selectedMonth={analysisMonth}
+          onSelectedMonthChange={setAnalysisMonth}
+          activeLayers={activeEnvironmentalLayers}
+          onToggleLayer={(variable) => setActiveEnvironmentalLayers((current) => ({ ...current, [variable]: !current[variable] }))}
+          fusionGroups={environmentalFusion}
+        />
+      </section>
 
     </div>
   );
