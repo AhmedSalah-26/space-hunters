@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:geometry": "node --experimental-default-type=module --test tests/farmGeometry.test.mjs",
+    "test:nasa": "node --experimental-default-type=module --test tests/powerProvider.test.mjs",
+    "test:data": "node --experimental-default-type=module --test tests/*.test.mjs",
+    "test:rotation": "node --experimental-default-type=module --test tests/rotationEngine.test.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

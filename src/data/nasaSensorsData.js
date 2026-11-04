@@ -1,16 +1,16 @@
 /**
- * NASA Earth Satellite Sensors Data and Telemetry Integration
- * Schema-ready for database / API connection
+ * Informational sensor references. These are not integrated observation data.
  */
 
 export const nasaSensorsHeader = {
-  titleAr: "تكامل الاستشعار الفضائي (NASA Space-to-Farm Telemetry)",
-  titleEn: "Space-to-Farm Telemetry (NASA Earth Observation)",
-  subAr: "المستشعرات الفضائية المستخدمة في قياس ومطابقة صحة المحاصيل والتربة والمناخ.",
-  subEn: "Earth-observing satellite sensors measuring crop health, soil dynamics, and climate trends.",
-  accuracyStampAr: "نسبة دقة المطابقة المكانية:",
-  accuracyStampEn: "Spatial Calibration Accuracy:",
-  accuracyScore: "99.4% Space-Calibrated Accuracy"
+  titleAr: "مراجع مستشعرات رصد الأرض",
+  titleEn: "Earth-observation sensor references",
+  subAr: "معلومات عامة عن مستشعرات محتملة؛ هذه المنتجات غير مدمجة في التطبيق.",
+  subEn: "General information about possible sensors; these products are not integrated in this application.",
+  accuracyStampAr: "دقة التحليل الزراعي:",
+  accuracyStampEn: "Agronomic analysis accuracy:",
+  accuracyScoreAr: "غير مُقيّمة",
+  accuracyScoreEn: "Not evaluated"
 };
 
 export const nasaSensorCards = [
@@ -21,8 +21,8 @@ export const nasaSensorCards = [
     borderColor: "border-sky-500/40",
     titleColor: "text-sky-300",
     badgeBg: "bg-sky-950 text-sky-400 border-sky-500/30",
-    descAr: "رصد رطوبة منطقة الجذور على عمق 5 سم؛ أكد نجاح دورتك في استعادة رطوبة التربة الطبيعية وتفادي الجفاف.",
-    descEn: "Monitors root-zone soil moisture at 5cm depth, verifying soil hydration recovery and drought mitigation."
+    descAr: "لم تُدمج ملاحظات SMAP في التطبيق؛ لا توجد قراءة لرطوبة التربة هنا.",
+    descEn: "SMAP observations are not integrated here; no soil-moisture reading is available."
   },
   {
     id: "landsat",
@@ -31,8 +31,8 @@ export const nasaSensorCards = [
     borderColor: "border-red-500/40",
     titleColor: "text-red-300",
     badgeBg: "bg-red-950 text-red-400 border-red-500/30",
-    descAr: "قياس درجة حرارة سطح الأرض؛ انخفض الإجهاد الحراري بمقدار 1.8°C بفضل التغطية المستمرة للمحاصيل.",
-    descEn: "Tracks land surface temperatures, confirming a 1.8°C drop in thermal stress via continuous crop cover."
+    descAr: "لم تُدمج بيانات Landsat في التطبيق؛ لا توجد قراءة لحرارة السطح هنا.",
+    descEn: "Landsat data are not integrated here; no surface-temperature reading is available."
   },
   {
     id: "modis",
@@ -41,8 +41,8 @@ export const nasaSensorCards = [
     borderColor: "border-emerald-500/40",
     titleColor: "text-emerald-300",
     badgeBg: "bg-emerald-950 text-emerald-400 border-emerald-500/30",
-    descAr: "مؤشر صحة الكلوروفيل والغطاء الأخضر؛ سجل ارتفاعاً بنسبة +32% مما يعكس حيوية ممتازة للنباتات.",
-    descEn: "Evaluates chlorophyll vitality and vegetative canopy, detecting a +32% surge in overall crop health."
+    descAr: "لم تُدمج بيانات MODIS في التطبيق؛ لا توجد قراءة لمؤشر الغطاء النباتي هنا.",
+    descEn: "MODIS data are not integrated here; no vegetation-index reading is available."
   },
   {
     id: "gpm",
@@ -51,7 +51,7 @@ export const nasaSensorCards = [
     borderColor: "border-cyan-500/40",
     titleColor: "text-cyan-300",
     badgeBg: "bg-cyan-950 text-cyan-400 border-cyan-500/30",
-    descAr: "رصد نماذج الأمطار العالمية لضبط جداول الري التكميلي ومواعيد زراعة البقوليات الصيفية.",
-    descEn: "Maps global precipitation patterns to optimize supplemental irrigation schedules and legume planting windows."
+    descAr: "لم تُدمج بيانات GPM في التطبيق؛ الأمطار المعروضة تأتي من مرجع NASA POWER المناخي.",
+    descEn: "GPM data are not integrated; rainfall shown elsewhere comes from NASA POWER climatology."
   }
 ];

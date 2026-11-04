@@ -5,8 +5,10 @@ import StepperHeader from './StepperHeader';
 import BriefingTelemetrySidebar from './briefing/BriefingTelemetrySidebar';
 import BriefingDialogue from './briefing/BriefingDialogue';
 import BriefingStoryPanel from './briefing/BriefingStoryPanel';
+import { useLanguage } from '../context/LanguageContext';
 
-export default function MissionBriefingScreen({ mission, onBack, onContinue }) {
+export default function MissionBriefingScreen({ mission, onBack, onContinue, onOpenFarmData }) {
+  const { lang } = useLanguage();
   const [mobileTab, setMobileTab] = React.useState('dialogue'); // 'dialogue' | 'telemetry' | 'story'
 
   return (
@@ -17,12 +19,16 @@ export default function MissionBriefingScreen({ mission, onBack, onContinue }) {
         <StepperHeader currentStep={1} />
       </div>
 
+      <p role="note" className="shrink-0 rounded-lg border border-amber-500/30 bg-amber-950/30 px-2 py-1 text-[10px] text-amber-100">
+        {lang === 'ar' ? 'بيانات المهمة والحوار سيناريوهات تعليمية توضيحية، وليست قياسات NASA أو إرشادات صادرة عنها.' : 'Mission metrics and dialogue are illustrative learning scenarios, not NASA measurements or NASA-issued guidance.'}
+      </p>
+
       {/* Mobile Tab Switcher (Visible on < lg screens) */}
       <div className="lg:hidden p-1 bg-[#061633]/95 border border-cyan-500/30 rounded-xl grid grid-cols-3 gap-1 shrink-0">
         {[
-          { id: 'dialogue', label: '💬 المحادثة' },
-          { id: 'telemetry', label: '🛰️ بيانات ناسا' },
-          { id: 'story', label: '📋 القصة' },
+          { id: 'dialogue', label: lang === 'ar' ? '💬 المحادثة' : '💬 Dialogue' },
+          { id: 'telemetry', label: lang === 'ar' ? '🛰️ مرجع المهمة' : '🛰️ Scenario data' },
+          { id: 'story', label: lang === 'ar' ? '📋 القصة' : '📋 Story' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -43,7 +49,7 @@ export default function MissionBriefingScreen({ mission, onBack, onContinue }) {
 
         {/* 🛰️ PANEL 1: NASA Current Telemetry (3 Cols) */}
         <div className={`lg:col-span-3 flex flex-col min-h-0 ${mobileTab === 'telemetry' ? 'block' : 'hidden lg:flex'}`}>
-          <BriefingTelemetrySidebar mission={mission} />
+          <BriefingTelemetrySidebar mission={mission} onOpenFarmData={onOpenFarmData} />
         </div>
 
         {/* 🏞️ PANEL 2: Main Briefing & Interactive Two-Way Chat (6 Cols) */}

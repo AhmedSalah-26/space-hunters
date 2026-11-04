@@ -4,11 +4,11 @@ import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { 
   Thermometer, Droplets, Sun, Sprout, 
-  CloudRain, Globe2, CheckCircle2, BarChart3 
+  CloudRain, Globe2
 } from 'lucide-react';
 
-export default function MapLegendSidebar({ className = '', isMobile = false, onCloseMobile }) {
-  const { t } = useLanguage();
+export default function MapLegendSidebar({ className = '', isMobile = false, onCloseMobile, missionCount = 0 }) {
+  const { t, lang } = useLanguage();
 
   const containerClasses = className || "hidden lg:flex lg:absolute lg:top-3 lg:left-3 z-20 w-[230px] flex-col justify-between max-h-[calc(100%-1.5rem)] overflow-y-auto pointer-events-auto custom-scrollbar";
 
@@ -65,30 +65,12 @@ export default function MapLegendSidebar({ className = '', isMobile = false, onC
               <Globe2 className="w-3.5 h-3.5 text-[#38bdf8]" />
             </div>
             <div>
-              <p className="text-[10px] font-bold text-[#38bdf8]">{t.statAvailable}</p>
-              <p className="text-xs font-black text-white leading-none">24</p>
+              <p className="text-[10px] font-bold text-[#38bdf8]">{lang === 'ar' ? 'سيناريوهات تعليمية' : 'Learning scenarios'}</p>
+              <p className="text-xs font-black text-white leading-none">{missionCount}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-[#0284c7] flex items-center justify-center shrink-0 shadow-sm">
-              <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-[#38bdf8]">{t.statCompleted}</p>
-              <p className="text-xs font-black text-white leading-none">3</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-[#0284c7]/20 border border-[#38bdf8]/40 flex items-center justify-center shrink-0">
-              <BarChart3 className="w-3.5 h-3.5 text-[#38bdf8]" />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-[#38bdf8]">{t.statScore}</p>
-              <p className="text-xs font-black text-white leading-none">1,280</p>
-            </div>
-          </div>
+          <p className="text-[9px] leading-relaxed text-slate-400">{lang === 'ar' ? 'لا يتم حفظ تقدم أو نقاط للاعبين.' : 'Player progress and scores are not stored.'}</p>
         </div>
       </div>
 

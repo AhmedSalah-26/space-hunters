@@ -7,7 +7,7 @@ import {
   ArrowRight, ArrowLeft, Satellite 
 } from 'lucide-react';
 
-export default function MissionDetailCard({ selectedMission, onStartMission, className = '', isMobile = false, onCloseMobile }) {
+export default function MissionDetailCard({ selectedMission, onStartMission, onOpenFarmData, className = '', isMobile = false, onCloseMobile }) {
   const { t, lang, isRtl } = useLanguage();
 
   const containerClasses = className || "hidden lg:flex lg:absolute lg:top-3 lg:right-3 z-20 w-[360px] max-h-[calc(100%-1.5rem)] overflow-y-auto pointer-events-auto flex-col gap-3.5 p-4 bg-[#061633]/96 border border-cyan-400/50 shadow-2xl backdrop-blur-md custom-scrollbar rounded-2xl";
@@ -82,6 +82,9 @@ export default function MissionDetailCard({ selectedMission, onStartMission, cla
 
       {/* NASA DATA SECTION */}
       <div>
+        <p role="note" className="mb-2 rounded border border-amber-500/30 bg-amber-950/30 px-2 py-1 text-[10px] text-amber-100">
+          {lang === 'ar' ? 'المقاييس المعروضة أمثلة للمهمة وليست قياسات NASA مسترجعة.' : 'Displayed metrics are mission examples, not retrieved NASA measurements.'}
+        </p>
         <div className="flex items-center gap-1.5 mb-2">
           <span className="text-sm">🛰️</span>
           <span className="text-xs font-black text-white">{t.keyNasaData}</span>
@@ -137,7 +140,7 @@ export default function MissionDetailCard({ selectedMission, onStartMission, cla
       {/* BUTTONS */}
       <div className="flex flex-col gap-2 mt-1">
         <button
-          onClick={onStartMission}
+          onClick={onOpenFarmData}
           className="w-full py-3 px-4 font-black text-sm text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.98] cursor-pointer shadow-lg rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 shadow-blue-500/40"
         >
           {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
@@ -149,7 +152,7 @@ export default function MissionDetailCard({ selectedMission, onStartMission, cla
           className="w-full py-2 px-3 font-bold text-xs text-slate-300 flex items-center justify-center gap-1.5 border border-cyan-500/35 hover:border-cyan-400 hover:text-white bg-white/[0.04] transition-all cursor-pointer rounded-xl"
         >
           <Satellite className="w-3.5 h-3.5 text-cyan-400" />
-          <span>{t.viewAllMissions}</span>
+          <span>{lang === 'ar' ? 'فتح التحليل البيئي' : 'Open environmental analysis'}</span>
         </button>
       </div>
     </div>

@@ -3,11 +3,24 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useLanguage } from '../../context/LanguageContext';
+import { useWorkingSession } from '../../context/WorkingSessionContext';
+import { getPowerClimatology } from '../../services/nasa/powerProvider';
+import { fuseEnvironmentalObservations } from '../../analysis/environmental/fusion';
+import EnvironmentalAnalysisDashboard from './EnvironmentalAnalysisDashboard';
+import {
+  FARM_AREA_UNITS,
+  convertArea,
+  createFarmLocationSelection,
+  formatArea,
+  getPolygonCentroid,
+  validateCoordinates,
+  validateFarmPolygon,
+} from '../../utils/farmGeometry';
 import { 
-  Sparkles, Scan, ArrowLeft, ArrowRight, Bookmark, 
-  MapPin, Check, Globe, X, Sprout, Droplets, Sun, CheckCircle2,
-  Search, Compass, Navigation, Loader2, CloudRain, Thermometer,
-  ShieldAlert, Printer, RefreshCw, FileText, Eye, EyeOff
+  Scan, ArrowLeft, ArrowRight,
+  MapPin, X, Sprout, Droplets,
+  Search, Compass, Loader2,
+  Printer, RefreshCw, Eye, EyeOff
 } from 'lucide-react';
 
 // Dynamic import for Leaflet map to ensure 100% Client-Side rendering
@@ -18,7 +31,7 @@ const RealSatelliteLeafletMap = dynamic(
     loading: () => (
       <div className="w-full h-full bg-[#030914] flex flex-col items-center justify-center text-cyan-400 gap-3">
         <div className="w-10 h-10 border-3 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-        <span className="text-xs font-bold font-mono">LOADING REAL NASA SATELLITE TILES...</span>
+        <span className="text-xs font-bold font-mono">LOADING SATELLITE BASEMAP TILES...</span>
       </div>
     )
   }
@@ -40,66 +53,148 @@ const PRESET_LOCATIONS = [
   { nameAr: 'حوض موراي-دارلينغ (أستراليا)', nameEn: 'Murray-Darling Basin (Australia)', center: [-34.520, 145.480], tag: 'أستراليا 🇦🇺', soil: 'Saline Silt Loam', crops: ['Barley', 'Lupin Pulse', 'Wheat'] },
 ];
 
-export default function FarmProStudio({ onBackToHome, onOpenGame }) {
+function localizeGeometryError(error, lang) {
+  if (lang !== 'ar') return error || '';
+  const messages = {
+    'Enter numeric latitude and longitude.': 'أدخل قيمتين رقميتين لخط العرض وخط الطول.',
+    'Latitude must be between -90° and 90°.': 'يجب أن يكون خط العرض بين ‎-90° و90°.',
+    'Longitude must be between -180° and 180°.': 'يجب أن يكون خط الطول بين ‎-180° و180°.',
+    'Add at least three boundary points.': 'أضف ثلاث نقاط حدود على الأقل.',
+    'Boundary points must not be repeated.': 'يجب ألا تتكرر نقاط الحدود.',
+    'Boundary edges cross. Move a point to make a simple polygon.': 'تتقاطع أضلاع الحدود؛ حرّك نقطة لتكوين مضلع بسيط.',
+    'The boundary is too small or has no measurable area.': 'الحدود صغيرة جداً أو لا تنتج مساحة قابلة للقياس.',
+    'The boundary is too large to be a farm parcel.': 'المساحة المحاطة أكبر من أن تمثل قطعة مزرعة.',
+  };
+  return messages[error] || error || '';
+}
+
+export default function FarmProStudio({ onBackToHome, onOpenGame, onOpenRotationBuilder, focusEnvironmental = false }) {
   const { lang, isRtl, toggleLanguage } = useLanguage();
+  const { session, updateSession } = useWorkingSession();
+  const farmDraft = session.farmInformation?.farmSelectionDraft || {};
 
   // Active Map Location (Default to Nile Delta: Aga / Mit Ghamr, Dakahlia)
-  const [selectedLocation, setSelectedLocation] = useState([30.825, 31.310]);
-  const [locationName, setLocationName] = useState(lang === 'ar' ? 'مركز أجا وميت غمر، محافظة الدقهلية' : 'Aga & Mit Ghamr, Dakahlia');
+  const [selectedLocation, setSelectedLocation] = useState(() => farmDraft.selectedLocation || (session.farmLocation
+    ? [session.farmLocation.latitude, session.farmLocation.longitude]
+    : [30.825, 31.310]));
+  const [locationName, setLocationName] = useState(() => farmDraft.locationName || session.farmLocation?.label || (lang === 'ar' ? 'مركز أجا وميت غمر، محافظة الدقهلية' : 'Aga & Mit Ghamr, Dakahlia'));
+  const [selectionMode, setSelectionMode] = useState(() => farmDraft.selectionMode || (session.farmLocation?.selectionMethod === 'polygon-boundary' ? 'boundary' : 'point-area'));
+  const [areaUnit, setAreaUnit] = useState(() => farmDraft.areaUnit || session.farmLocation?.areaUnit || 'feddan');
+  const [areaInput, setAreaInput] = useState(() => String(farmDraft.areaInput ?? (session.farmLocation?.selectionMethod === 'point-area' ? session.farmLocation.area ?? 1 : 1)));
+  const [latitudeInput, setLatitudeInput] = useState(() => String(farmDraft.latitudeInput ?? session.farmLocation?.latitude ?? 30.825));
+  const [longitudeInput, setLongitudeInput] = useState(() => String(farmDraft.longitudeInput ?? session.farmLocation?.longitude ?? 31.310));
+  const [boundaryPoints, setBoundaryPoints] = useState(() => {
+    if (Array.isArray(farmDraft.boundaryPoints)) return farmDraft.boundaryPoints;
+    const coordinates = session.farmLocation?.geometry?.coordinates?.[0];
+    return Array.isArray(coordinates) && coordinates.length > 1
+      ? coordinates.slice(0, -1).map(([longitude, latitude]) => ({ latitude, longitude }))
+      : [];
+  });
+  const [locationError, setLocationError] = useState('');
   const [isScanning, setIsScanning] = useState(false);
-  const [selectedPlanTab, setSelectedPlanTab] = useState('water'); // 'water' | 'soil' | 'economic'
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
-  const [showTechDetails, setShowTechDetails] = useState(false);
 
   // Search Bar State
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [onlineSearchResults, setOnlineSearchResults] = useState([]);
+  const [onlineSearchStatus, setOnlineSearchStatus] = useState('');
 
-  // Real NASA POWER Telemetry state
-  const [nasaLive, setNasaLive] = useState(null);
+  // NASA POWER product status and seasonal month selection.
   const [isNasaLoading, setIsNasaLoading] = useState(false);
+  const [nasaError, setNasaError] = useState('');
+  const [analysisMonth, setAnalysisMonth] = useState(() => session.analysisResults?.environmentalView?.month ?? new Date().getMonth());
+  const [activeEnvironmentalLayers, setActiveEnvironmentalLayers] = useState(() => session.analysisResults?.environmentalView?.layers || { T2M: true, PRECTOTCORR: true, RH2M: false, ALLSKY_SFC_SW_DWN: false });
 
-  // Live NASA POWER Agroclimatology API Fetch (MERRA-2 Satellite Telemetry)
   useEffect(() => {
+    updateSession({ farmInformation: { ...(session.farmInformation || {}), farmSelectionDraft: { selectedLocation, locationName, selectionMode, areaUnit, areaInput, latitudeInput, longitudeInput, boundaryPoints } } });
+    // Save a temporary draft so screen navigation does not discard an in-progress point or polygon.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLocation, locationName, selectionMode, areaUnit, areaInput, latitudeInput, longitudeInput, boundaryPoints, updateSession]);
+
+  useEffect(() => {
+    updateSession({ analysisResults: { ...(session.analysisResults || {}), environmentalView: { month: analysisMonth, layers: activeEnvironmentalLayers } } });
+    // Store display choices only when the choices change; preserve other analysis results.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [analysisMonth, activeEnvironmentalLayers, updateSession]);
+
+  useEffect(() => {
+    if (focusEnvironmental) document.getElementById('environmental-analysis')?.scrollIntoView({ block: 'start' });
+  }, [focusEnvironmental]);
+
+  const boundaryValidation = useMemo(() => validateFarmPolygon(boundaryPoints), [boundaryPoints]);
+  const polygonCentroid = useMemo(() => boundaryValidation.valid ? getPolygonCentroid(boundaryPoints) : null, [boundaryPoints, boundaryValidation.valid]);
+  const referenceCoordinates = selectionMode === 'boundary' && polygonCentroid ? polygonCentroid : selectedLocation;
+  const areaValue = selectionMode === 'boundary'
+    ? (boundaryValidation.valid ? convertArea(boundaryValidation.areaSquareMeters, 'squareMeter', areaUnit) : null)
+    : Number(areaInput);
+  const pointAreaSquareMeters = selectionMode === 'point-area' ? convertArea(areaValue, areaUnit, 'squareMeter') : null;
+  const pointAreaIsValid = selectionMode !== 'point-area' || (Number.isFinite(areaValue) && areaValue > 0 && pointAreaSquareMeters <= 1e12);
+  const displayedCoordinates = selectionMode === 'boundary' && polygonCentroid ? polygonCentroid : selectedLocation;
+  const farmSelection = useMemo(() => createFarmLocationSelection({
+    mode: selectionMode === 'boundary' ? 'boundary' : 'point-area',
+    latitude: referenceCoordinates[0],
+    longitude: referenceCoordinates[1],
+    area: areaValue,
+    areaUnit,
+    boundaryPoints,
+    label: selectionMode === 'boundary'
+      ? (lang === 'ar' ? 'مركز حدود المزرعة' : 'Farm boundary centroid')
+      : locationName,
+  }), [selectionMode, referenceCoordinates[0], referenceCoordinates[1], areaValue, areaUnit, boundaryPoints, lang, locationName]);
+
+  const powerObservations = useMemo(() => (session.environmentalObservations || []).filter((item) => (
+    item.source?.id === 'nasa-power-climatology'
+    && item.source?.dataKind === 'reference'
+    && item.source?.requestCoordinates?.latitude === farmSelection.farmLocation?.latitude
+    && item.source?.requestCoordinates?.longitude === farmSelection.farmLocation?.longitude
+  )), [session.environmentalObservations, farmSelection.farmLocation?.latitude, farmSelection.farmLocation?.longitude]);
+  const environmentalFusion = useMemo(() => fuseEnvironmentalObservations(powerObservations, farmSelection.valid ? farmSelection.farmLocation : null), [powerObservations, farmSelection.valid, farmSelection.farmLocation]);
+  const environmentalPointLayers = useMemo(() => {
+    const month = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][analysisMonth];
+    return Object.entries(activeEnvironmentalLayers).filter(([, enabled]) => enabled).map(([variable]) => (
+      powerObservations.find((item) => item.variable === variable && item.referenceDate === `climatology:${month}`)
+    )).filter((item) => Number.isFinite(item?.value));
+  }, [powerObservations, analysisMonth, activeEnvironmentalLayers]);
+
+  useEffect(() => {
+    updateSession({
+      farmLocation: farmSelection.valid ? farmSelection.farmLocation : null,
+      farmArea: farmSelection.valid ? farmSelection.farmArea : null,
+    });
+  }, [farmSelection.valid, farmSelection.farmLocation, updateSession]);
+
+  // Load source-tagged NASA POWER climatology for the selected point.
+  useEffect(() => {
+    if (!farmSelection.valid) {
+      updateSession({ environmentalObservations: [] });
+      setNasaError('');
+      setIsNasaLoading(false);
+      return undefined;
+    }
+
     let isCancelled = false;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+    setNasaError('');
+
     const fetchNasaData = async () => {
       setIsNasaLoading(true);
       try {
-        const lat = selectedLocation[0].toFixed(3);
-        const lng = selectedLocation[1].toFixed(3);
-        const url = `https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=T2M,PRECTOTCORR,RH2M&community=AG&longitude=${lng}&latitude=${lat}&format=JSON`;
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 7000);
-        const res = await fetch(url, { signal: controller.signal });
-        clearTimeout(timeoutId);
+        const observations = await getPowerClimatology({
+          latitude: farmSelection.farmLocation.latitude,
+          longitude: farmSelection.farmLocation.longitude,
+          signal: controller.signal,
+        });
+        if (isCancelled) return;
 
-        if (res.ok) {
-          const json = await res.json();
-          const p = json?.properties?.parameter;
-          if (p && !isCancelled) {
-            const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-            const currentMonth = monthNames[new Date().getMonth()] || "OCT";
-            
-            const tempVal = p.T2M?.[currentMonth] ?? p.T2M?.ANN ?? 24.5;
-            const rainDaily = p.PRECTOTCORR?.[currentMonth] ?? p.PRECTOTCORR?.ANN ?? 0.3;
-            const rainMonthly = Math.max(1, Math.round(rainDaily * 30));
-            const rhVal = Math.round(p.RH2M?.[currentMonth] ?? p.RH2M?.ANN ?? 58);
-
-            setNasaLive({
-              temp: `${Number(tempVal).toFixed(1)}°C`,
-              rain: `${rainMonthly} mm`,
-              humidity: `${rhVal}%`,
-              smapEst: `${Math.round(rhVal * 0.42)}%`,
-              month: currentMonth,
-              source: 'NASA POWER MERRA-2'
-            });
-          }
-        }
+        updateSession({ environmentalObservations: observations });
       } catch (err) {
-        // Fallback to calibrated local models
+        if (!isCancelled) {
+          setNasaError(err?.name === 'AbortError' ? 'Request timed out or was cancelled.' : (err?.message || 'NASA POWER data request failed.'));
+        }
       } finally {
         if (!isCancelled) setIsNasaLoading(false);
       }
@@ -109,135 +204,10 @@ export default function FarmProStudio({ onBackToHome, onOpenGame }) {
 
     return () => {
       isCancelled = true;
+      clearTimeout(timeoutId);
+      controller.abort();
     };
-  }, [selectedLocation]);
-
-  // Calculate dynamic realistic NASA Earth Telemetry based on coordinates
-  const telemetry = useMemo(() => {
-    const lat = selectedLocation[0];
-    const lng = selectedLocation[1];
-
-    // Nile Delta region
-    const isDelta = lat >= 30.0 && lat <= 31.8 && lng >= 29.5 && lng <= 32.5;
-    const isUpperEgypt = lat >= 24.0 && lat < 30.0 && lng >= 29.0 && lng <= 33.5;
-    const isUSA = lat >= 32.0 && lat <= 45.0 && lng <= -80.0 && lng >= -120.0;
-
-    let lst = 28.2;
-    let smap = 23;
-    let gpmRain = 54;
-    let ndvi = 0.74;
-    let soilTextAr = 'أرض طمي سوداء خصبة';
-    let soilTextEn = 'Deep Alluvial Nile Loam';
-    let waterStatusAr = 'الأرض شبعانة مية ومش محتاجة ري';
-    let waterStatusEn = 'Moist Root-Zone';
-    let heatStressAr = 'الجو مظبوط ومناسب للزرع';
-    let heatStressEn = 'Optimal Thermal State';
-
-    if (isDelta) {
-      lst = 27.8;
-      smap = 24;
-      gpmRain = 58;
-      ndvi = 0.78;
-      soilTextAr = 'أرض دلتا سوداء خصبة جداً';
-      soilTextEn = 'Fertile Nile Silt Loam';
-      waterStatusAr = 'رطوبة ممتازة من مية الترعة';
-      waterStatusEn = 'Good Moisture from Canals';
-      heatStressAr = 'الجو معتدل ومناسب للنمو';
-    } else if (isUpperEgypt) {
-      lst = 34.2;
-      smap = 11;
-      gpmRain = 12;
-      ndvi = 0.52;
-      soilTextAr = 'أرض حامية في الصعيد';
-      soilTextEn = 'Arid Silt Loam';
-      waterStatusAr = 'الأرض عطشانة ومحتاجة ري قريب';
-      waterStatusEn = 'High Evaporation & Thirsty';
-      heatStressAr = 'شمس حامية.. انتبه للعطش';
-      heatStressEn = 'High Summer Heat Stress';
-    } else if (isUSA) {
-      lst = 25.1;
-      smap = 17;
-      gpmRain = 460;
-      ndvi = 0.65;
-      soilTextAr = 'Prairie Silt Loam';
-      soilTextEn = 'Prairie Silt Loam';
-      waterStatusAr = 'مية الآبار محتاجة ترشيد';
-      waterStatusEn = 'Aquifer Needs Conservation';
-    } else {
-      lst = 29.0;
-      smap = 18;
-      gpmRain = 120;
-      ndvi = 0.62;
-    }
-
-    return {
-      lst: nasaLive ? nasaLive.temp : `${lst.toFixed(1)}°C`,
-      smap: nasaLive ? nasaLive.smapEst : `${smap}%`,
-      gpmRain: nasaLive ? nasaLive.rain : `${gpmRain} mm`,
-      ndvi: ndvi.toFixed(2),
-      soilTextAr,
-      soilTextEn,
-      waterStatusAr,
-      waterStatusEn,
-      heatStressAr,
-      heatStressEn,
-      isLiveNasa: !!nasaLive
-    };
-  }, [selectedLocation, nasaLive]);
-
-  // Recommended 3-Season Rotations tailored to this exact site
-  const rotationPlans = useMemo(() => {
-    return [
-      {
-        id: 'water',
-        titleAr: 'دورة توفير المية (وفّر ٣٥٪ من مية الري) 💧',
-        titleEn: 'Water-Smart Rotation (35% Water Saved)',
-        color: 'from-sky-500 to-blue-600',
-        badge: 'توفير عالي للمية',
-        seasons: [
-          { sAr: 'الموسم 1 (شتوي)', sEn: 'Season 1 (Winter)', cropAr: 'قمح مقاوم للحرارة', cropEn: 'Hardy Wheat', noteAr: 'محصول أساسي مضمون ومربح' },
-          { sAr: 'الموسم 2 (صيفي مبكر)', sEn: 'Season 2 (Summer)', cropAr: 'فول بلدي / بقوليات', cropEn: 'Faba Bean Legume', noteAr: 'يريح الأرض ويغذيها طبيعياً' },
-          { sAr: 'الموسم 3 (صيفي متأخر)', sEn: 'Season 3 (Late Summer)', cropAr: 'ذرة رفيعة (سورجوم)', cropEn: 'Grain Sorghum', noteAr: 'تتحمل شمس الصيف والعطش' },
-        ],
-        waterSavedAr: 'هتوفر حوالي ٩٥٠ متر مية لكل فدان',
-        waterSavedEn: 'Saves ~950 m³ water per feddan',
-        nitrogenBenefitAr: 'هتغذي أرضك بـ ٤٢ كجم نيتروجين طبيعي ببلاش',
-        nitrogenBenefitEn: '+42 kg/ha Natural Biological Nitrogen'
-      },
-      {
-        id: 'soil',
-        titleAr: 'دورة تغذية الأرض وراحة التربة 🌱',
-        titleEn: 'Soil Bio-Regeneration & Nitrogen Fixation',
-        color: 'from-emerald-500 to-teal-600',
-        badge: 'تسميد طبيعي ٤٥٪+',
-        seasons: [
-          { sAr: 'الموسم 1 (شتوي)', sEn: 'Season 1 (Winter)', cropAr: 'برسيم بلدي / علف', cropEn: 'Berseem Clover', noteAr: 'يغذي الأرض وينضفها من الحشائش' },
-          { sAr: 'الموسم 2 (صيفي)', sEn: 'Season 2 (Summer)', cropAr: 'ذرة شامية هجين', cropEn: 'Hybrid Maize', noteAr: 'يستفيد من غذاء البرسيم اللي قبله' },
-          { sAr: 'الموسم 3 (تغطية)', sEn: 'Season 3 (Cover Crop)', cropAr: 'محصول تغطية ووقاية', cropEn: 'Bio-Fumigant Cover', noteAr: 'ينضف التربة من ديدان وأمراض الجذور' },
-        ],
-        waterSavedAr: 'هتوفر ٧٠٠ متر مية لكل فدان',
-        waterSavedEn: 'Saves ~700 m³ water',
-        nitrogenBenefitAr: 'هتوفر ٤٠٪ من مصاريف الكيماوي والسماد',
-        nitrogenBenefitEn: 'Injects 65 kg natural N, cuts fertilizer 40%'
-      },
-      {
-        id: 'economic',
-        titleAr: 'دورة أعلى مكسب وفلوس نقدية 💰',
-        titleEn: 'Maximum Profit & Market Cash Yield',
-        color: 'from-amber-500 to-orange-600',
-        badge: 'أعلى مكسب وفلوس',
-        seasons: [
-          { sAr: 'الموسم 1 (شتوي)', sEn: 'Season 1 (Winter)', cropAr: 'بنجر سكر / شعير', cropEn: 'Sugar Beet / Barley', noteAr: 'سعر توريد مضمون ويتحمل الملوحة' },
-          { sAr: 'الموسم 2 (صيفي)', sEn: 'Season 2 (Summer)', cropAr: 'فول سوداني / صويا زيتية', cropEn: 'Groundnut / Soy', noteAr: 'مكسب كاش سريع ويخدم الأرض' },
-          { sAr: 'الموسم 3 (خريفي)', sEn: 'Season 3 (Autumn)', cropAr: 'خضار سريع / قمح بدري', cropEn: 'Quick Cash Crop', noteAr: 'سبوبة ربح سريعة قبل عروة الشتا' },
-        ],
-        waterSavedAr: 'هتوفر ٨٠٠ متر مية لكل فدان',
-        waterSavedEn: 'Saves ~800 m³ water',
-        nitrogenBenefitAr: 'مكسب كاش سريع مع الحفاظ على خصوبة أرضك',
-        nitrogenBenefitEn: 'Optimal cash return with soil health'
-      }
-    ];
-  }, []);
+  }, [farmSelection.valid, farmSelection.farmLocation?.latitude, farmSelection.farmLocation?.longitude, updateSession]);
 
   // Filter preset locations based on search query
   const filteredPresets = useMemo(() => {
@@ -250,10 +220,46 @@ export default function FarmProStudio({ onBackToHome, onOpenGame }) {
     );
   }, [searchQuery]);
 
+  const applyPointLocation = (latitude, longitude, label) => {
+    const validation = validateCoordinates(latitude, longitude);
+    if (!validation.valid) {
+      setLocationError(localizeGeometryError(validation.error, lang));
+      return false;
+    }
+    setSelectedLocation([latitude, longitude]);
+    setLatitudeInput(String(latitude));
+    setLongitudeInput(String(longitude));
+    setLocationName(label);
+    setSelectionMode('point-area');
+    setLocationError('');
+    return true;
+  };
+
+  const handleApplyCoordinates = () => {
+    if (!latitudeInput.trim() || !longitudeInput.trim()) {
+      setLocationError(lang === 'ar' ? 'أدخل خط العرض وخط الطول.' : 'Enter both latitude and longitude.');
+      return;
+    }
+    const latitude = Number(latitudeInput);
+    const longitude = Number(longitudeInput);
+    if (validateCoordinates(latitude, longitude).valid) {
+      applyPointLocation(latitude, longitude, `${latitude.toFixed(4)}°, ${longitude.toFixed(4)}°`);
+    } else {
+      setLocationError(localizeGeometryError(validateCoordinates(latitude, longitude).error, lang));
+    }
+  };
+
+  const handleAreaUnitChange = (nextUnit) => {
+    if (selectionMode === 'point-area') {
+      const converted = convertArea(Number(areaInput), areaUnit, nextUnit);
+      if (converted !== null) setAreaInput(String(Number(converted.toFixed(6))));
+    }
+    setAreaUnit(nextUnit);
+  };
+
   // Handle Location Selection
   const handleSelectLocation = (loc) => {
-    setSelectedLocation(loc.center);
-    setLocationName(lang === 'ar' ? loc.nameAr : loc.nameEn);
+    applyPointLocation(loc.center[0], loc.center[1], lang === 'ar' ? loc.nameAr : loc.nameEn);
     setSearchQuery(lang === 'ar' ? loc.nameAr : loc.nameEn);
     setShowSearchDropdown(false);
   };
@@ -269,22 +275,33 @@ export default function FarmProStudio({ onBackToHome, onOpenGame }) {
       const lat = parseFloat(coordMatch[1]);
       const lng = parseFloat(coordMatch[2]);
       if (!isNaN(lat) && !isNaN(lng)) {
-        setSelectedLocation([lat, lng]);
-        setLocationName(`${lat.toFixed(4)}°, ${lng.toFixed(4)}°`);
+        applyPointLocation(lat, lng, `${lat.toFixed(4)}°, ${lng.toFixed(4)}°`);
+        setOnlineSearchStatus('');
         setShowSearchDropdown(false);
         return;
       }
     }
 
     setIsSearching(true);
+    setOnlineSearchStatus('');
     setShowSearchDropdown(true);
 
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5`);
+      if (!res.ok) throw new Error(`Location search failed with HTTP ${res.status}`);
       const data = await res.json();
-      setOnlineSearchResults(data || []);
+      const seenNames = new Set();
+      const uniqueResults = (data || []).filter((result) => {
+        const name = String(result.display_name || '').trim().toLocaleLowerCase();
+        if (!name || seenNames.has(name)) return false;
+        seenNames.add(name);
+        return true;
+      });
+      setOnlineSearchResults(uniqueResults);
+      if (!uniqueResults.length) setOnlineSearchStatus('no-results');
     } catch (err) {
       setOnlineSearchResults([]);
+      setOnlineSearchStatus('error');
     } finally {
       setIsSearching(false);
     }
@@ -292,8 +309,41 @@ export default function FarmProStudio({ onBackToHome, onOpenGame }) {
 
   // Click on map to place beacon
   const handleMapClick = (coords) => {
-    setSelectedLocation(coords);
-    setLocationName(lang === 'ar' ? `الموقع المختار (${coords[0].toFixed(3)}°, ${coords[1].toFixed(3)}°)` : `Coordinates (${coords[0].toFixed(3)}°, ${coords[1].toFixed(3)}°)`);
+    const validation = validateCoordinates(coords[0], coords[1]);
+    if (!validation.valid) {
+      setLocationError(localizeGeometryError(validation.error, lang));
+      return;
+    }
+    if (selectionMode === 'boundary') {
+      setBoundaryPoints((points) => [...points, { latitude: coords[0], longitude: coords[1] }]);
+      setLocationError('');
+      return;
+    }
+    applyPointLocation(
+      coords[0],
+      coords[1],
+      lang === 'ar' ? `الموقع المختار (${coords[0].toFixed(3)}°, ${coords[1].toFixed(3)}°)` : `Coordinates (${coords[0].toFixed(3)}°, ${coords[1].toFixed(3)}°)`
+    );
+  };
+
+  const handleMoveBoundaryPoint = (index, point) => {
+    const validation = validateCoordinates(point.latitude, point.longitude);
+    if (!validation.valid) {
+      setLocationError(localizeGeometryError(validation.error, lang));
+      return;
+    }
+    setBoundaryPoints((points) => points.map((current, pointIndex) => pointIndex === index ? point : current));
+    setLocationError('');
+  };
+
+  const handleRemoveBoundaryPoint = (index) => {
+    setBoundaryPoints((points) => points.filter((_, pointIndex) => pointIndex !== index));
+    setLocationError('');
+  };
+
+  const handleClearBoundary = () => {
+    setBoundaryPoints([]);
+    setLocationError('');
   };
 
   // Trigger Scanner animation
@@ -305,7 +355,7 @@ export default function FarmProStudio({ onBackToHome, onOpenGame }) {
   };
 
   return (
-    <div className="relative w-full h-full min-h-[650px] flex flex-col bg-[#050c18] overflow-hidden select-none font-sans">
+    <div className="relative w-full h-full min-h-0 flex flex-col bg-[#050c18] overflow-hidden font-sans">
       
       {/* ── TOP HEADER & LIVE SEARCH BAR ── */}
       <div className="w-full bg-[#0a1827]/95 backdrop-blur-md border-b border-white/10 px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs z-30">
@@ -327,6 +377,8 @@ export default function FarmProStudio({ onBackToHome, onOpenGame }) {
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
+                setOnlineSearchResults([]);
+                setOnlineSearchStatus('');
                 setShowSearchDropdown(true);
               }}
               onFocus={() => setShowSearchDropdown(true)}
@@ -366,6 +418,9 @@ export default function FarmProStudio({ onBackToHome, onOpenGame }) {
               </div>
 
               {/* Online results */}
+          {isSearching && <p role="status" className="px-2 py-2 text-[10px] text-cyan-200">{lang === 'ar' ? 'جارٍ البحث عن الموقع…' : 'Searching for this place…'}</p>}
+          {!isSearching && onlineSearchStatus === 'no-results' && <p role="status" className="px-2 py-2 text-[10px] text-amber-200">{lang === 'ar' ? 'لم يُعثر على أماكن مطابقة. جرّب اسماً آخر أو اختر منطقة سريعة.' : 'No matching places found. Try another name or choose a quick region.'}</p>}
+          {!isSearching && onlineSearchStatus === 'error' && <p role="alert" className="px-2 py-2 text-[10px] text-rose-200">{lang === 'ar' ? 'تعذر الوصول إلى خدمة البحث عن الأماكن. تحقق من الاتصال أو اختر منطقة سريعة.' : 'Could not reach the place-search service. Check the connection or choose a quick region.'}</p>}
               {onlineSearchResults.length > 0 && (
                 <div className="mb-2">
                   <div className="text-[9px] font-bold text-cyan-300 px-2 py-0.5 uppercase tracking-wider">{lang === 'ar' ? 'نتائج البحث:' : 'Search Results:'}</div>
@@ -375,8 +430,7 @@ export default function FarmProStudio({ onBackToHome, onOpenGame }) {
                       onClick={() => {
                         const lat = parseFloat(res.lat);
                         const lng = parseFloat(res.lon);
-                        setSelectedLocation([lat, lng]);
-                        setLocationName(res.display_name.split(',')[0]);
+                        applyPointLocation(lat, lng, res.display_name.split(',')[0]);
                         setShowSearchDropdown(false);
                       }}
                       className="w-full text-left p-2 rounded-xl hover:bg-indigo-600/30 text-xs font-bold text-white flex items-center justify-between transition-all cursor-pointer"
@@ -429,16 +483,22 @@ export default function FarmProStudio({ onBackToHome, onOpenGame }) {
         </div>
       </div>
 
-      {/* ── REAL 3D HIGH-RES SATELLITE MAP (SINGLE GLOWING CIRCLE ONLY) ── */}
-      <div className="relative flex-1 w-full h-full overflow-hidden">
+      {/* Map imagery is a basemap; environmental data is added as point references only. */}
+      <div className="relative flex-1 min-h-0 w-full h-full overflow-hidden">
         
-        {/* Real Leaflet Map with only the single glowing circle */}
+        {/* Esri imagery basemap with farm geometry and optional POWER point inspector. */}
         <RealSatelliteLeafletMap
-          center={selectedLocation}
+          center={referenceCoordinates}
           zoom={15}
-          selectedLocation={selectedLocation}
+          selectedLocation={referenceCoordinates}
           onLocationSelect={handleMapClick}
           isScanning={isScanning}
+          drawingMode={selectionMode === 'boundary'}
+          boundaryPoints={boundaryPoints}
+          polygonIsValid={boundaryValidation.valid}
+          onBoundaryPointMove={handleMoveBoundaryPoint}
+          environmentalPointLayers={environmentalPointLayers}
+          lang={lang}
         />
 
         {/* ── LEFT FLOATING PANEL: NASA WEATHER & RECOMMENDED ROTATIONS (COLLAPSIBLE, 100% SOLID OPAQUE) ── */}
@@ -453,8 +513,8 @@ export default function FarmProStudio({ onBackToHome, onOpenGame }) {
           </button>
         ) : (
           <div 
-            style={{ backgroundColor: '#07152b', opacity: 1 }}
-            className="absolute top-4 left-4 z-20 w-[92%] sm:w-[420px] max-w-[440px] border-2 border-indigo-500/60 text-white rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] p-4 sm:p-5 flex flex-col gap-3.5 max-h-[calc(100vh-130px)] overflow-y-auto animate-in fade-in zoom-in-95"
+            className="absolute top-4 left-4 z-20 w-[92%] sm:w-[420px] max-w-[440px] border-2 border-indigo-500/60 text-white rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] p-4 sm:p-5 flex flex-col gap-3.5 overflow-y-auto animate-in fade-in zoom-in-95"
+            style={{ backgroundColor: '#07152b', opacity: 1, maxHeight: 'calc(100% - 2rem)' }}
           >
             
             {/* Selected Location Title & Coordinates + Minimize button */}
@@ -465,12 +525,12 @@ export default function FarmProStudio({ onBackToHome, onOpenGame }) {
                 </div>
                 <div className="min-w-0">
                   <div className="text-[10px] text-slate-400 font-bold">{lang === 'ar' ? 'أرضك اللي اخترتها:' : 'Target Farm Location:'}</div>
-                  <div className="text-xs font-black text-white truncate">{locationName}</div>
+                  <div className="text-xs font-black text-white truncate">{selectionMode === 'boundary' && polygonCentroid ? (lang === 'ar' ? 'مركز المضلع' : 'Polygon centroid') : locationName}</div>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <span className="text-[9px] font-mono text-cyan-300 bg-cyan-950 px-2 py-1 rounded border border-cyan-500/30">
-                  {selectedLocation[0].toFixed(3)}°, {selectedLocation[1].toFixed(3)}°
+                  {displayedCoordinates[0].toFixed(3)}°, {displayedCoordinates[1].toFixed(3)}°
                 </span>
                 <button
                   onClick={() => setIsPanelCollapsed(true)}
@@ -482,163 +542,123 @@ export default function FarmProStudio({ onBackToHome, onOpenGame }) {
               </div>
             </div>
 
-            {/* 🛰️ 1. NASA WEATHER & EARTH TELEMETRY CARDS 🛰️ */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-1.5 text-xs font-black text-cyan-300">
-                  <Sun className="w-4 h-4 text-amber-400" />
-                  <span>{lang === 'ar' ? 'حالة الجو والأرض من ناسا' : 'NASA Satellite & Soil Status'}</span>
-                </div>
-                {isNasaLoading ? (
-                  <span className="text-[9px] font-mono text-cyan-300 font-bold flex items-center gap-1 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-500/40">
-                    <Loader2 className="w-2.5 h-2.5 animate-spin text-cyan-400" />
-                    <span>{lang === 'ar' ? 'بنقيس حالاً...' : 'FETCHING...'}</span>
-                  </span>
-                ) : telemetry.isLiveNasa ? (
-                  <span className="text-[9px] font-mono text-emerald-300 font-bold flex items-center gap-1.5 bg-emerald-950/90 px-2 py-0.5 rounded border border-emerald-400/50 shadow-[0_0_8px_rgba(16,185,129,0.3)]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
-                    <span>{lang === 'ar' ? '🛰️ قمر ناسا مباشر' : '🛰️ NASA POWER LIVE'}</span>
-                  </span>
-                ) : (
-                  <span className="text-[9px] font-mono text-emerald-400 font-bold">✓ LIVE CALIBRATED</span>
-                )}
+            {/* Farm location and area selection */}
+            <section className="p-3 bg-[#030914] rounded-2xl border border-indigo-400/40 space-y-3" aria-label={lang === 'ar' ? 'تحديد موقع ومساحة المزرعة' : 'Farm location and area selection'}>
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-xs font-black text-white">{lang === 'ar' ? 'حدد موقع ومساحة المزرعة' : 'Define Farm Location & Area'}</h2>
+                <span className="text-[9px] text-cyan-300 font-mono">{lang === 'ar' ? 'اختياري' : 'WORKING SESSION'}</span>
               </div>
 
-              {/* Satellite Instruments Toggle */}
-              <div className="flex justify-end mb-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 <button
                   type="button"
-                  onClick={() => setShowTechDetails(!showTechDetails)}
-                  className="text-[9.5px] text-cyan-400 hover:text-cyan-300 underline underline-offset-2 cursor-pointer transition-colors"
+                  aria-pressed={selectionMode === 'point-area'}
+                  onClick={() => { setSelectionMode('point-area'); setLocationError(''); }}
+                  className={`rounded-xl border px-2 py-2 text-[10px] sm:text-[11px] font-black transition-all ${selectionMode === 'point-area' ? 'bg-cyan-700/70 border-cyan-300 text-white' : 'bg-[#081730] border-white/10 text-slate-300'}`}
                 >
-                  {showTechDetails 
-                    ? (lang === 'ar' ? '✕ إخفاء الرموز العلمية' : '✕ Hide scientific acronyms') 
-                    : (lang === 'ar' ? '🔬 عرض تفاصيل ناسا التقنية' : '🔬 Show satellite instruments')}
+                  {lang === 'ar' ? 'نقطة + مساحة' : 'Select Point + Enter Area'}
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={selectionMode === 'boundary'}
+                  onClick={() => { setSelectionMode('boundary'); setLocationError(''); }}
+                  className={`rounded-xl border px-2 py-2 text-[10px] sm:text-[11px] font-black transition-all ${selectionMode === 'boundary' ? 'bg-cyan-700/70 border-cyan-300 text-white' : 'bg-[#081730] border-white/10 text-slate-300'}`}
+                >
+                  {lang === 'ar' ? 'ارسم حدود المزرعة' : 'Draw Farm Boundary'}
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                {/* Temperature */}
-                <div className="p-2.5 bg-[#030d1d] border border-amber-500/30 rounded-xl">
-                  <div className="flex items-center justify-between text-slate-400 text-[10px] mb-1">
-                    <span>
-                      {lang === 'ar' ? 'حرارة التربة والأرض' : 'Land Temperature'}
-                      {showTechDetails && <span className="text-[8.5px] font-mono text-amber-400 block">(Landsat LST)</span>}
-                    </span>
-                    <Thermometer className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              {selectionMode === 'point-area' ? (
+                <div className="space-y-2.5">
+                  <p className="text-[10px] leading-relaxed text-slate-300">{lang === 'ar' ? 'اختر نقطة على الخريطة أو ابحث عن مكان. المساحة المدخلة تقدير حول نقطة مرجعية ولا تحدد شكل حدود المزرعة.' : 'Click the map or search for a place. The entered area is an estimate around a reference point; it does not define the farm boundary.'}</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <label className="text-[10px] text-slate-300 space-y-1">
+                      <span>{lang === 'ar' ? 'خط العرض' : 'Latitude'}</span>
+                      <input inputMode="decimal" value={latitudeInput} onChange={(event) => setLatitudeInput(event.target.value)} className="w-full rounded-lg border border-cyan-500/30 bg-[#081426] px-2 py-1.5 text-white" />
+                    </label>
+                    <label className="text-[10px] text-slate-300 space-y-1">
+                      <span>{lang === 'ar' ? 'خط الطول' : 'Longitude'}</span>
+                      <input inputMode="decimal" value={longitudeInput} onChange={(event) => setLongitudeInput(event.target.value)} className="w-full rounded-lg border border-cyan-500/30 bg-[#081426] px-2 py-1.5 text-white" />
+                    </label>
                   </div>
-                  <div className="text-base font-black text-amber-300 font-mono">{telemetry.lst}</div>
-                  <div className="text-[9.5px] text-slate-300 mt-0.5 truncate">{lang === 'ar' ? telemetry.heatStressAr : telemetry.heatStressEn}</div>
-                </div>
-
-                {/* Soil Moisture */}
-                <div className="p-2.5 bg-[#030d1d] border border-sky-500/30 rounded-xl">
-                  <div className="flex items-center justify-between text-slate-400 text-[10px] mb-1">
-                    <span>
-                      {lang === 'ar' ? 'مية ورطوبة الجذور' : 'Root Soil Moisture'}
-                      {showTechDetails && <span className="text-[8.5px] font-mono text-sky-400 block">(NASA SMAP)</span>}
-                    </span>
-                    <Droplets className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-                  </div>
-                  <div className="text-base font-black text-sky-300 font-mono">{telemetry.smap}</div>
-                  <div className="text-[9.5px] text-slate-300 mt-0.5 truncate">{lang === 'ar' ? telemetry.waterStatusAr : telemetry.waterStatusEn}</div>
-                </div>
-
-                {/* Rain */}
-                <div className="p-2.5 bg-[#030d1d] border border-cyan-500/30 rounded-xl">
-                  <div className="flex items-center justify-between text-slate-400 text-[10px] mb-1">
-                    <span>
-                      {lang === 'ar' ? 'المطر المتوقع' : 'Rainfall'}
-                      {showTechDetails && <span className="text-[8.5px] font-mono text-cyan-400 block">(NASA GPM)</span>}
-                    </span>
-                    <CloudRain className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  </div>
-                  <div className="text-base font-black text-cyan-300 font-mono">{telemetry.gpmRain}</div>
-                  <div className="text-[9.5px] text-slate-300 mt-0.5">{lang === 'ar' ? 'معدل المطر في منطقتك' : 'Seasonal Trend'}</div>
-                </div>
-
-                {/* Vegetation Health */}
-                <div className="p-2.5 bg-[#030d1d] border border-emerald-500/30 rounded-xl">
-                  <div className="flex items-center justify-between text-slate-400 text-[10px] mb-1">
-                    <span>
-                      {lang === 'ar' ? 'صحة وخضار الزرع' : 'Canopy Health'}
-                      {showTechDetails && <span className="text-[8.5px] font-mono text-emerald-400 block">(MODIS NDVI)</span>}
-                    </span>
-                    <Sprout className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  </div>
-                  <div className="text-base font-black text-emerald-300 font-mono">{telemetry.ndvi}</div>
-                  <div className="text-[9.5px] text-slate-300 mt-0.5">{lang === 'ar' ? 'الزرع مورّق وصحته ممتازة' : 'Vigorous Green'}</div>
-                </div>
-              </div>
-            </div>
-
-            {/* 🔄 2. RECOMMENDED CROP ROTATIONS FOR THIS SITE 🔄 */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1.5 text-xs font-black text-emerald-300">
-                  <RefreshCw className="w-4 h-4 text-emerald-400" />
-                  <span>{lang === 'ar' ? 'أحسن دورات زراعية لأرضك (تزرع إيه بعد إيه؟)' : 'Recommended Crop Rotations'}</span>
-                </div>
-              </div>
-
-              {/* Rotation Selector Pills */}
-              <div className="grid grid-cols-3 gap-1 bg-[#020814] p-1 rounded-xl border border-white/10 mb-2.5">
-                {[
-                  { id: 'water', labelAr: '💧 توفير مية', labelEn: '💧 Save Water' },
-                  { id: 'soil', labelAr: '🌱 راحة التربة', labelEn: '🌱 Soil Health' },
-                  { id: 'economic', labelAr: '💰 أعلى مكسب', labelEn: '💰 Max Profit' }
-                ].map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setSelectedPlanTab(tab.id)}
-                    className={`py-1.5 px-1 rounded-lg text-[10px] font-black transition-all cursor-pointer text-center ${
-                      selectedPlanTab === tab.id ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    {lang === 'ar' ? tab.labelAr : tab.labelEn}
+                  <button type="button" onClick={handleApplyCoordinates} className="w-full rounded-lg border border-cyan-400/40 bg-cyan-950/70 py-1.5 text-[10px] font-bold text-cyan-100 hover:bg-cyan-900/80">
+                    {lang === 'ar' ? 'تطبيق الإحداثيات' : 'Apply Coordinates'}
                   </button>
-                ))}
-              </div>
-
-              {/* Selected Plan Details Card */}
-              {(() => {
-                const plan = rotationPlans.find(p => p.id === selectedPlanTab) || rotationPlans[0];
-                return (
-                  <div className="p-3 bg-[#030c1d] border-2 border-indigo-500/40 rounded-2xl space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-black text-white">{lang === 'ar' ? plan.titleAr : plan.titleEn}</span>
-                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
-                        {plan.badge}
-                      </span>
-                    </div>
-
-                    {/* 3 Seasons Sequence */}
-                    <div className="grid grid-cols-3 gap-1.5 text-center">
-                      {plan.seasons.map((s, idx) => (
-                        <div key={idx} className="p-2 bg-[#020712] rounded-xl border border-white/10">
-                          <span className="text-[9px] text-slate-400 block">{lang === 'ar' ? s.sAr : s.sEn}</span>
-                          <span className="text-xs font-black text-cyan-200 block mt-0.5">{lang === 'ar' ? s.cropAr : s.cropEn}</span>
-                          <span className="text-[8.5px] text-emerald-400 block mt-0.5">{lang === 'ar' ? s.noteAr : s.noteEn}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Projected Benefits */}
-                    <div className="pt-2 border-t border-white/10 space-y-1 text-[10.5px]">
-                      <div className="text-sky-300 font-bold flex items-center gap-1.5">
-                        <Droplets className="w-3.5 h-3.5" />
-                        <span>{lang === 'ar' ? plan.waterSavedAr : plan.waterSavedEn}</span>
-                      </div>
-                      <div className="text-emerald-300 font-bold flex items-center gap-1.5">
-                        <Sprout className="w-3.5 h-3.5" />
-                        <span>{lang === 'ar' ? plan.nitrogenBenefitAr : plan.nitrogenBenefitEn}</span>
-                      </div>
-                    </div>
+                  <div className="grid grid-cols-[1fr_1.1fr] gap-2">
+                    <label className="text-[10px] text-slate-300 space-y-1">
+                      <span>{lang === 'ar' ? 'مساحة المزرعة' : 'Farm area'}</span>
+                      <input type="number" min="0" step="any" value={areaInput} onChange={(event) => setAreaInput(event.target.value)} className="w-full rounded-lg border border-cyan-500/30 bg-[#081426] px-2 py-1.5 text-white" />
+                    </label>
+                    <label className="text-[10px] text-slate-300 space-y-1">
+                      <span>{lang === 'ar' ? 'وحدة المساحة' : 'Area unit'}</span>
+                      <select value={areaUnit} onChange={(event) => handleAreaUnitChange(event.target.value)} className="w-full rounded-lg border border-cyan-500/30 bg-[#081426] px-2 py-1.5 text-white">
+                        {Object.entries(FARM_AREA_UNITS).map(([unit, config]) => <option key={unit} value={unit}>{lang === 'ar' ? config.labelAr : config.labelEn}</option>)}
+                      </select>
+                    </label>
                   </div>
-                );
-              })()}
-            </div>
+                  {!pointAreaIsValid && <p role="alert" className="text-[10px] text-rose-300">{lang === 'ar' ? 'أدخل مساحة أكبر من صفر وضمن نطاق المزرعة.' : 'Enter an area greater than zero and within a valid farm-size range.'}</p>}
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  <p className="text-[10px] leading-relaxed text-slate-300">{lang === 'ar' ? 'اضغط على الخريطة لإضافة نقاط الحدود. اسحب النقاط لتعديلها، أو احذف النقاط غير المطلوبة.' : 'Click the map to add boundary points. Drag a vertex to edit it, or remove individual points below.'}</p>
+                  <div className="flex items-center gap-2">
+                    <button type="button" disabled={!boundaryPoints.length} onClick={() => handleRemoveBoundaryPoint(boundaryPoints.length - 1)} className="flex-1 rounded-lg border border-white/10 bg-[#081730] py-1.5 text-[10px] font-bold text-slate-200 disabled:opacity-40">{lang === 'ar' ? 'تراجع عن آخر نقطة' : 'Undo Last Point'}</button>
+                    <button type="button" disabled={!boundaryPoints.length} onClick={handleClearBoundary} className="flex-1 rounded-lg border border-rose-500/30 bg-rose-950/40 py-1.5 text-[10px] font-bold text-rose-200 disabled:opacity-40">{lang === 'ar' ? 'مسح وإعادة الرسم' : 'Clear & Redraw'}</button>
+                  </div>
+                  {boundaryPoints.length > 0 && (
+                    <ol className="max-h-28 space-y-1 overflow-y-auto rounded-lg border border-white/10 p-1.5">
+                      {boundaryPoints.map((point, index) => (
+                        <li key={`${index}-${point.latitude}-${point.longitude}`} className="flex items-center justify-between gap-2 text-[9px] text-slate-200">
+                          <span>{index + 1}. {point.latitude.toFixed(5)}, {point.longitude.toFixed(5)}</span>
+                          <button type="button" onClick={() => handleRemoveBoundaryPoint(index)} className="rounded px-1.5 py-0.5 text-rose-300 hover:bg-rose-950/60" aria-label={`${lang === 'ar' ? 'حذف النقطة' : 'Remove point'} ${index + 1}`}><X className="h-3 w-3" /></button>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                  <label className="block text-[10px] text-slate-300 space-y-1">
+                    <span>{lang === 'ar' ? 'عرض المساحة المحسوبة بوحدة' : 'Show calculated area in'}</span>
+                    <select value={areaUnit} onChange={(event) => handleAreaUnitChange(event.target.value)} className="w-full rounded-lg border border-cyan-500/30 bg-[#081426] px-2 py-1.5 text-white">
+                      {Object.entries(FARM_AREA_UNITS).map(([unit, config]) => <option key={unit} value={unit}>{lang === 'ar' ? config.labelAr : config.labelEn}</option>)}
+                    </select>
+                  </label>
+                  {boundaryPoints.length > 0 && !boundaryValidation.valid && <p role="alert" className="text-[10px] text-amber-200">{lang === 'ar' ? 'أكمل مضلعاً صالحاً: ' : ''}{localizeGeometryError(boundaryValidation.error, lang)}</p>}
+                </div>
+              )}
 
+              {locationError && <p role="alert" className="text-[10px] text-rose-300">{localizeGeometryError(locationError, lang)}</p>}
+
+              <div className="rounded-xl border border-cyan-500/25 bg-[#07152b] p-2.5 space-y-1">
+                <div className="text-[10px] font-black text-cyan-200">{lang === 'ar' ? 'ملخص المزرعة' : 'Farm Selection Summary'}</div>
+                <div className="text-[10px] text-slate-200">{lang === 'ar' ? 'الموقع:' : 'Location:'} {selectionMode === 'boundary' && polygonCentroid ? (lang === 'ar' ? 'مركز المضلع' : 'Polygon centroid') : locationName}</div>
+                <div className="text-[10px] font-mono text-slate-300">{displayedCoordinates[0].toFixed(5)}°, {displayedCoordinates[1].toFixed(5)}°</div>
+                <div className="text-[10px] text-slate-200">{lang === 'ar' ? 'المساحة:' : 'Area:'} {selectionMode === 'point-area'
+                  ? (pointAreaIsValid ? formatArea(areaValue, areaUnit, lang) : (lang === 'ar' ? 'مساحة غير صالحة' : 'Invalid area'))
+                  : (boundaryValidation.valid ? formatArea(areaValue, areaUnit, lang) : (lang === 'ar' ? 'أكمل حدوداً صالحة' : 'Complete a valid boundary'))}</div>
+                <div className="text-[9px] text-slate-400">{selectionMode === 'point-area'
+                  ? (lang === 'ar' ? 'الطريقة: نقطة مرجعية + مساحة مدخلة؛ لا تمثل حدوداً دقيقة.' : 'Method: reference point + entered area; exact boundary is unknown.')
+                  : (lang === 'ar' ? `الطريقة: حدود مرسومة (${boundaryPoints.length} نقاط)` : `Method: drawn polygon (${boundaryPoints.length} vertices)`)}</div>
+                {selectionMode === 'boundary' && boundaryValidation.valid && <div className="text-[9px] text-emerald-300">{lang === 'ar' ? 'هندسة GeoJSON جاهزة للتحليل المكاني لاحقاً.' : 'GeoJSON polygon geometry is ready for future spatial analysis.'}</div>}
+              </div>
+            </section>
+
+            <EnvironmentalAnalysisDashboard
+              id="environmental-analysis"
+              observations={powerObservations}
+              farmLocation={farmSelection.valid ? farmSelection.farmLocation : null}
+              lang={lang}
+              isLoading={isNasaLoading}
+              requestError={nasaError}
+              selectedMonth={analysisMonth}
+              onSelectedMonthChange={setAnalysisMonth}
+              activeLayers={activeEnvironmentalLayers}
+              onToggleLayer={(variable) => setActiveEnvironmentalLayers((current) => ({ ...current, [variable]: !current[variable] }))}
+              fusionGroups={environmentalFusion}
+            />
+            <section className="rounded-2xl border border-cyan-700/50 bg-[#030c1d] p-3">
+              <div className="text-xs font-black text-cyan-200">{lang === 'ar' ? 'مقارنة دورات المحاصيل' : 'Crop rotation comparison'}</div>
+              <p className="mt-1 text-[10px] text-slate-400">{lang === 'ar' ? 'قارن خط الأساس والبدائل باستخدام صفات منشورة وأولوياتك.' : 'Compare a baseline and alternatives using sourced crop traits and your priorities.'}</p>
+              <button onClick={onOpenRotationBuilder} className="mt-2 w-full rounded-lg bg-cyan-700 px-3 py-2 text-xs font-bold text-white">{lang === 'ar' ? 'فتح مقارنة الاستراتيجيات' : 'Open strategy comparison'}</button>
+            </section>
             {/* Action Buttons */}
             <div className="flex gap-2 pt-1">
               <button
@@ -669,13 +689,15 @@ export default function FarmProStudio({ onBackToHome, onOpenGame }) {
             className="text-xs font-black text-white px-3.5 py-2 rounded-2xl border-2 border-cyan-400/40 shadow-[0_10px_30px_rgba(0,0,0,0.9)] flex items-center gap-2"
           >
             <MapPin className="w-4 h-4 text-cyan-400 animate-bounce" />
-            <span>{lang === 'ar' ? 'دوس على أي حتة في الخريطة عشان تحدد أرضك بالظبط' : 'Click anywhere on map to pinpoint your location accurately'}</span>
+            <span>{selectionMode === 'boundary'
+              ? (lang === 'ar' ? 'اضغط لإضافة نقاط الحدود واسحب النقاط لتعديلها' : 'Click to add boundary points; drag vertices to edit')
+              : (lang === 'ar' ? 'دوس على الخريطة لتحديد نقطة مرجعية للمزرعة' : 'Click the map to select a farm reference point')}</span>
           </div>
           <span 
             style={{ backgroundColor: '#07152b', opacity: 1 }}
             className="text-[10px] font-mono text-cyan-300 font-bold px-2.5 py-1 rounded-lg border border-white/10"
           >
-            NASA Earth Observations • SMAP / Landsat-9 / GPM
+            {lang === 'ar' ? 'خلفية صور Esri • بيانات NASA POWER نقاط مرجعية فقط' : 'Esri imagery basemap • NASA POWER values are point references only'}
           </span>
         </div>
 

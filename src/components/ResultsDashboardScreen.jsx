@@ -1,206 +1,28 @@
 'use client';
-
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import StepperHeader from './StepperHeader';
-import ResultsSidebar, { RESULTS_NAV_TABS } from './results/ResultsSidebar';
-import ResultsEvaluationPanel from './results/ResultsEvaluationPanel';
-import OverviewTab from './results/tabs/OverviewTab';
-import MetricsTab from './results/tabs/MetricsTab';
-import ImpactTab from './results/tabs/ImpactTab';
-import NasaDataTab from './results/tabs/NasaDataTab';
-import LessonsTab from './results/tabs/LessonsTab';
-import { ratingTiers } from '../data/decisionFeedbackData';
+import { ROTATION_CRITERIA } from '../analysis/rotation/evaluateStrategies.js';
+import { useWorkingSession } from '../context/WorkingSessionContext.jsx';
+import { assessRotationUncertainty } from '../analysis/uncertainty/assessRotationUncertainty.js';
+import { assessEnvironmentalRisk } from '../analysis/risk/assessEnvironmentalRisk.js';
 
-export default function ResultsDashboardScreen({ 
-  mission, 
-  playerChoice, 
-  playerCustomSequence, 
-  onBackToMap, 
-  onNextMission 
-}) {
-  const { t, lang, isRtl } = useLanguage();
-  const [activeSideTab, setActiveSideTab] = useState('overview');
-
-  // Compute completely DYNAMIC Results & Certification Grade based on player's chosen sequence
-  const dynamicResults = useMemo(() => {
-    const c1 = mission.crops.find(c => c.id === playerCustomSequence?.season1) || mission.crops[0];
-    const c2 = mission.crops.find(c => c.id === playerCustomSequence?.season2) || mission.crops[1];
-    const c3 = mission.crops.find(c => c.id === playerCustomSequence?.season3) || mission.crops[2];
-
-    const hasLegume = [c1.id, c2.id, c3.id].some(id => 
-      id.includes('legume') || id.includes('faba') || id.includes('soy') || id.includes('chickpea')
-    );
-    const hasSorghumOrResilient = [c1.id, c2.id, c3.id].some(id => 
-      id.includes('sorghum') || id.includes('millet') || id.includes('brachiaria')
-    );
-    const uniqueIds = new Set([c1.id, c2.id, c3.id]);
-    const isStrictMonoculture = uniqueIds.size === 1;
-    const isPartialMonoculture = uniqueIds.size === 2;
-
-    // Dynamic scoring formula
-    let score = 75;
-    let waterSavedPercent = 25;
-    let yieldChangePercent = 22;
-    let soilHealthChangePercent = 20;
-    let climateRiskChangePercent = -20;
-
-    if (hasLegume) {
-      score += 15;
-      soilHealthChangePercent += 18;
-      waterSavedPercent += 8;
-      yieldChangePercent += 6;
-    } else {
-      score -= 10;
-      soilHealthChangePercent -= 15;
-    }
-
-    if (hasSorghumOrResilient) {
-      score += 8;
-      waterSavedPercent += 12;
-      climateRiskChangePercent -= 8;
-    }
-
-    if (isStrictMonoculture) {
-      score = 42;
-      waterSavedPercent = -18;
-      yieldChangePercent = -15;
-      soilHealthChangePercent = -35;
-      climateRiskChangePercent = 35;
-    } else if (isPartialMonoculture) {
-      score -= 12;
-      waterSavedPercent -= 8;
-      yieldChangePercent -= 5;
-    }
-
-    score = Math.max(30, Math.min(99, score));
-
-    // Determine Dynamic Grade Letter & Evaluation Rating from Data Tier
-    let tier = ratingTiers.tierAPlus;
-    if (score >= 90) {
-      tier = ratingTiers.tierAPlus;
-    } else if (score >= 80) {
-      tier = ratingTiers.tierA;
-    } else if (score >= 70) {
-      tier = ratingTiers.tierB;
-    } else if (score >= 60) {
-      tier = ratingTiers.tierC;
-    } else {
-      tier = ratingTiers.tierF;
-    }
-
-    const grade = tier.grade;
-    const ratingAr = tier.ratingAr;
-    const ratingEn = tier.ratingEn;
-    const gradeColor = tier.gradeColor;
-
-    // Dynamic Checklist based on choices
-    const checks = [
-      { text: t.gradeCheck1, passed: score >= 65 },
-      { text: t.gradeCheck2, passed: hasLegume },
-      { text: t.gradeCheck3, passed: waterSavedPercent >= 15 },
-      { text: t.gradeCheck4, passed: !isStrictMonoculture },
-    ];
-
-    const cropYieldChange = yieldChangePercent >= 0 ? `+${yieldChangePercent}%` : `${yieldChangePercent}%`;
-    const waterSavedChange = waterSavedPercent >= 0 ? `-${waterSavedPercent}%` : `+${Math.abs(waterSavedPercent)}%`;
-    const soilHealthChange = soilHealthChangePercent >= 0 ? `+${soilHealthChangePercent}%` : `${soilHealthChangePercent}%`;
-    const climateRiskChange = climateRiskChangePercent <= 0 ? `${climateRiskChangePercent}%` : `+${climateRiskChangePercent}%`;
-
-    return {
-      score,
-      grade,
-      ratingAr,
-      ratingEn,
-      gradeColor,
-      checks,
-      hasLegume,
-      isStrictMonoculture,
-      isPartialMonoculture,
-      cropYieldChange,
-      waterSavedChange,
-      soilHealthChange,
-      climateRiskChange,
-      yieldChangePercent,
-      waterSavedPercent,
-      soilHealthChangePercent,
-      climateRiskChangePercent,
-      c1, c2, c3,
-      sequenceNameAr: `${c1.nameAr} ➔ ${c2.nameAr} ➔ ${c3.nameAr}`,
-      sequenceNameEn: `${c1.nameEn} ➔ ${c2.nameEn} ➔ ${c3.nameEn}`,
-    };
-  }, [mission.crops, playerCustomSequence, t]);
-
-  return (
-    <div className="w-full max-w-[1650px] mx-auto px-2 sm:px-6 py-1.5 sm:py-2 flex flex-col gap-2.5 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden">
-      
-      {/* 1. Stepper Header at Top */}
-      <div className="shrink-0">
-        <StepperHeader currentStep={3} />
-      </div>
-
-      {/* 🧭 Mobile Tab Switcher (< lg) */}
-      <ResultsSidebar 
-        isMobileOnly={true}
-        mission={mission}
-        activeSideTab={activeSideTab}
-        setActiveSideTab={setActiveSideTab}
-      />
-
-      {/* 2. Main 3-Column Desktop Grid Layout (lg:grid-cols-12) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 flex-1 min-h-0 items-stretch overflow-y-auto lg:overflow-hidden">
-        
-        {/* 📋 Left Panel: Vertical Navigation Sidebar on Desktop (3 Cols) */}
-        <ResultsSidebar 
-          mission={mission}
-          activeSideTab={activeSideTab}
-          setActiveSideTab={setActiveSideTab}
-        />
-
-        {/* 📊 Center Dynamic Content Panel (6 Cols on desktop, full width on mobile) */}
-        <div className="lg:col-span-6 flex flex-col gap-2.5 min-h-0 overflow-y-auto custom-scrollbar">
-          {activeSideTab === 'overview' && (
-            <OverviewTab mission={mission} dynamicResults={dynamicResults} />
-          )}
-
-          {activeSideTab === 'results' && (
-            <MetricsTab dynamicResults={dynamicResults} />
-          )}
-
-          {activeSideTab === 'impact' && (
-            <ImpactTab mission={mission} />
-          )}
-
-          {activeSideTab === 'nasa' && (
-            <NasaDataTab />
-          )}
-
-          {activeSideTab === 'lessons' && (
-            <LessonsTab />
-          )}
-
-          {/* On Mobile: Render Return to Map button at the bottom of the tab */}
-          <div className="lg:hidden mt-3 pt-2 border-t border-white/10">
-            <button
-              onClick={onBackToMap}
-              className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-black text-xs rounded-xl shadow-lg border border-cyan-400/40 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
-            >
-              <span>{t.backToMap}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* 🏆 Right Panel: Mission Evaluation & NASA Certification (3 Cols on desktop) */}
-        <div className="hidden lg:flex lg:col-span-3 flex-col min-h-0">
-          <ResultsEvaluationPanel
-            mission={mission}
-            dynamicResults={dynamicResults}
-            onBackToMap={onBackToMap}
-          />
-        </div>
-
-      </div>
-
-    </div>
-  );
+export default function ResultsDashboardScreen({ mission, playerChoice, playerEvaluation, onBackToMap, onNextMission, backLabel, nextLabel }) {
+  const { lang, isRtl } = useLanguage(); const ar = lang === 'ar';
+  const { session } = useWorkingSession();
+  const chosen = playerEvaluation?.strategies?.find((item) => item.id === playerChoice) || playerEvaluation?.strategies?.[0];
+  if (!chosen) return <div className="m-auto p-6 text-center text-white"><p>{ar ? 'لا توجد نتيجة تقييم مركزية بعد.' : 'No centralized strategy evaluation is available yet.'}</p><button onClick={onBackToMap} className="mt-4 rounded bg-cyan-700 px-4 py-2">{ar ? 'عودة' : 'Back'}</button></div>;
+  const crops = chosen.crops || [];
+  const uncertainty = assessRotationUncertainty({ strategy: chosen, evaluation: playerEvaluation, farmLocation: session.farmLocation, environmentalObservations: session.environmentalObservations || [] });
+  const risk = assessEnvironmentalRisk({ observations: session.environmentalObservations || [], farmLocation: session.farmLocation, strategies: playerEvaluation.strategies });
+  return <main dir={isRtl ? 'rtl' : 'ltr'} className="mx-auto w-full max-w-6xl flex-1 overflow-y-auto p-4 text-slate-100 sm:p-6">
+    <header className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs text-cyan-300">{ar ? `${mission.countryAr} · ${mission.code}` : `${mission.countryEn} · ${mission.code}`}</p><h1 className="text-2xl font-black">{ar ? 'ملخص مقارنة الدورة' : 'Rotation strategy summary'}</h1><p className="text-xs text-slate-400">{ar ? 'نتيجة دعم قرار نسبية وليست توصية زراعية مضمونة.' : 'A relative decision-support result, not a guaranteed agronomic recommendation.'}</p></div><div className="rounded-xl border border-cyan-700 bg-[#07152b] p-3 text-center"><span className="text-[10px] text-slate-400">{ar ? 'الدرجة النسبية' : 'Relative fit score'}</span><div className="text-3xl font-black text-cyan-300">{chosen.metrics.overallScore ?? '—'}<small className="text-xs text-slate-500"> / 100</small></div></div></header>
+    <section className="mt-4 rounded-xl border border-slate-700 bg-[#07152b] p-4"><h2 className="text-lg font-bold">{chosen.name}</h2><div className="mt-3 grid gap-3 sm:grid-cols-3">{crops.map((crop, index) => <div key={`${crop?.id}-${index}`} className="rounded-lg border border-cyan-900 bg-slate-900 p-3"><span className="text-[10px] text-slate-400">{ar ? `الموسم ${index + 1}` : `Season ${index + 1}`}</span><div className="font-bold">{ar ? crop?.nameAr : crop?.nameEn}</div>{crop?.cropWaterNeed && <p className="mt-1 text-[10px] text-slate-400">{ar ? 'احتياج مائي إرشادي من FAO' : 'FAO indicative crop water need'}: {crop.cropWaterNeed.rangeMmPerGrowingPeriod.join('–')} mm / {ar ? 'فترة نمو' : 'growing period'}</p>}</div>)}</div></section>
+    <section className="mt-4 grid gap-3 md:grid-cols-2"><div className="rounded-xl border border-slate-700 bg-[#07152b] p-4"><h2 className="font-bold">{ar ? 'المقارنة مع خط الأساس' : 'Compared with baseline'}</h2><p className="mt-2 text-sm">{chosen.comparisonToBaseline == null ? (ar ? 'غير متاح' : 'Unavailable') : `${chosen.comparisonToBaseline > 0 ? '+' : ''}${chosen.comparisonToBaseline} ${ar ? 'نقطة' : 'points'}`}</p><p className="mt-2 text-xs text-slate-400">{ar ? 'كل الاستراتيجيات قيّمت بالمعايير والأوزان نفسها. لا تدخل الصفات غير المتاحة في الدرجة.' : 'All strategies were evaluated with the same criteria and weights. Unavailable traits are excluded from the score.'}</p><div className="mt-3 space-y-2">{playerEvaluation.scoredCriteria.map((key) => <div key={key}><div className="flex justify-between text-[10px]"><span>{ar ? ROTATION_CRITERIA[key].labelAr : ROTATION_CRITERIA[key].labelEn}</span><span>{Math.round(chosen.metrics[key])}</span></div><div className="h-1.5 rounded bg-slate-700"><div className="h-full rounded bg-cyan-400" style={{ width: `${chosen.metrics[key]}%` }} /></div></div>)}</div></div>
+      <div className="rounded-xl border border-slate-700 bg-[#07152b] p-4"><h2 className="font-bold">{ar ? 'ما الذي تحد من النتيجة؟' : 'Limits & assumptions'}</h2><ul className="mt-2 list-disc space-y-1 ps-4 text-xs text-amber-200">{chosen.assumptions.map((item, i) => <li key={i}>{item}</li>)}<li>{ar ? 'الغلة، الملاءمة السوقية، حرارة الموقع، التربة، تغطية التربة غير محسوبة لغياب بيانات موثقة.' : 'Yield, market fit, site heat response, soil response, and soil cover were not scored because verified data is unavailable.'}</li></ul><p className="mt-3 text-[10px] text-slate-400">{ar ? 'احتياج الماء المقدر للدورة' : 'Indicative sequence crop-water need'}: {chosen.metrics.waterNeedRangeMm ? `${chosen.metrics.waterNeedRangeMm.min}–${chosen.metrics.waterNeedRangeMm.max} mm` : 'Unavailable'}</p><p className="text-[10px] text-slate-500">{ar ? 'هذا مجموع احتياجات المحاصيل على فترات نموها المنشورة، وليس كمية ري أو وفراً مائياً.' : 'Sum of published crop growing-period needs; it is not irrigation volume or water saved.'}</p></div></section>
+    <section className="mt-4 grid gap-3 md:grid-cols-2">
+      <article className="rounded-xl border border-amber-600/40 bg-[#07152b] p-4"><h2 className="font-bold">{ar ? 'فحص المخاطر البيئية' : 'Environmental risk screen'}</h2><p className="mt-1 text-xs text-slate-400">{ar ? 'لا يمكن تصنيف المخاطر أو إنشاء توقعات من مرجع مناخي وحده.' : 'Risk classes and forecasts cannot be derived from climatology alone.'}</p><div className="mt-2 flex flex-wrap gap-1">{risk.risks.map((item) => <span key={item.id} className="rounded border border-slate-700 bg-slate-900 px-2 py-1 text-[9px]">{ar ? item.labelAr : item.label}: <b className="text-amber-200">{ar ? 'غير مصنف' : 'Unclassified'}</b></span>)}</div><p className="mt-2 text-[9px] text-slate-400">{ar ? (session.farmLocation?.selectionMethod === 'polygon-boundary' ? 'المضلع محفوظ، لكن مرجع NASA يصف نقطة المركز فقط؛ لا يوجد تلخيص مكاني للمزرعة.' : 'الإحداثية المحددة نقطة مرجعية فقط؛ لا توجد طبقة مخاطر مكانية مدعومة.') : risk.spatial.explanation}</p></article>
+      <article className="rounded-xl border border-violet-600/40 bg-[#07152b] p-4"><h2 className="font-bold">{ar ? 'اكتمال البيانات وعدم اليقين' : 'Data completeness & uncertainty'}</h2><p className="mt-1 text-xs text-violet-200">{ar ? uncertainty.overallAr : uncertainty.overall}</p><p className="mt-1 text-[10px] text-slate-400">{ar ? uncertainty.environmentalEvidence.kindAr : uncertainty.environmentalEvidence.kind} · {ar ? (uncertainty.environmentalEvidence.temporalCoverageAr || 'التغطية غير متاحة') : (uncertainty.environmentalEvidence.temporalCoverage || 'Coverage unavailable')} · {ar ? (uncertainty.environmentalEvidence.spatialResolutionAr || 'الدقة المكانية غير متاحة') : (uncertainty.environmentalEvidence.spatialResolution || 'Spatial resolution unavailable')}</p><p className="mt-2 text-[9px] text-slate-300">{ar ? uncertainty.basisAr : uncertainty.basis}</p><ul className="mt-2 list-disc space-y-1 ps-4 text-[9px] text-slate-400">{(ar ? uncertainty.missingInputsAr : uncertainty.missingInputs).slice(0, 4).map((item) => <li key={item}>{item}</li>)}</ul></article>
+    </section>
+    <footer className="mt-4 flex flex-wrap gap-2"><button onClick={onBackToMap} className="rounded-lg border border-slate-600 px-4 py-2 text-xs">{backLabel || (ar ? 'العودة للخريطة' : 'Back to map')}</button><button onClick={onNextMission} className="rounded-lg bg-cyan-700 px-4 py-2 text-xs font-bold">{nextLabel || (ar ? 'المهمة التالية' : 'Next mission')}</button></footer>
+  </main>;
 }

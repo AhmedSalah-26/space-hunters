@@ -3,12 +3,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from '../components/Navbar';
 import StartScreen from '../components/StartScreen';
-import UniversalRotationScreen from '../components/UniversalRotationScreen';
 import WorldMapScreen from '../components/WorldMapScreen';
 import MissionBriefingScreen from '../components/MissionBriefingScreen';
 import DecisionMatrixScreen from '../components/DecisionMatrixScreen';
 import ResultsDashboardScreen from '../components/ResultsDashboardScreen';
-import FarmProStudio from '../components/farmPro/FarmProStudio';
+import MissionTerminal from '../components/MissionTerminal';
 import AgriBankModal from '../components/AgriBankModal';
 import GameGuideModal from '../components/GameGuideModal';
 import { missionsData } from '../data/missionsData';
@@ -23,6 +22,8 @@ export default function Home() {
   const [selectedMission, setSelectedMission] = useState(missionsData[0]);
   const [playerChoice, setPlayerChoice] = useState(null);
   const [playerCustomSequence, setPlayerCustomSequence] = useState(null);
+  const [playerEvaluation, setPlayerEvaluation] = useState(null);
+  const [terminalStartStep, setTerminalStartStep] = useState(0);
 
   // Navigate to screen with full Browser History & URL Hash support
   const navigateToScreen = useCallback((screenName, replace = false) => {
@@ -105,6 +106,12 @@ export default function Home() {
   };
 
   const handleOpenFarmPro = () => {
+    setTerminalStartStep(0);
+    navigateToScreen('farmPro');
+  };
+
+  const handleOpenFarmData = () => {
+    setTerminalStartStep(1);
     navigateToScreen('farmPro');
   };
 
@@ -113,7 +120,8 @@ export default function Home() {
   };
 
   const handleOpenSequenceBuilder = () => {
-    navigateToScreen('universalBuilder');
+    setTerminalStartStep(3);
+    navigateToScreen('farmPro');
   };
 
   const handleOpenGameGuide = () => {
@@ -129,9 +137,10 @@ export default function Home() {
     navigateToScreen('decision');
   };
 
-  const handleDecisionSubmit = (rotationId, customSequence) => {
+  const handleDecisionSubmit = (rotationId, customSequence, evaluation) => {
     setPlayerChoice(rotationId);
     setPlayerCustomSequence(customSequence);
+    setPlayerEvaluation(evaluation);
     navigateToScreen('results');
   };
 
@@ -187,7 +196,7 @@ export default function Home() {
 
       {/* Dynamic Screen View - Takes full remaining vertical space */}
       <div className={`flex-1 min-h-0 flex flex-col relative z-10 w-full ${
-        currentScreen === 'map' ? 'overflow-hidden' : 'overflow-y-auto justify-start md:justify-center'
+        currentScreen === 'map' || currentScreen === 'farmPro' || currentScreen === 'universalBuilder' ? 'overflow-hidden' : 'overflow-y-auto justify-start md:justify-center'
       }`}>
         
         {/* 🌟 1. START / LANDING SCREEN 🌟 */}
@@ -203,17 +212,16 @@ export default function Home() {
 
         {/* 🛰️ 2. FARM PRO DECISION STUDIO & FIELD BOUNDARY DETECTOR 🛰️ */}
         {currentScreen === 'farmPro' && (
-          <FarmProStudio
-            onBackToHome={handleGoHome}
+          <MissionTerminal
+            onBackHome={handleGoHome}
             onOpenGame={handleStartGame}
+            initialStep={terminalStartStep}
           />
         )}
 
         {/* 🔬 3. UNIVERSAL CROP ROTATION SANDBOX (ALL CROPS DATABASE) 🔬 */}
         {currentScreen === 'universalBuilder' && (
-          <UniversalRotationScreen
-            onBack={handleGoHome}
-          />
+          <MissionTerminal onBackHome={handleGoHome} onOpenGame={handleStartGame} initialStep={3} />
         )}
 
         {/* 🗺️ 4. WORLD MISSIONS MAP 🗺️ */}
@@ -223,6 +231,7 @@ export default function Home() {
             selectedMission={selectedMission}
             setSelectedMission={setSelectedMission}
             onStartMission={handleStartMission}
+            onOpenFarmData={handleOpenFarmData}
           />
         )}
 
@@ -232,6 +241,7 @@ export default function Home() {
             mission={selectedMission}
             onBack={handleBackToMap}
             onContinue={handleContinueToDecision}
+            onOpenFarmData={handleOpenFarmData}
           />
         )}
 
@@ -256,6 +266,7 @@ export default function Home() {
             mission={selectedMission}
             playerChoice={playerChoice}
             playerCustomSequence={playerCustomSequence}
+            playerEvaluation={playerEvaluation}
             onBackToMap={() => navigateToScreen('map')}
             onNextMission={handleNextMission}
           />

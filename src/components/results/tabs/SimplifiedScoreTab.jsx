@@ -27,7 +27,7 @@ export default function SimplifiedScoreTab({ mission, dynamicResults }) {
           <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
             <span className="text-sm font-black text-amber-400">✨ {lang === 'ar' ? res.ratingAr : res.ratingEn}</span>
             <span className="text-[10px] font-mono text-cyan-300 bg-cyan-950/80 px-2 py-0.5 rounded-full border border-cyan-500/30">
-              NASA VERIFIED
+              {t.nasaVerified}
             </span>
           </div>
 

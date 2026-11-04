@@ -7,8 +7,8 @@ import {
   Sprout, Sun, ExternalLink 
 } from 'lucide-react';
 
-export default function BriefingTelemetrySidebar({ mission }) {
-  const { t } = useLanguage();
+export default function BriefingTelemetrySidebar({ mission, onOpenFarmData }) {
+  const { t, lang } = useLanguage();
 
   return (
     <div
@@ -18,6 +18,9 @@ export default function BriefingTelemetrySidebar({ mission }) {
       }}
     >
       <div className="space-y-2.5">
+        <p role="note" className="rounded border border-amber-500/30 bg-amber-950/30 px-2 py-1 text-[10px] text-amber-100">
+          {lang === 'ar' ? 'قيم السيناريو توضيحية وليست قياسات أقمار فعلية.' : 'Scenario values are illustrative, not satellite observations.'}
+        </p>
         <h3 className="text-sm sm:text-base font-black text-white flex items-center gap-2 pb-1.5 border-b border-cyan-500/20">
           <Satellite className="w-4 h-4 text-cyan-400 animate-pulse" />
           <span>{t.nasaCurrentData}</span>
@@ -34,7 +37,7 @@ export default function BriefingTelemetrySidebar({ mission }) {
               <div>
                 <p className="text-xs sm:text-sm text-white font-bold leading-tight">{t.tempAnomaly}</p>
                 <p className="text-xs text-red-300 font-semibold truncate">
-                  {mission.telemetry?.historicalNoteAr || t.aboveHistorical}
+                  {(lang === 'ar' ? mission.telemetry?.historicalNoteAr : mission.telemetry?.historicalNoteEn) || t.aboveHistorical}
                 </p>
               </div>
             </div>
@@ -52,7 +55,7 @@ export default function BriefingTelemetrySidebar({ mission }) {
               <div>
                 <p className="text-xs sm:text-sm text-white font-bold leading-tight">{t.rainfallTrend}</p>
                 <p className="text-xs text-sky-300 font-semibold truncate">
-                  {mission.telemetry?.rainNoteAr || t.belowAverage}
+                  {(lang === 'ar' ? mission.telemetry?.rainNoteAr : mission.telemetry?.rainNoteEn) || t.belowAverage}
                 </p>
               </div>
             </div>
@@ -70,7 +73,7 @@ export default function BriefingTelemetrySidebar({ mission }) {
               <div>
                 <p className="text-xs sm:text-sm text-white font-bold leading-tight">{t.soilMoisture}</p>
                 <p className="text-xs text-emerald-300 font-semibold truncate">
-                  {mission.telemetry?.soilNoteAr || t.significantDrop}
+                  {(lang === 'ar' ? mission.telemetry?.soilNoteAr : mission.telemetry?.soilNoteEn) || t.significantDrop}
                 </p>
               </div>
             </div>
@@ -88,7 +91,7 @@ export default function BriefingTelemetrySidebar({ mission }) {
               <div>
                 <p className="text-xs sm:text-sm text-white font-bold leading-tight">{t.ndviIndex}</p>
                 <p className="text-xs text-cyan-300 font-semibold truncate">
-                  {mission.telemetry?.ndviNoteAr || t.declinePlantHealth}
+                  {(lang === 'ar' ? mission.telemetry?.ndviNoteAr : mission.telemetry?.ndviNoteEn) || t.declinePlantHealth}
                 </p>
               </div>
             </div>
@@ -104,12 +107,12 @@ export default function BriefingTelemetrySidebar({ mission }) {
         <div className="w-full h-24 sm:h-28 relative overflow-hidden border border-white/10 mb-2 rounded-lg shadow-inner">
           <img 
             src={mission.satelliteImage || mission.heroImage} 
-            alt="NASA Satellite View" 
+            alt={lang === 'ar' ? 'صورة توضيحية للمهمة' : 'Illustrative mission image'}
             className="w-full h-full object-cover" 
           />
           <div className="absolute inset-0 bg-blue-500/10" />
           <span className="absolute bottom-1 right-1 text-[10px] font-mono text-cyan-300 bg-black/85 px-1.5 py-0.5 rounded border border-white/15">
-            Landsat-9 / SMAP
+            {lang === 'ar' ? 'صورة توضيحية' : 'Illustrative image'}
           </span>
         </div>
 
@@ -117,6 +120,8 @@ export default function BriefingTelemetrySidebar({ mission }) {
         <p className="text-xs text-slate-400 mb-2">{t.satelliteDate}</p>
 
         <button
+          onClick={onOpenFarmData}
+          type="button"
           className="w-full py-2 px-3 bg-blue-600/30 hover:bg-blue-600/50 border border-cyan-400/40 text-xs sm:text-sm font-black text-cyan-300 flex items-center justify-center gap-1.5 transition-all rounded-lg cursor-pointer hover:text-white"
         >
           <ExternalLink className="w-4 h-4" />

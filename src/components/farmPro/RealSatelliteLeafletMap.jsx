@@ -7,11 +7,22 @@ export default function RealSatelliteLeafletMap({
   zoom = 15,
   selectedLocation = [30.825, 31.310],
   onLocationSelect,
-  isScanning
+  isScanning,
+  drawingMode = false,
+  boundaryPoints = [],
+  polygonIsValid = false,
+  onBoundaryPointMove,
+  environmentalPointLayers = [],
+  lang = 'en',
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const beaconLayerRef = useRef(null);
+  const boundaryLayerRef = useRef(null);
+  const environmentalLayerRef = useRef(null);
+  const zoomControlRef = useRef(null);
+  const callbacksRef = useRef({});
+  callbacksRef.current = { onLocationSelect, onBoundaryPointMove };
 
   // Initialize Leaflet Map once
   useEffect(() => {
@@ -31,7 +42,7 @@ export default function RealSatelliteLeafletMap({
         attributionControl: false,
       });
 
-      // 1. High-Resolution Esri World Imagery (Real High-Res Satellite Tiles)
+      // Esri World Imagery is the basemap, not an analytical NASA data layer.
       L.tileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         {
@@ -50,16 +61,24 @@ export default function RealSatelliteLeafletMap({
       ).addTo(map);
 
       // Custom Zoom Control top-right
-      L.control.zoom({ position: 'topright' }).addTo(map);
+      zoomControlRef.current = L.control.zoom({
+        position: 'topright',
+        zoomInTitle: lang === 'ar' ? 'تكبير الخريطة' : 'Zoom in',
+        zoomOutTitle: lang === 'ar' ? 'تصغير الخريطة' : 'Zoom out',
+      }).addTo(map);
 
       // Click to choose any location on Earth!
       map.on('click', (e) => {
         const { lat, lng } = e.latlng;
-        onLocationSelect?.([lat, lng]);
+        callbacksRef.current.onLocationSelect?.([lat, lng]);
       });
 
       const beaconGroup = L.layerGroup().addTo(map);
+      const boundaryGroup = L.layerGroup().addTo(map);
+      const environmentalGroup = L.layerGroup().addTo(map);
       beaconLayerRef.current = beaconGroup;
+      boundaryLayerRef.current = boundaryGroup;
+      environmentalLayerRef.current = environmentalGroup;
       mapInstanceRef.current = map;
     });
 
@@ -67,9 +86,22 @@ export default function RealSatelliteLeafletMap({
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
+        zoomControlRef.current = null;
       }
     };
   }, []);
+
+  useEffect(() => {
+    const control = zoomControlRef.current;
+    if (!control) return;
+    const zoomInTitle = lang === 'ar' ? 'تكبير الخريطة' : 'Zoom in';
+    const zoomOutTitle = lang === 'ar' ? 'تصغير الخريطة' : 'Zoom out';
+    control.options.zoomInTitle = zoomInTitle;
+    control.options.zoomOutTitle = zoomOutTitle;
+    const container = control.getContainer();
+    container?.querySelector('.leaflet-control-zoom-in')?.setAttribute('title', zoomInTitle);
+    container?.querySelector('.leaflet-control-zoom-out')?.setAttribute('title', zoomOutTitle);
+  }, [lang]);
 
   // Handle center or zoom updates (Fly smoothly to country/governorate)
   useEffect(() => {
@@ -81,40 +113,17 @@ export default function RealSatelliteLeafletMap({
     }
   }, [center[0], center[1], zoom]);
 
-  // Render ONLY the single glowing concentric circle on the selected location!
+  // Render the point marker or polygon boundary without implying a surveyed farm edge.
   useEffect(() => {
     if (!mapInstanceRef.current || !beaconLayerRef.current) return;
 
     import('leaflet').then((L) => {
       const group = beaconLayerRef.current;
       group.clearLayers();
+      if (drawingMode) return;
 
       if (!selectedLocation || selectedLocation.length < 2) return;
       const [lat, lng] = selectedLocation;
-
-      // 1. Outer Luminous Neon Circle (Represents the farm parcel radius / boundary)
-      const farmRadiusCircle = L.circle([lat, lng], {
-        radius: 280, // ~15 Feddans zone
-        className: 'leaflet-neon-polygon-selected',
-        color: '#a855f7',
-        weight: 3.5,
-        fillColor: '#6366f1',
-        fillOpacity: 0.28,
-      });
-      group.addLayer(farmRadiusCircle);
-
-      // 2. Subtle dashed warning boundary
-      const outerRing = L.circle([lat, lng], {
-        radius: 380,
-        color: '#38bdf8',
-        weight: 1.5,
-        dashArray: '5, 8',
-        fill: false,
-        opacity: 0.6
-      });
-      group.addLayer(outerRing);
-
-      // 3. Exact Concentric Glowing Beacon Marker on the EXACT dead center of the circle
       const beaconIcon = L.divIcon({
         className: 'custom-neon-beacon',
         iconSize: [64, 64],
@@ -134,7 +143,7 @@ export default function RealSatelliteLeafletMap({
 
             <!-- Perfectly Centered Target Badge Above -->
             <div style="position: absolute; top: -16px; left: 50%; transform: translateX(-50%); background: rgba(10, 15, 30, 0.95); border: 1px solid #38bdf8; color: #38bdf8; font-size: 8.5px; font-weight: 900; font-family: monospace; padding: 1px 6px; border-radius: 6px; white-space: nowrap; box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);">
-              NASA TARGET
+              ${lang === 'ar' ? 'موقع المزرعة' : 'FARM LOCATION'}
             </div>
           </div>
         `
@@ -143,12 +152,100 @@ export default function RealSatelliteLeafletMap({
       const marker = L.marker([lat, lng], { icon: beaconIcon });
       group.addLayer(marker);
     });
-  }, [selectedLocation]);
+  }, [selectedLocation, drawingMode, lang]);
+
+  useEffect(() => {
+    if (!mapInstanceRef.current || !boundaryLayerRef.current) return;
+
+    import('leaflet').then((L) => {
+      const group = boundaryLayerRef.current;
+      if (!group) return;
+      group.clearLayers();
+      if (!boundaryPoints.length) return;
+
+      const latLngs = boundaryPoints.map((point) => [point.latitude, point.longitude]);
+      if (latLngs.length >= 2) {
+        const shape = latLngs.length >= 3 && polygonIsValid
+          ? L.polygon(latLngs, {
+            color: '#22d3ee',
+            weight: 3,
+            fillColor: '#0891b2',
+            fillOpacity: 0.22,
+            className: 'leaflet-neon-polygon-selected',
+          })
+          : L.polyline(latLngs, { color: '#22d3ee', weight: 3, dashArray: '6, 6' });
+        group.addLayer(shape);
+      }
+
+      boundaryPoints.forEach((point, index) => {
+        const editable = L.marker([point.latitude, point.longitude], {
+          draggable: true,
+          keyboard: true,
+          icon: L.divIcon({
+            className: 'custom-neon-beacon',
+            html: '<div style="width:16px;height:16px;border:2px solid #ecfeff;border-radius:50%;background:#06b6d4;box-shadow:0 0 12px rgba(6,182,212,.9)"></div>',
+            iconSize: [18, 18],
+            iconAnchor: [9, 9],
+          }),
+          title: `Boundary point ${index + 1}; drag to edit`,
+        });
+        editable.on('dragend', (event) => {
+          const { lat, lng } = event.target.getLatLng();
+          callbacksRef.current.onBoundaryPointMove?.(index, { latitude: lat, longitude: lng });
+        });
+        group.addLayer(editable);
+      });
+    });
+  }, [boundaryPoints, polygonIsValid]);
+
+  // POWER currently supplies a location-based climatology, not a raster.
+  // Render one point inspector with selected measures; never shade the farm.
+  useEffect(() => {
+    if (!mapInstanceRef.current || !environmentalLayerRef.current) return;
+
+    import('leaflet').then((L) => {
+      const group = environmentalLayerRef.current;
+      if (!group) return;
+      group.clearLayers();
+      if (!selectedLocation || !environmentalPointLayers.length) return;
+
+      const marker = L.circleMarker(selectedLocation, {
+        radius: 8,
+        color: '#f8fafc',
+        weight: 2,
+        fillColor: '#06b6d4',
+        fillOpacity: 0.95,
+        bubblingMouseEvents: false,
+      });
+      marker.bindTooltip(lang === 'ar' ? 'نقطة مرجعية من NASA POWER · ليست طبقة صور' : 'NASA POWER reference point · not a raster overlay', { direction: 'top' });
+
+      const popup = L.DomUtil.create('div', 'environmental-point-popup');
+      const heading = L.DomUtil.create('strong', '', popup);
+      heading.textContent = lang === 'ar' ? 'NASA POWER · مرجع نقطي' : 'NASA POWER · point reference';
+      const explanation = L.DomUtil.create('p', '', popup);
+      explanation.textContent = lang === 'ar'
+        ? 'صور Esri هي خريطة الأساس. هذه قيم مناخية شبكية وليست قياسات حقلية أو متوسطات للمضلع.'
+        : 'Esri imagery is the basemap. These values are climatological grid references, not field measurements or polygon averages.';
+      environmentalPointLayers.forEach((item) => {
+        const row = L.DomUtil.create('p', '', popup);
+        const unit = item.unit === 'degC' ? '°C' : item.unit;
+        row.textContent = `${item.variable}: ${Number(item.value).toFixed(2)} ${unit} · ${item.referenceDate} · ${item.source?.provider || 'NASA POWER'}`;
+        const quality = L.DomUtil.create('small', '', popup);
+        quality.textContent = item.quality || (lang === 'ar' ? 'لم يجرِ التطبيق تقييماً إضافياً للجودة' : 'Quality not further assessed by application');
+      });
+      marker.bindPopup(popup, { maxWidth: 280 });
+      group.addLayer(marker);
+    });
+  }, [selectedLocation, environmentalPointLayers, lang]);
 
   return (
     <div className="relative w-full h-full min-h-[500px]">
-      {/* Real Map DOM Container */}
+      {/* Esri basemap container */}
       <div ref={mapContainerRef} className="w-full h-full z-0 cursor-crosshair" />
+
+      <div className="absolute top-3 right-3 z-[500] rounded-md border border-white/20 bg-[#07152b]/95 px-2 py-1 text-[8px] font-mono text-slate-200 pointer-events-none">
+        {lang === 'ar' ? 'الخلفية: صور Esri © Esri وMaxar وEarthstar · التحليل: بيانات نقطية فقط' : 'BASEMAP: ESRI IMAGERY © ESRI, MAXAR, EARTHSTAR · ANALYSIS: POINT DATA ONLY'}
+      </div>
 
       {/* Laser Scanning Overlay Animation */}
       {isScanning && (

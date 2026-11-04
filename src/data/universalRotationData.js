@@ -457,10 +457,10 @@ export const universalEngineTexts = {
   headerBadgeEn: "NASA Space Apps 2026 • Universal Crop Rotation Engine",
   titleAr: "مُنشئ ومحاكي الدورات الزراعية الشامل (Global Crop Rotation Sandbox)",
   titleEn: "Universal Crop Rotation Decision Sandbox",
-  subtitleAr: "اختر من بنك المحاصيل العالمي وصمم دورات زراعية ثلاثية المواسم لاختبار صمودها تحت مؤشرات ومستشعرات NASA",
-  subtitleEn: "Assemble multi-season sequences from global crops and stress-test them against real NASA telemetry",
+  subtitleAr: "أنشئ دورات زراعية توضيحية وقارن خصائص المحاصيل مع مراعاة حدود البيانات والافتراضات.",
+  subtitleEn: "Build illustrative crop rotations and compare crop traits with data and assumption limits made clear.",
   
-  presetLabelAr: "اختر بيئة ومناخ المحاكاة (NASA Telemetry Preset):",
+  presetLabelAr: "اختر افتراضات البيئة والمناخ للسيناريو التوضيحي:",
   presetLabelEn: "Simulation Climate & Soil Preset:",
   
   categoryFilterLabelAr: "تصفية بنك المحاصيل:",
@@ -473,11 +473,11 @@ export const universalEngineTexts = {
   season3TitleAr: "الموسم 3: التعاقبي / كسر الآفات",
   season3TitleEn: "Season 3: Cover / Break Crop",
 
-  gaugesHeaderAr: "النتائج التراكمية ومؤشرات NASA الحية للدورة المصممة:",
-  gaugesHeaderEn: "Cumulative Rotation Results & Real-time NASA Telemetry:",
+  gaugesHeaderAr: "مؤشرات توضيحية للدورة المصممة (ليست قياسات NASA مباشرة):",
+  gaugesHeaderEn: "Illustrative rotation indicators (not live NASA telemetry):",
 
-  waterGaugeAr: "معدل الوفر المائي (SMAP):",
-  waterGaugeEn: "Water Savings (SMAP):",
+  waterGaugeAr: "الاحتياج المائي النسبي للمحاصيل:",
+  waterGaugeEn: "Relative crop water demand:",
   nitrogenGaugeAr: "رصيد النيتروجين العضوي:",
   nitrogenGaugeEn: "Organic Nitrogen Balance:",
   pestGaugeAr: "كسر دورة الآفات والأمراض:",

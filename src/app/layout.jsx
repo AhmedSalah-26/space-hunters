@@ -1,5 +1,6 @@
 import './globals.css';
 import { LanguageProvider } from '../context/LanguageContext';
+import { WorkingSessionProvider } from '../context/WorkingSessionContext';
 
 export const metadata = {
   title: 'Space Hunters 🌱 | NASA Space Apps Challenge 2026',
@@ -13,8 +14,6 @@ export const metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: 'cover',
 };
 
@@ -23,7 +22,9 @@ export default function RootLayout({ children }) {
     <html lang="en" dir="ltr" className="h-full">
       <body className="bg-[#050c1b] text-slate-100 h-full overflow-hidden selection:bg-blue-600 selection:text-white">
         <LanguageProvider>
-          {children}
+          <WorkingSessionProvider>
+            {children}
+          </WorkingSessionProvider>
         </LanguageProvider>
       </body>
     </html>

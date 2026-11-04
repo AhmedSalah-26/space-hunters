@@ -11,8 +11,8 @@ export const startScreenData = {
   
   titlePrefix: "SPACE",
   titleSuffix: "HUNTERS",
-  taglineAr: "ازرع صح ووفّر ميتك وفلوسك ببيانات أقمار ناسا الفضائية",
-  taglineEn: "Agricultural Adaptation & Crop Rotation System Powered by NASA Earth Data",
+  taglineAr: "استكشف مراجع NASA POWER المناخية وقارن سيناريوهات دورات المحاصيل بشفافية",
+  taglineEn: "Explore NASA POWER climate references and transparently compare crop-rotation scenarios",
 
   descAr: "ساعد الفلاحين يزرعوا صح، ويوفروا مية الري، ويرجعوا عافية أرضهم وتزيد غلتهم باستخدام أقمار ناسا الفضائية.",
   descEn: "Join Team Space Hunters on a global mission to help farmers adapt to climate stress, conserve water, and restore soil fertility using NASA Earth observations.",
@@ -51,20 +51,20 @@ export const startScreenData = {
     {
       id: "missions",
       value: "5",
-      labelAr: "مهمات زراعية عالمية",
-      labelEn: "Global Field Missions"
+      labelAr: "سيناريوهات تعليمية توضيحية",
+      labelEn: "Illustrative learning scenarios"
     },
     {
       id: "satellites",
-      value: "4",
-      labelAr: "أقمار رصد من ناسا",
-      labelEn: "NASA Space Sensors"
+      value: "1",
+      labelAr: "مزود بيانات مدمج: POWER المناخي",
+      labelEn: "Integrated provider: POWER climatology"
     },
     {
       id: "accuracy",
-      value: "99.4%",
-      labelAr: "دقة بيانات ناسا",
-      labelEn: "Calibrated Accuracy"
+      value: "—",
+      labelAr: "دقة التوصيات غير مُقيّمة",
+      labelEn: "Recommendation accuracy not evaluated"
     }
   ],
 

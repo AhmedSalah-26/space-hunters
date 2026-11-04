@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { 
   X, Database, Sprout, Droplets, Sun, 
@@ -19,6 +19,26 @@ export default function AgriBankModal({ isOpen, onClose }) {
   const { t, lang } = useLanguage();
   const [activeTab, setActiveTab] = useState('crops'); // 'crops' | 'soil' | 'satellites'
   const [searchQuery, setSearchQuery] = useState('');
+  const dialogRef = useRef(null);
+  const closeButtonRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const previousFocus = document.activeElement;
+    closeButtonRef.current?.focus();
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') { onClose?.(); return; }
+      if (event.key !== 'Tab') return;
+      const focusable = dialogRef.current?.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])');
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => { window.removeEventListener('keydown', onKeyDown); previousFocus?.focus?.(); };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -28,7 +48,7 @@ export default function AgriBankModal({ isOpen, onClose }) {
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="agri-bank-title" className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div 
         className="relative w-full max-w-4xl bg-[#051329]/98 border border-cyan-400/50 shadow-[0_0_50px_rgba(0,180,216,0.35)] flex flex-col max-h-[94vh] sm:max-h-[90vh] overflow-hidden rounded-2xl"
         style={{
@@ -42,7 +62,7 @@ export default function AgriBankModal({ isOpen, onClose }) {
               <Database className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-xs sm:text-base font-black text-white flex items-center gap-1.5 sm:gap-2">
+              <h2 id="agri-bank-title" className="text-xs sm:text-base font-black text-white flex items-center gap-1.5 sm:gap-2">
                 <span>{t.navAgriBank}</span>
                 <span className="text-[10px] sm:text-xs text-cyan-300 font-mono px-1.5 sm:px-2 py-0.5 bg-cyan-950 border border-cyan-500/40 rounded-lg">
                   {agriBankHeader.badge}
@@ -56,6 +76,8 @@ export default function AgriBankModal({ isOpen, onClose }) {
 
           <button
             onClick={onClose}
+            ref={closeButtonRef}
+            aria-label={lang === 'ar' ? 'إغلاق دليل المحاصيل' : 'Close crops guide'}
             className="w-7 h-7 sm:w-8 sm:h-8 bg-white/5 hover:bg-white/15 border border-cyan-500/30 rounded-lg flex items-center justify-center text-slate-300 hover:text-white transition-all cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
@@ -106,9 +128,9 @@ export default function AgriBankModal({ isOpen, onClose }) {
               {filteredCrops.map((crop) => (
                 <div key={crop.id} className="p-3 bg-[#081730] border border-cyan-500/35 rounded-xl flex gap-3 items-start shadow-md hover:border-cyan-400/70 transition-all">
                   <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-xl overflow-hidden border border-white/10 shrink-0 relative shadow-inner">
-                    <img src={crop.image} alt={crop.nameEn} className="w-full h-full object-cover" />
-                    <span className="absolute bottom-1 right-1 text-[10px] bg-black/85 px-1.5 py-0.5 rounded text-cyan-300 font-mono font-bold">
-                      {crop.droughtScore}%
+                    <img src={crop.image} alt={lang === 'ar' ? crop.nameAr : crop.nameEn} className="w-full h-full object-cover" />
+                    <span className="absolute bottom-1 right-1 text-[9px] bg-black/85 px-1.5 py-0.5 rounded text-cyan-300 font-bold">
+                      {lang === 'ar' ? 'توضيحي' : 'Illustrative'}
                     </span>
                   </div>
 
@@ -181,7 +203,7 @@ export default function AgriBankModal({ isOpen, onClose }) {
                       </div>
                     </div>
                     <span className="text-xs font-mono font-bold text-cyan-300 bg-[#040e21] px-2.5 py-1 border border-cyan-500/30 rounded-lg">
-                      pH: {soil.ph}
+                      {lang === 'ar' ? `الأس الهيدروجيني: ${soil.ph}` : `pH: ${soil.phEn || soil.ph}`}
                     </span>
                   </div>
 
@@ -228,7 +250,7 @@ export default function AgriBankModal({ isOpen, onClose }) {
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm sm:text-base font-black text-white">{sat.name}</h3>
                       <span className="text-xs font-mono text-cyan-300 bg-cyan-950 px-2.5 py-0.5 rounded-lg border border-cyan-500/30">
-                        {sat.resolution}
+                        {lang === 'ar' && sat.resolution === 'Not integrated' ? 'غير مدمج' : sat.resolution}
                       </span>
                     </div>
                     <p className="text-xs sm:text-sm font-bold text-emerald-300">

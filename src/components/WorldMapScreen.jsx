@@ -22,7 +22,7 @@ const MISSION_GEO = {
 /* SVG VIEWBOX DIMENSIONS */
 const W = 960, H = 520;
 
-export default function WorldMapScreen({ missions, selectedMission, setSelectedMission, onStartMission }) {
+export default function WorldMapScreen({ missions, selectedMission, setSelectedMission, onStartMission, onOpenFarmData }) {
   const { lang, isRtl } = useLanguage();
 
   /* ── Responsive Screen Width Detection ── */
@@ -204,6 +204,10 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
         </button>
       </div>
 
+      <p role="note" className="relative z-30 shrink-0 border-b border-amber-500/25 bg-amber-950/70 px-2 py-1 text-center text-[9px] text-amber-100">
+        {lang === 'ar' ? 'قيم المهمات أمثلة توضيحية، وليست رصداً مسترجعاً من NASA.' : 'Mission metrics are illustrative examples, not retrieved NASA observations.'}
+      </p>
+
       {/* ═══════════════════════════════════════════════════════════
           BACKGROUND WORLD MAP
           ═══════════════════════════════════════════════════════════ */}
@@ -336,6 +340,7 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
           <MissionDetailCard
             selectedMission={selectedMission}
             onStartMission={onStartMission}
+            onOpenFarmData={onOpenFarmData}
             className="w-full max-w-lg mx-auto p-3.5 bg-[#061633]/98 border border-cyan-400/60 shadow-2xl backdrop-blur-xl flex flex-col gap-3 rounded-2xl"
             isMobile={true}
             onCloseMobile={() => setMobileView('map')}
@@ -374,6 +379,7 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
         <div className="lg:hidden absolute inset-0 z-30 p-2.5 bg-black/85 backdrop-blur-md overflow-y-auto flex flex-col justify-start">
           <div className="w-full max-w-lg mx-auto">
             <MapLegendSidebar
+              missionCount={missions.length}
               className="w-full flex flex-col gap-2 p-1"
               isMobile={true}
               onCloseMobile={() => setMobileView('map')}
@@ -385,11 +391,12 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
       {/* ═══════════════════════════════════════════════════════════
           DESKTOP FLOATING HUD OVERLAYS (Shown on lg:block)
           ═══════════════════════════════════════════════════════════ */}
-      <MapLegendSidebar />
+      <MapLegendSidebar missionCount={missions.length} />
 
       <MissionDetailCard
         selectedMission={selectedMission}
         onStartMission={onStartMission}
+        onOpenFarmData={onOpenFarmData}
       />
 
       <MissionsCarousel

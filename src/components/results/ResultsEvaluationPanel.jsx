@@ -28,7 +28,7 @@ export default function ResultsEvaluationPanel({ mission, dynamicResults, onBack
             <span>{t.missionGrade}</span>
           </h3>
           <span className="text-[10px] font-mono text-cyan-300 bg-cyan-950/80 px-2 py-0.5 rounded-full border border-cyan-500/30">
-            ✓ NASA VERIFIED
+            {t.nasaVerified}
           </span>
         </div>
 

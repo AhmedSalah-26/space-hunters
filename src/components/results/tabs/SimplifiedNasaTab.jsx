@@ -17,8 +17,8 @@ export default function SimplifiedNasaTab() {
       border: 'border-sky-500/40',
       bg: 'bg-sky-950/30',
       title: lang === 'ar' ? 'رطوبة التربة' : 'Soil Moisture',
-      val: '38%',
-      status: lang === 'ar' ? 'وفر مائي ممتاز (+33%)' : 'Optimal Soil Moisture',
+      val: lang === 'ar' ? 'غير متاح' : 'Unavailable',
+      status: lang === 'ar' ? 'المصدر غير مدمج' : 'Provider not integrated',
     },
     {
       id: 'lst',
@@ -28,8 +28,8 @@ export default function SimplifiedNasaTab() {
       border: 'border-amber-500/40',
       bg: 'bg-amber-950/30',
       title: lang === 'ar' ? 'حرارة سطح الأرض' : 'Land Surface Temp',
-      val: '32°C',
-      status: lang === 'ar' ? 'انخفاض الإجهاد الحراري' : 'Heat Stress Mitigated',
+      val: lang === 'ar' ? 'غير متاح' : 'Unavailable',
+      status: lang === 'ar' ? 'المصدر غير مدمج' : 'Provider not integrated',
     },
     {
       id: 'ndvi',
@@ -39,8 +39,8 @@ export default function SimplifiedNasaTab() {
       border: 'border-emerald-500/40',
       bg: 'bg-emerald-950/30',
       title: lang === 'ar' ? 'كثافة الغطاء النباتي' : 'Vegetation Index',
-      val: '0.74',
-      status: lang === 'ar' ? 'صحة المحصول عالية' : 'Vigorous Crop Canopy',
+      val: lang === 'ar' ? 'غير متاح' : 'Unavailable',
+      status: lang === 'ar' ? 'المصدر غير مدمج' : 'Provider not integrated',
     },
     {
       id: 'gpm',
@@ -50,8 +50,8 @@ export default function SimplifiedNasaTab() {
       border: 'border-cyan-500/40',
       bg: 'bg-cyan-950/30',
       title: lang === 'ar' ? 'رصد الأمطار العالمي' : 'Precipitation',
-      val: '120 mm',
-      status: lang === 'ar' ? 'تزامن مثالي مع الري' : 'Rainfed Balance',
+      val: lang === 'ar' ? 'غير متاح' : 'Unavailable',
+      status: lang === 'ar' ? 'المصدر غير مدمج' : 'Provider not integrated',
     },
   ];
 
@@ -65,9 +65,13 @@ export default function SimplifiedNasaTab() {
           <h3 className="text-xs sm:text-sm font-black text-white">{t.tabNasaData}</h3>
         </div>
         <span className="text-[10px] font-mono text-cyan-300 bg-cyan-950 px-2.5 py-0.5 rounded-full border border-cyan-500/30">
-          🛰️ Earth Observation Level 3
+          {lang === 'ar' ? 'مراجع غير مدمجة' : 'References not integrated'}
         </span>
       </div>
+
+      <p role="note" className="rounded border border-amber-500/30 bg-amber-950/30 px-2 py-1 text-[10px] text-amber-100">
+        {lang === 'ar' ? 'لا تعرض هذه الشاشة قياسات أقمار فعلية؛ القيم غير المتاحة لا تُستبدل ببيانات تجريبية.' : 'This screen does not show satellite measurements; unavailable values are not replaced with demo measurements.'}
+      </p>
 
       {/* 🛰️ 2. 4 SATELLITE SENSOR CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -106,8 +110,8 @@ export default function SimplifiedNasaTab() {
           {/* Traditional Monoculture */}
           <div className="p-2.5 bg-red-950/20 border border-red-500/30 rounded-lg">
             <span className="text-red-400 font-bold block mb-1 text-[11px]">❌ {t.before}:</span>
-            <p className="text-slate-300 text-[11px] leading-relaxed">
-              {lang === 'ar' ? 'استنزاف 5,800 م³ مياه، وتراجع خصوبة التربة وتزايد مخاطر الآفات.' : 'Depleted 5,800 m³ water, nutrient loss and high pest vulnerabilities.'}
+              <p className="text-slate-300 text-[11px] leading-relaxed">
+              {lang === 'ar' ? 'خط أساس الإنتاج والمياه غير متاح لهذه المزرعة.' : 'No farm-specific baseline for production or water use is available.'}
             </p>
           </div>
 
@@ -115,7 +119,7 @@ export default function SimplifiedNasaTab() {
           <div className="p-2.5 bg-emerald-950/20 border border-emerald-500/30 rounded-lg">
             <span className="text-emerald-400 font-bold block mb-1 text-[11px]">✔️ {t.after}:</span>
             <p className="text-slate-300 text-[11px] leading-relaxed">
-              {lang === 'ar' ? 'وفر 33% مياه، وتثبيت النيتروجين الحيوي وحصانة بيئية متكاملة.' : 'Saved 33% water, fixed organic nitrogen and boosted climate resilience.'}
+              {lang === 'ar' ? 'لا يتوفر قياس لاحق أو تقدير موثق للوفر.' : 'No measured outcome or sourced savings estimate is available.'}
             </p>
           </div>
         </div>

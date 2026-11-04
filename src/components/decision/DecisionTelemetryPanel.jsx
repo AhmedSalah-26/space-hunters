@@ -136,13 +136,13 @@ export default function DecisionTelemetryPanel({ mission }) {
       <div className="relative overflow-hidden rounded-xl border border-cyan-500/40 h-28 sm:h-32 shrink-0 shadow-lg mt-auto group">
         <img
           src={mission.satelliteImage || mission.heroImage}
-          alt="NASA Satellite View"
+          alt={lang === 'ar' ? 'صورة توضيحية للمهمة' : 'Illustrative mission image'}
           className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#040e21]/95 via-[#040e21]/30 to-transparent flex flex-col justify-between p-2.5 pointer-events-none">
           <div className="flex items-center justify-between">
             <span className="text-[10.5px] font-mono font-black text-cyan-300 bg-black/80 backdrop-blur-sm px-2 py-0.5 rounded border border-cyan-500/40 shadow">
-              🛰️ Landsat-9 • SMAP
+              {lang === 'ar' ? 'صورة توضيحية' : 'Illustrative image'}
             </span>
             <span className="text-[10px] font-mono text-emerald-400 bg-black/80 px-2 py-0.5 rounded border border-emerald-500/40 font-bold shadow">
               {t.spaceTelemetryLive}
@@ -154,7 +154,7 @@ export default function DecisionTelemetryPanel({ mission }) {
                 ? `${decisionScreenLabels.spaceTelemetryAr} ${mission.countryAr}` 
                 : `${decisionScreenLabels.spaceTelemetryEn} ${mission.countryEn}`}
             </span>
-            <span className="text-[10.5px] text-cyan-300 font-mono font-bold">NASA Earth Engine</span>
+            <span className="text-[10.5px] text-cyan-300 font-mono font-bold">{t.spaceTelemetryLive}</span>
           </div>
         </div>
       </div>

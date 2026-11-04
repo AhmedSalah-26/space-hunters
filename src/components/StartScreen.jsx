@@ -20,7 +20,7 @@ export default function StartScreen({
   const { lang, isRtl, toggleLanguage } = useLanguage();
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center overflow-y-auto select-none">
+    <div className="relative w-full h-full flex flex-col items-center overflow-y-auto">
       
       {/* ── CINEMATIC SPACE BACKGROUND (Fixed, GPU Composited, Zero-glitch on RTL/LTR toggle) ── */}
       <div 
@@ -45,6 +45,7 @@ export default function StartScreen({
         {/* Action Pills */}
         <div className="flex items-center gap-1.5">
           <button
+            aria-label={lang === 'ar' ? 'فتح دليل المحاصيل' : 'Open Crops Guide'}
             onClick={onOpenAgriBank}
             className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#061a33]/90 hover:bg-[#0a284e] border border-emerald-500/35 hover:border-emerald-400/60 text-[10px] sm:text-xs font-bold text-emerald-300 hover:text-white rounded-lg transition-all cursor-pointer backdrop-blur-md active:scale-95"
           >
@@ -53,6 +54,7 @@ export default function StartScreen({
           </button>
 
           <button
+            aria-label={lang === 'ar' ? 'فتح دليل اللعبة' : 'Open Game Guide'}
             onClick={onOpenGameGuide}
             className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#061530]/90 hover:bg-[#0c2858] border border-white/10 hover:border-cyan-400/60 text-[10px] sm:text-xs font-bold text-slate-300 hover:text-white rounded-lg transition-all cursor-pointer backdrop-blur-md active:scale-95"
           >
@@ -126,14 +128,14 @@ export default function StartScreen({
               <div className="text-left">
                 <div className="flex items-center gap-2">
                   <span className="text-base sm:text-lg font-black tracking-wide leading-tight text-white">
-                    {lang === 'ar' ? 'حدد أرضك على الخريطة' : 'Target Your Farm'}
+                    {lang === 'ar' ? 'افتح مركز مهمة المزرعة' : 'Open Farm Mission Terminal'}
                   </span>
                   <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-200 border border-cyan-400/40 font-mono font-bold">
                     PRO
                   </span>
                 </div>
                 <div className="text-xs text-indigo-200 font-medium mt-0.5">
-                  {lang === 'ar' ? 'خريطة أقمار ناسا • اعرف حالة أرضك وأحسن زرعة ليها' : 'Real NASA Satellite Tiles • Smart Crop Advisory'}
+                  {lang === 'ar' ? 'حدد أرضك، استكشف بيانات البيئة، وقارن دورات المحاصيل' : 'Select your farm, explore environmental data, and compare crop rotations'}
                 </div>
               </div>
             </div>

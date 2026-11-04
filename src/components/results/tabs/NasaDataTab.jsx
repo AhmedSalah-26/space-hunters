@@ -45,7 +45,7 @@ export default function NasaDataTab() {
           {lang === 'ar' ? nasaSensorsHeader.accuracyStampAr : nasaSensorsHeader.accuracyStampEn}
         </span>
         <span className="text-emerald-400 font-bold font-mono">
-          {nasaSensorsHeader.accuracyScore}
+          {lang === 'ar' ? nasaSensorsHeader.accuracyScoreAr : nasaSensorsHeader.accuracyScoreEn}
         </span>
       </div>
     </div>
