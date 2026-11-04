@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import Navbar from '../components/Navbar';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import AppNavigation from '../components/AppNavigation';
 import StartScreen from '../components/StartScreen';
 import WorldMapScreen from '../components/WorldMapScreen';
 import MissionBriefingScreen from '../components/MissionBriefingScreen';
@@ -24,19 +24,28 @@ export default function Home() {
   const [playerCustomSequence, setPlayerCustomSequence] = useState(null);
   const [playerEvaluation, setPlayerEvaluation] = useState(null);
   const [terminalStartStep, setTerminalStartStep] = useState(0);
+  const currentScreenRef = useRef('start');
+  const navigationIndexRef = useRef(0);
+  const navigationScreensRef = useRef(['start']);
 
   // Navigate to screen with full Browser History & URL Hash support
   const navigateToScreen = useCallback((screenName, replace = false) => {
+    const previousScreen = currentScreenRef.current;
     setCurrentScreen(screenName);
+    currentScreenRef.current = screenName;
     setActiveNavTab(null);
     if (typeof window !== 'undefined') {
       const hash = `#${screenName}`;
-      if (window.location.hash !== hash) {
-        if (replace) {
-          window.history.replaceState({ screen: screenName, modal: null }, '', hash);
-        } else {
-          window.history.pushState({ screen: screenName, modal: null }, '', hash);
-        }
+      if (replace) {
+        const navIndex = navigationIndexRef.current;
+        navigationScreensRef.current[navIndex] = screenName;
+        window.history.replaceState({ screen: screenName, modal: null, navIndex }, '', hash);
+      } else if (previousScreen !== screenName || window.location.hash !== hash) {
+        const navIndex = navigationIndexRef.current + 1;
+        navigationScreensRef.current = navigationScreensRef.current.slice(0, navIndex);
+        navigationScreensRef.current[navIndex] = screenName;
+        navigationIndexRef.current = navIndex;
+        window.history.pushState({ screen: screenName, modal: null, navIndex }, '', hash);
       }
     }
   }, []);
@@ -46,7 +55,7 @@ export default function Home() {
     setActiveNavTab(modalName);
     if (typeof window !== 'undefined') {
       const current = window.location.hash.split('?')[0] || `#${currentScreen}`;
-      window.history.pushState({ screen: currentScreen, modal: modalName }, '', `${current}?modal=${modalName}`);
+      window.history.pushState({ screen: currentScreen, modal: modalName, navIndex: navigationIndexRef.current }, '', `${current}?modal=${modalName}`);
     }
   }, [currentScreen]);
 
@@ -74,22 +83,32 @@ export default function Home() {
 
     const initial = parseUrl();
     setCurrentScreen(initial.screen);
+    currentScreenRef.current = initial.screen;
     if (initial.modal) setActiveNavTab(initial.modal);
 
-    // Initial state record
-    window.history.replaceState(
-      { screen: initial.screen, modal: initial.modal },
-      '',
-      initial.modal ? `#${initial.screen}?modal=${initial.modal}` : `#${initial.screen}`
-    );
+    // A direct workflow link gets a safe in-app Back destination instead of
+    // relying on whatever external page happened to open it.
+    if (initial.screen === 'start') {
+      navigationIndexRef.current = 0;
+      navigationScreensRef.current = ['start'];
+      window.history.replaceState({ screen: 'start', modal: initial.modal, navIndex: 0 }, '', initial.modal ? '#start?modal=' + initial.modal : '#start');
+    } else {
+      navigationIndexRef.current = 1;
+      navigationScreensRef.current = ['start', initial.screen];
+      window.history.replaceState({ screen: 'start', modal: null, navIndex: 0 }, '', '#start');
+      window.history.pushState({ screen: initial.screen, modal: initial.modal, navIndex: 1 }, '', initial.modal ? `#${initial.screen}?modal=${initial.modal}` : `#${initial.screen}`);
+    }
 
     const onPopState = (e) => {
       if (e.state && e.state.screen && VALID_SCREENS.includes(e.state.screen)) {
         setCurrentScreen(e.state.screen);
+        currentScreenRef.current = e.state.screen;
         setActiveNavTab(e.state.modal || null);
+        if (Number.isInteger(e.state.navIndex)) navigationIndexRef.current = e.state.navIndex;
       } else {
         const parsed = parseUrl();
         setCurrentScreen(parsed.screen);
+        currentScreenRef.current = parsed.screen;
         setActiveNavTab(parsed.modal);
       }
     };
@@ -144,21 +163,16 @@ export default function Home() {
     navigateToScreen('results');
   };
 
-  const handleBackToMap = () => {
-    if (typeof window !== 'undefined' && window.location.hash.includes('briefing')) {
-      window.history.back();
-    } else {
-      navigateToScreen('map');
+  const handleBack = () => {
+    if (activeNavTab) {
+      handleCloseModal();
+      return;
     }
+    if (navigationIndexRef.current > 0 && typeof window !== 'undefined') window.history.back();
+    else navigateToScreen('start', true);
   };
 
-  const handleGoHome = () => {
-    if (typeof window !== 'undefined' && (window.location.hash.includes('farmPro') || window.location.hash.includes('map') || window.location.hash.includes('universalBuilder'))) {
-      window.history.back();
-    } else {
-      navigateToScreen('start');
-    }
-  };
+  const handleGoHome = () => navigateToScreen('start');
 
   const handleNextMission = () => {
     const currentIndex = missionsData.findIndex(m => m.id === selectedMission.id);
@@ -180,19 +194,15 @@ export default function Home() {
         style={{ transform: 'translateZ(0)' }}
       />
 
-      {/* Global Navbar (Shown on Map view, with home button returning to start screen) */}
-      {currentScreen === 'map' && (
-        <Navbar
-          activeTab="map"
-          setActiveTab={(tab) => {
-            if (tab === 'map') handleBackToMap();
-            else if (tab === 'farmPro') handleOpenFarmPro();
-            else handleOpenModal(tab);
-          }}
-          onGoHome={handleGoHome}
-          onOpenFarmPro={handleOpenFarmPro}
-        />
-      )}
+      {currentScreen !== 'start' && <AppNavigation
+        currentScreen={currentScreen}
+        onBack={handleBack}
+        onHome={handleGoHome}
+        onOpenMap={() => navigateToScreen('map')}
+        onOpenFarm={() => { setTerminalStartStep(0); navigateToScreen('farmPro'); }}
+        onOpenAgriBank={handleOpenAgriBank}
+        onOpenGameGuide={handleOpenGameGuide}
+      />}
 
       {/* Dynamic Screen View - Takes full remaining vertical space */}
       <div className={`flex-1 min-h-0 flex flex-col relative z-10 w-full ${
@@ -213,15 +223,15 @@ export default function Home() {
         {/* 🛰️ 2. FARM PRO DECISION STUDIO & FIELD BOUNDARY DETECTOR 🛰️ */}
         {currentScreen === 'farmPro' && (
           <MissionTerminal
-            onBackHome={handleGoHome}
             onOpenGame={handleStartGame}
+            onWorkflowStepChange={setTerminalStartStep}
             initialStep={terminalStartStep}
           />
         )}
 
         {/* 🔬 3. UNIVERSAL CROP ROTATION SANDBOX (ALL CROPS DATABASE) 🔬 */}
         {currentScreen === 'universalBuilder' && (
-          <MissionTerminal onBackHome={handleGoHome} onOpenGame={handleStartGame} initialStep={3} />
+          <MissionTerminal onOpenGame={handleStartGame} onWorkflowStepChange={setTerminalStartStep} initialStep={3} />
         )}
 
         {/* 🗺️ 4. WORLD MISSIONS MAP 🗺️ */}
@@ -239,7 +249,6 @@ export default function Home() {
         {currentScreen === 'briefing' && (
           <MissionBriefingScreen
             mission={selectedMission}
-            onBack={handleBackToMap}
             onContinue={handleContinueToDecision}
             onOpenFarmData={handleOpenFarmData}
           />
@@ -249,13 +258,6 @@ export default function Home() {
         {currentScreen === 'decision' && (
           <DecisionMatrixScreen
             mission={selectedMission}
-            onBack={() => {
-              if (typeof window !== 'undefined' && window.location.hash.includes('decision')) {
-                window.history.back();
-              } else {
-                navigateToScreen('briefing');
-              }
-            }}
             onDecisionSubmit={handleDecisionSubmit}
           />
         )}
@@ -267,7 +269,6 @@ export default function Home() {
             playerChoice={playerChoice}
             playerCustomSequence={playerCustomSequence}
             playerEvaluation={playerEvaluation}
-            onBackToMap={() => navigateToScreen('map')}
             onNextMission={handleNextMission}
           />
         )}
@@ -275,7 +276,7 @@ export default function Home() {
 
       {/* Persistent Space Apps Challenge 2026 Slim Footer - Hidden on Map screen on mobile */}
       <footer className={`w-full min-h-7 py-1 px-2.5 sm:px-4 border-t border-white/5 bg-[#030712]/95 backdrop-blur-md text-[8.5px] sm:text-[9.5px] text-slate-500 flex flex-wrap items-center justify-between gap-1 shrink-0 z-20 ${
-        currentScreen === 'map' ? 'hidden sm:flex' : 'flex'
+        ['map', 'farmPro', 'universalBuilder'].includes(currentScreen) ? 'hidden sm:flex' : 'flex'
       }`}>
         <div className="flex items-center gap-1.5 text-slate-400">
           <span className="text-cyan-400 font-black">NASA SPACE APPS 2026</span>

@@ -100,7 +100,7 @@ export default function RotationStrategyWorkbench({ mission = null, onBack, onDe
 
     <section className="grid lg:grid-cols-[1fr_300px] gap-3">
       <div className="md:col-span-3"><h2 className="text-sm font-bold"><span className="me-2 text-cyan-300">01</span>{ar ? 'مقارنة الدورات الزراعية' : 'Module 01 · Compare Rotations'}</h2></div>
-      <div id="rotation-comparison" className="grid scroll-mt-3 md:col-span-3 md:grid-cols-3 gap-3">
+      <div id="rotation-comparison" className="grid scroll-mt-3 md:col-span-3 lg:grid-cols-3 gap-3">
         {strategies.map((strategy, si) => {
           const result = evaluation.strategies[si];
           return <article key={strategy.id} onClick={() => setSelectedId(strategy.id)} className={`rounded-xl border p-3 bg-[#07152b]/90 cursor-pointer ${selectedId === strategy.id ? 'border-cyan-400 shadow-[0_0_20px_rgba(34,211,238,.12)]' : 'border-slate-700'}`}>
@@ -133,7 +133,7 @@ export default function RotationStrategyWorkbench({ mission = null, onBack, onDe
       </aside>
     </section>
 
-    <section className="grid md:grid-cols-2 gap-3">
+    <section className="grid lg:grid-cols-2 gap-3">
       <div className="rounded-xl border border-cyan-800/60 bg-[#07152b] p-3"><h2 className="text-sm font-bold">{ar ? 'لماذا تتصدر هذه الاستراتيجية؟' : 'Strategy explanation'}</h2><p className="mt-2 text-xs text-slate-300">{selected.metrics.overallScore == null ? (ar ? 'لا تتوفر بيانات كافية لحساب درجة مشتركة.' : 'There is not enough comparable crop data for a combined score.') : (ar ? `الدرجة ${selected.metrics.overallScore}/100 تقيس الملاءمة النسبية للأوزان المحددة فقط.` : `Score ${selected.metrics.overallScore}/100 reflects relative fit to the selected priorities only.`)}</p><p className="mt-1 text-[10px] text-slate-400">{ar ? 'المياه تعني احتياج المحصول لا كفاءة الري. إمكانات تثبيت النيتروجين لا تضمن كمية مضافة. الأرقام ليست توصية زراعية مضمونة.' : 'Water means crop evapotranspiration need, not irrigation efficiency. Legume potential is not a guaranteed nitrogen quantity. Scores are not guaranteed recommendations.'}</p>
         <div className="mt-3 grid grid-cols-2 gap-2 text-[10px]">{evaluation.scoredCriteria.map((key) => <div key={key} className="rounded bg-slate-900 p-2"><span>{ar ? ROTATION_CRITERIA[key].labelAr : ROTATION_CRITERIA[key].labelEn}</span><div className="mt-1 h-1.5 bg-slate-700 rounded"><div className="h-full bg-cyan-400 rounded" style={{ width: `${selected.metrics[key]}%` }} /></div><span className="text-cyan-300">{Math.round(selected.metrics[key])} · {evaluation.normalizedWeights[key].toFixed(0)}% {ar ? 'وزن' : 'weight'}</span></div>)}</div>
       </div>

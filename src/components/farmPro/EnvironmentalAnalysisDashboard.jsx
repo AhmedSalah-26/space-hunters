@@ -85,7 +85,7 @@ function SeasonalChart({ observations, variable, selectedMonth, color, lang }) {
   const path = xy.map(({ x, y }, index) => `${index ? 'L' : 'M'}${x},${y}`).join(' ');
   return (
     <div>
-      <svg viewBox="0 0 300 82" className="w-full h-[82px] overflow-visible" role="img" aria-label={lang === 'ar' ? 'ملف موسمي من اثني عشر متوسطاً مناخياً شهرياً' : 'Seasonal profile of twelve monthly climatological averages'}>
+      <svg viewBox="0 0 300 96" className="w-full h-24 overflow-visible" role="img" aria-label={lang === 'ar' ? 'ملف موسمي من اثني عشر متوسطاً مناخياً شهرياً' : 'Seasonal profile of twelve monthly climatological averages'}>
         <path d="M12 64H288" stroke="#334155" strokeWidth="1" />
         <path d={path} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
         {xy.map(({ x, y, value, index }) => (
@@ -94,7 +94,7 @@ function SeasonalChart({ observations, variable, selectedMonth, color, lang }) {
             <circle cx={x} cy={y} r={index === selectedMonth ? 4.5 : 2.5} fill={index === selectedMonth ? '#fff' : color} stroke={color} strokeWidth="1.5" />
           </g>
         ))}
-        {MONTHS.map((month, index) => <text key={month[0]} x={12 + (276 * index) / 11} y="78" fill={index === selectedMonth ? '#e2e8f0' : '#64748b'} fontSize="6.5" textAnchor="middle">{lang === 'ar' ? MONTH_ABBREVIATIONS_AR[index] : month[1]}</text>)}
+        {MONTHS.map((month, index) => <text key={month[0]} x={12 + (276 * index) / 11} y="90" fill={index === selectedMonth ? '#e2e8f0' : '#94a3b8'} fontSize="11" textAnchor="middle">{lang === 'ar' ? MONTH_ABBREVIATIONS_AR[index] : month[1]}</text>)}
       </svg>
       <div className="flex justify-between text-[8px] text-slate-500"><span>{min.toFixed(2)} {displayUnit(points[valid.find(({ observation }) => observation.value === min).index].unit)}</span><span>{max.toFixed(2)} {displayUnit(points[valid.find(({ observation }) => observation.value === max).index].unit)}</span></div>
     </div>
@@ -118,7 +118,7 @@ function IndicatorMetric({ observation, observations, selectedMonth, color, lang
       <div className="text-[8px] text-cyan-200 mt-1">{variableName(observation, lang)} · {item?.referenceDate ? MONTHS[selectedMonth][lang === 'ar' ? 2 : 1] : '—'}</div>
       <SeasonalChart observations={observations} variable={observation} selectedMonth={selectedMonth} color={color} lang={lang} />
       <div className="text-[7.5px] text-slate-500">{lang === 'ar' ? '١٢ متوسطاً مناخياً شهرياً؛ لا يوجد اتجاه تاريخي سنة بسنة.' : '12 monthly climatology normals; no year-by-year historical trend.'}</div>
-      <div className="text-[8px] text-slate-500 truncate" title={qualityLabel(item?.quality, lang)}>{qualityLabel(item?.quality, lang)}</div>
+      <div className="break-words text-[8px] text-slate-400" title={qualityLabel(item?.quality, lang)}>{qualityLabel(item?.quality, lang)}</div>
     </div>
   );
 }
@@ -192,7 +192,7 @@ export default function EnvironmentalAnalysisDashboard({
           <span className="text-[8px] text-slate-400">{isArabic ? 'اختيار شهر مناخي، وليس فترة تاريخية' : 'Month-of-year selector; not a historical date range'}</span>
         </div>
         <input id="environment-month" type="range" min="0" max="11" step="1" value={selectedMonth} onChange={(event) => onSelectedMonthChange(Number(event.target.value))} className="w-full accent-cyan-400" aria-label={isArabic ? 'اختر شهر المناخ' : 'Select climatology month'} />
-        <div className="grid grid-cols-6 sm:grid-cols-12 gap-0.5 text-center">{MONTHS.map((month, index) => <button type="button" key={month[0]} onClick={() => onSelectedMonthChange(index)} aria-label={month[isArabic ? 2 : 1]} title={month[isArabic ? 2 : 1]} aria-pressed={index === selectedMonth} className={`rounded py-1 text-[7px] ${index === selectedMonth ? 'bg-cyan-700 text-white' : 'text-slate-500 hover:bg-white/5'}`}>{isArabic ? MONTH_ABBREVIATIONS_AR[index] : month[1]}</button>)}</div>
+        <div className="grid grid-cols-6 sm:grid-cols-12 gap-0.5 text-center">{MONTHS.map((month, index) => <button type="button" key={month[0]} onClick={() => onSelectedMonthChange(index)} aria-label={month[isArabic ? 2 : 1]} title={month[isArabic ? 2 : 1]} aria-pressed={index === selectedMonth} className={`min-h-11 rounded py-1 font-semibold text-[7px] ${index === selectedMonth ? 'bg-cyan-700 text-white' : 'text-slate-300 hover:bg-white/5'}`}>{isArabic ? MONTH_ABBREVIATIONS_AR[index] : month[1]}</button>)}</div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -228,12 +228,12 @@ export default function EnvironmentalAnalysisDashboard({
       <div className="rounded-xl border border-indigo-400/20 bg-[#07152b] p-2.5">
         <div className="flex items-center justify-between gap-2">
           <h3 className="flex items-center gap-1.5 text-[10px] font-black text-indigo-100"><Layers className="w-3.5 h-3.5" />{isArabic ? 'طبقات البيئة على الخريطة' : 'Environmental map layers'}</h3>
-          <button type="button" onClick={() => setShowLayerDetails((value) => !value)} className="text-[8px] text-cyan-300 underline">{showLayerDetails ? (isArabic ? 'إخفاء' : 'Hide details') : (isArabic ? 'تفاصيل' : 'Layer details')}</button>
+          <button type="button" onClick={() => setShowLayerDetails((value) => !value)} className="app-nav-button px-2 text-sm font-semibold text-cyan-200 underline">{showLayerDetails ? (isArabic ? 'إخفاء' : 'Hide details') : (isArabic ? 'تفاصيل' : 'Layer details')}</button>
         </div>
         <p className="mt-1 text-[8px] text-slate-400">{isArabic ? 'فعّل عدة قياسات لمقارنتها في نافذة النقطة على الخريطة.' : 'Enable multiple measures to compare them together in the map point inspector.'}</p>
         <div className="grid grid-cols-2 gap-1 mt-2">{LAYERS.map((layer) => {
           const value = valueForMonth(monthlyObservations, layer.variable, selectedMonth);
-          return <label key={layer.variable} className={`flex items-center gap-1 rounded-lg border border-white/5 bg-[#030914] p-1.5 text-[8px] ${Number.isFinite(value?.value) ? 'text-slate-200' : 'text-slate-600'}`}>
+          return <label key={layer.variable} className={`flex min-h-11 items-center gap-2 rounded-lg border border-white/5 bg-[#030914] p-2 text-[8px] ${Number.isFinite(value?.value) ? 'text-slate-200' : 'text-slate-500'}`}>
             <input type="checkbox" checked={!!activeLayers[layer.variable]} disabled={!Number.isFinite(value?.value)} onChange={() => onToggleLayer(layer.variable)} className="accent-cyan-400" />
             <span className="truncate">{isArabic ? layer.labelAr : layer.label}</span>
           </label>;

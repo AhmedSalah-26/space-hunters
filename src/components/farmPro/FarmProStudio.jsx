@@ -17,10 +17,10 @@ import {
   validateFarmPolygon,
 } from '../../utils/farmGeometry';
 import { 
-  Scan, ArrowLeft, ArrowRight,
-  MapPin, X, Sprout, Droplets,
+  Scan,
+  MapPin, X,
   Search, Compass, Loader2,
-  Printer, RefreshCw, Eye, EyeOff
+  Printer, Eye, EyeOff
 } from 'lucide-react';
 
 // Dynamic import for Leaflet map to ensure 100% Client-Side rendering
@@ -68,8 +68,8 @@ function localizeGeometryError(error, lang) {
   return messages[error] || error || '';
 }
 
-export default function FarmProStudio({ onBackToHome, onOpenGame, onOpenRotationBuilder, focusEnvironmental = false }) {
-  const { lang, isRtl, toggleLanguage } = useLanguage();
+export default function FarmProStudio({ onOpenRotationBuilder, focusEnvironmental = false }) {
+  const { lang, isRtl } = useLanguage();
   const { session, updateSession } = useWorkingSession();
   const farmDraft = session.farmInformation?.farmSelectionDraft || {};
 
@@ -106,6 +106,14 @@ export default function FarmProStudio({ onBackToHome, onOpenGame, onOpenRotation
   const [nasaError, setNasaError] = useState('');
   const [analysisMonth, setAnalysisMonth] = useState(() => session.analysisResults?.environmentalView?.month ?? new Date().getMonth());
   const [activeEnvironmentalLayers, setActiveEnvironmentalLayers] = useState(() => session.analysisResults?.environmentalView?.layers || { T2M: true, PRECTOTCORR: true, RH2M: false, ALLSKY_SFC_SW_DWN: false });
+
+  useEffect(() => {
+    const mobile = window.matchMedia('(max-width: 639px)');
+    const syncMapPanel = (event) => setIsPanelCollapsed(event.matches);
+    syncMapPanel(mobile);
+    mobile.addEventListener('change', syncMapPanel);
+    return () => mobile.removeEventListener('change', syncMapPanel);
+  }, []);
 
   useEffect(() => {
     updateSession({ farmInformation: { ...(session.farmInformation || {}), farmSelectionDraft: { selectedLocation, locationName, selectionMode, areaUnit, areaInput, latitudeInput, longitudeInput, boundaryPoints } } });
@@ -358,19 +366,9 @@ export default function FarmProStudio({ onBackToHome, onOpenGame, onOpenRotation
     <div className="relative w-full h-full min-h-0 flex flex-col bg-[#050c18] overflow-hidden font-sans">
       
       {/* ── TOP HEADER & LIVE SEARCH BAR ── */}
-      <div className="w-full bg-[#0a1827]/95 backdrop-blur-md border-b border-white/10 px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs z-30">
-        
-        {/* Back Button */}
-        <button
-          onClick={onBackToHome}
-          className="flex items-center gap-1.5 text-indigo-400 hover:text-white font-black transition-all cursor-pointer"
-        >
-          {isRtl ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-          <span>{lang === 'ar' ? 'الرئيسية' : 'Home'}</span>
-        </button>
-
+      <div className="w-full bg-[#0a1827]/95 backdrop-blur-md border-b border-white/10 px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2.5 text-sm z-30">
         {/* 🔍 LIVE SEARCH BAR 🔍 */}
-        <div className="relative flex-1 max-w-xl min-w-[260px]">
+        <div className="relative flex-1 max-w-xl min-w-0">
           <form onSubmit={handlePerformOnlineSearch} className="relative">
             <input
               type="text"
@@ -384,7 +382,7 @@ export default function FarmProStudio({ onBackToHome, onOpenGame, onOpenRotation
               onFocus={() => setShowSearchDropdown(true)}
               placeholder={lang === 'ar' ? '🔍 اكتب اسم بلدك، قريتك، أو دوس على الخريطة على طول...' : '🔍 Search village, governorate, or click anywhere on map...'}
               style={{ backgroundColor: '#081426', opacity: 1 }}
-              className="w-full border-2 border-indigo-500/60 hover:border-indigo-400 focus:border-cyan-400 text-white rounded-2xl pl-10 pr-10 py-2.5 text-xs font-bold shadow-[0_0_25px_rgba(0,0,0,0.8)] focus:outline-none transition-all placeholder:text-slate-400"
+              className="min-h-11 w-full border-2 border-indigo-500/60 hover:border-indigo-400 focus:border-cyan-400 text-white rounded-2xl pl-10 pr-10 py-2.5 text-sm font-bold shadow-[0_0_25px_rgba(0,0,0,0.8)] focus:outline-none transition-all placeholder:text-slate-400"
             />
             <Search className="w-4 h-4 text-cyan-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             {isSearching && (
@@ -433,7 +431,7 @@ export default function FarmProStudio({ onBackToHome, onOpenGame, onOpenRotation
                         applyPointLocation(lat, lng, res.display_name.split(',')[0]);
                         setShowSearchDropdown(false);
                       }}
-                      className="w-full text-left p-2 rounded-xl hover:bg-indigo-600/30 text-xs font-bold text-white flex items-center justify-between transition-all cursor-pointer"
+                      className="min-h-11 w-full text-left p-2 rounded-xl hover:bg-indigo-600/30 text-xs font-bold text-white flex items-center justify-between transition-all cursor-pointer"
                     >
                       <span className="truncate flex items-center gap-1.5">
                         <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
@@ -450,7 +448,7 @@ export default function FarmProStudio({ onBackToHome, onOpenGame, onOpenRotation
                   <button
                     key={idx}
                     onClick={() => handleSelectLocation(loc)}
-                    className="w-full text-left p-2 rounded-xl hover:bg-indigo-600/30 text-xs font-bold text-white flex items-center justify-between transition-all cursor-pointer"
+                    className="min-h-11 w-full text-left p-2 rounded-xl hover:bg-indigo-600/30 text-xs font-bold text-white flex items-center justify-between transition-all cursor-pointer"
                   >
                     <span className="flex items-center gap-2">
                       <Compass className="w-3.5 h-3.5 text-emerald-400" />
@@ -466,21 +464,6 @@ export default function FarmProStudio({ onBackToHome, onOpenGame, onOpenRotation
           )}
         </div>
 
-        {/* Action Pills */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onOpenGame}
-            className="px-3 py-1.5 rounded-xl bg-blue-600/30 hover:bg-blue-600/50 border border-blue-400/40 text-xs font-bold text-blue-200 transition-all cursor-pointer"
-          >
-            {lang === 'ar' ? '🎮 طور اللعبة' : '🎮 Game Mode'}
-          </button>
-          <button
-            onClick={toggleLanguage}
-            className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs cursor-pointer"
-          >
-            {lang === 'ar' ? 'EN' : 'عربي'}
-          </button>
-        </div>
       </div>
 
       {/* Map imagery is a basemap; environmental data is added as point references only. */}
@@ -506,15 +489,15 @@ export default function FarmProStudio({ onBackToHome, onOpenGame, onOpenRotation
           <button
             onClick={() => setIsPanelCollapsed(false)}
             style={{ backgroundColor: '#07152b', opacity: 1 }}
-            className="absolute top-4 left-4 z-20 border-2 border-cyan-400 text-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.85)] px-4 py-3 flex items-center gap-2.5 font-black text-xs hover:bg-[#0c2242] transition-all cursor-pointer animate-in fade-in"
+            className="app-nav-button absolute top-4 left-4 z-20 border-2 border-cyan-400 text-white rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.85)] px-4 flex items-center gap-2.5 font-black text-sm hover:bg-[#0c2242] transition-all cursor-pointer animate-in fade-in"
           >
             <Eye className="w-4 h-4 text-cyan-400" />
-            <span>{lang === 'ar' ? '🛰️ فتح روشتة الأرض وبيانات ناسا' : '🛰️ Open NASA Earth Advisory'}</span>
+            <span>{lang === 'ar' ? '🗺️ فتح أدوات موقع ومساحة المزرعة' : '🗺️ Open farm location & area tools'}</span>
           </button>
         ) : (
           <div 
-            className="absolute top-4 left-4 z-20 w-[92%] sm:w-[420px] max-w-[440px] border-2 border-indigo-500/60 text-white rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] p-4 sm:p-5 flex flex-col gap-3.5 overflow-y-auto animate-in fade-in zoom-in-95"
-            style={{ backgroundColor: '#07152b', opacity: 1, maxHeight: 'calc(100% - 2rem)' }}
+            className="absolute inset-x-2 bottom-2 top-auto z-20 max-h-[90%] w-auto max-w-none border-2 border-indigo-500/60 text-white rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] p-3 sm:inset-x-auto sm:left-4 sm:top-4 sm:bottom-auto sm:max-h-[calc(100%-2rem)] sm:w-[420px] sm:max-w-[440px] sm:p-5 flex flex-col gap-3.5 overflow-y-auto overscroll-contain animate-in fade-in zoom-in-95"
+            style={{ backgroundColor: '#07152b', opacity: 1 }}
           >
             
             {/* Selected Location Title & Coordinates + Minimize button */}
@@ -535,7 +518,7 @@ export default function FarmProStudio({ onBackToHome, onOpenGame, onOpenRotation
                 <button
                   onClick={() => setIsPanelCollapsed(true)}
                   title={lang === 'ar' ? 'تصغير اللوحة لرؤية الخريطة كاملة' : 'Collapse panel to view full map'}
-                  className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                  className="app-nav-button w-11 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
                 >
                   <EyeOff className="w-4 h-4" />
                 </button>
@@ -554,7 +537,7 @@ export default function FarmProStudio({ onBackToHome, onOpenGame, onOpenRotation
                   type="button"
                   aria-pressed={selectionMode === 'point-area'}
                   onClick={() => { setSelectionMode('point-area'); setLocationError(''); }}
-                  className={`rounded-xl border px-2 py-2 text-[10px] sm:text-[11px] font-black transition-all ${selectionMode === 'point-area' ? 'bg-cyan-700/70 border-cyan-300 text-white' : 'bg-[#081730] border-white/10 text-slate-300'}`}
+                  className={`min-h-11 rounded-xl border px-2 py-2 text-[10px] sm:text-[11px] font-black transition-all ${selectionMode === 'point-area' ? 'bg-cyan-700/70 border-cyan-300 text-white' : 'bg-[#081730] border-white/10 text-slate-300'}`}
                 >
                   {lang === 'ar' ? 'نقطة + مساحة' : 'Select Point + Enter Area'}
                 </button>
@@ -562,7 +545,7 @@ export default function FarmProStudio({ onBackToHome, onOpenGame, onOpenRotation
                   type="button"
                   aria-pressed={selectionMode === 'boundary'}
                   onClick={() => { setSelectionMode('boundary'); setLocationError(''); }}
-                  className={`rounded-xl border px-2 py-2 text-[10px] sm:text-[11px] font-black transition-all ${selectionMode === 'boundary' ? 'bg-cyan-700/70 border-cyan-300 text-white' : 'bg-[#081730] border-white/10 text-slate-300'}`}
+                  className={`min-h-11 rounded-xl border px-2 py-2 text-[10px] sm:text-[11px] font-black transition-all ${selectionMode === 'boundary' ? 'bg-cyan-700/70 border-cyan-300 text-white' : 'bg-[#081730] border-white/10 text-slate-300'}`}
                 >
                   {lang === 'ar' ? 'ارسم حدود المزرعة' : 'Draw Farm Boundary'}
                 </button>
@@ -574,24 +557,24 @@ export default function FarmProStudio({ onBackToHome, onOpenGame, onOpenRotation
                   <div className="grid grid-cols-2 gap-2">
                     <label className="text-[10px] text-slate-300 space-y-1">
                       <span>{lang === 'ar' ? 'خط العرض' : 'Latitude'}</span>
-                      <input inputMode="decimal" value={latitudeInput} onChange={(event) => setLatitudeInput(event.target.value)} className="w-full rounded-lg border border-cyan-500/30 bg-[#081426] px-2 py-1.5 text-white" />
+                      <input inputMode="decimal" value={latitudeInput} onChange={(event) => setLatitudeInput(event.target.value)} className="min-h-11 w-full rounded-lg border border-cyan-500/30 bg-[#081426] px-2 py-1.5 text-white" />
                     </label>
                     <label className="text-[10px] text-slate-300 space-y-1">
                       <span>{lang === 'ar' ? 'خط الطول' : 'Longitude'}</span>
-                      <input inputMode="decimal" value={longitudeInput} onChange={(event) => setLongitudeInput(event.target.value)} className="w-full rounded-lg border border-cyan-500/30 bg-[#081426] px-2 py-1.5 text-white" />
+                      <input inputMode="decimal" value={longitudeInput} onChange={(event) => setLongitudeInput(event.target.value)} className="min-h-11 w-full rounded-lg border border-cyan-500/30 bg-[#081426] px-2 py-1.5 text-white" />
                     </label>
                   </div>
-                  <button type="button" onClick={handleApplyCoordinates} className="w-full rounded-lg border border-cyan-400/40 bg-cyan-950/70 py-1.5 text-[10px] font-bold text-cyan-100 hover:bg-cyan-900/80">
+                  <button type="button" onClick={handleApplyCoordinates} className="app-nav-button w-full rounded-lg border border-cyan-400/40 bg-cyan-950/70 text-sm font-bold text-cyan-100 hover:bg-cyan-900/80">
                     {lang === 'ar' ? 'تطبيق الإحداثيات' : 'Apply Coordinates'}
                   </button>
                   <div className="grid grid-cols-[1fr_1.1fr] gap-2">
                     <label className="text-[10px] text-slate-300 space-y-1">
                       <span>{lang === 'ar' ? 'مساحة المزرعة' : 'Farm area'}</span>
-                      <input type="number" min="0" step="any" value={areaInput} onChange={(event) => setAreaInput(event.target.value)} className="w-full rounded-lg border border-cyan-500/30 bg-[#081426] px-2 py-1.5 text-white" />
+                      <input type="number" min="0" step="any" value={areaInput} onChange={(event) => setAreaInput(event.target.value)} className="min-h-11 w-full rounded-lg border border-cyan-500/30 bg-[#081426] px-2 py-1.5 text-white" />
                     </label>
                     <label className="text-[10px] text-slate-300 space-y-1">
                       <span>{lang === 'ar' ? 'وحدة المساحة' : 'Area unit'}</span>
-                      <select value={areaUnit} onChange={(event) => handleAreaUnitChange(event.target.value)} className="w-full rounded-lg border border-cyan-500/30 bg-[#081426] px-2 py-1.5 text-white">
+                      <select value={areaUnit} onChange={(event) => handleAreaUnitChange(event.target.value)} className="min-h-11 w-full rounded-lg border border-cyan-500/30 bg-[#081426] px-2 py-1.5 text-white">
                         {Object.entries(FARM_AREA_UNITS).map(([unit, config]) => <option key={unit} value={unit}>{lang === 'ar' ? config.labelAr : config.labelEn}</option>)}
                       </select>
                     </label>
@@ -602,22 +585,22 @@ export default function FarmProStudio({ onBackToHome, onOpenGame, onOpenRotation
                 <div className="space-y-2.5">
                   <p className="text-[10px] leading-relaxed text-slate-300">{lang === 'ar' ? 'اضغط على الخريطة لإضافة نقاط الحدود. اسحب النقاط لتعديلها، أو احذف النقاط غير المطلوبة.' : 'Click the map to add boundary points. Drag a vertex to edit it, or remove individual points below.'}</p>
                   <div className="flex items-center gap-2">
-                    <button type="button" disabled={!boundaryPoints.length} onClick={() => handleRemoveBoundaryPoint(boundaryPoints.length - 1)} className="flex-1 rounded-lg border border-white/10 bg-[#081730] py-1.5 text-[10px] font-bold text-slate-200 disabled:opacity-40">{lang === 'ar' ? 'تراجع عن آخر نقطة' : 'Undo Last Point'}</button>
-                    <button type="button" disabled={!boundaryPoints.length} onClick={handleClearBoundary} className="flex-1 rounded-lg border border-rose-500/30 bg-rose-950/40 py-1.5 text-[10px] font-bold text-rose-200 disabled:opacity-40">{lang === 'ar' ? 'مسح وإعادة الرسم' : 'Clear & Redraw'}</button>
+                    <button type="button" disabled={!boundaryPoints.length} onClick={() => handleRemoveBoundaryPoint(boundaryPoints.length - 1)} className="app-nav-button flex-1 rounded-lg border border-white/10 bg-[#081730] px-2 text-sm font-bold text-slate-200 disabled:opacity-40">{lang === 'ar' ? 'تراجع عن آخر نقطة' : 'Undo Last Point'}</button>
+                    <button type="button" disabled={!boundaryPoints.length} onClick={handleClearBoundary} className="app-nav-button flex-1 rounded-lg border border-rose-500/30 bg-rose-950/40 px-2 text-sm font-bold text-rose-100 disabled:opacity-40">{lang === 'ar' ? 'مسح وإعادة الرسم' : 'Clear & Redraw'}</button>
                   </div>
                   {boundaryPoints.length > 0 && (
                     <ol className="max-h-28 space-y-1 overflow-y-auto rounded-lg border border-white/10 p-1.5">
                       {boundaryPoints.map((point, index) => (
                         <li key={`${index}-${point.latitude}-${point.longitude}`} className="flex items-center justify-between gap-2 text-[9px] text-slate-200">
                           <span>{index + 1}. {point.latitude.toFixed(5)}, {point.longitude.toFixed(5)}</span>
-                          <button type="button" onClick={() => handleRemoveBoundaryPoint(index)} className="rounded px-1.5 py-0.5 text-rose-300 hover:bg-rose-950/60" aria-label={`${lang === 'ar' ? 'حذف النقطة' : 'Remove point'} ${index + 1}`}><X className="h-3 w-3" /></button>
+                          <button type="button" onClick={() => handleRemoveBoundaryPoint(index)} className="app-nav-button w-11 rounded text-rose-200 hover:bg-rose-950/60" aria-label={`${lang === 'ar' ? 'حذف النقطة' : 'Remove point'} ${index + 1}`}><X className="h-4 w-4" /></button>
                         </li>
                       ))}
                     </ol>
                   )}
                   <label className="block text-[10px] text-slate-300 space-y-1">
                     <span>{lang === 'ar' ? 'عرض المساحة المحسوبة بوحدة' : 'Show calculated area in'}</span>
-                    <select value={areaUnit} onChange={(event) => handleAreaUnitChange(event.target.value)} className="w-full rounded-lg border border-cyan-500/30 bg-[#081426] px-2 py-1.5 text-white">
+                    <select value={areaUnit} onChange={(event) => handleAreaUnitChange(event.target.value)} className="min-h-11 w-full rounded-lg border border-cyan-500/30 bg-[#081426] px-2 py-1.5 text-white">
                       {Object.entries(FARM_AREA_UNITS).map(([unit, config]) => <option key={unit} value={unit}>{lang === 'ar' ? config.labelAr : config.labelEn}</option>)}
                     </select>
                   </label>
@@ -683,7 +666,7 @@ export default function FarmProStudio({ onBackToHome, onOpenGame, onOpenRotation
         )}
 
         {/* ── MAP INSTRUCTION BADGE AT BOTTOM RIGHT ── */}
-        <div className="absolute bottom-6 right-6 z-20 flex flex-col items-end gap-1.5 pointer-events-none">
+        <div className={`absolute bottom-6 right-6 z-20 flex-col items-end gap-1.5 pointer-events-none ${isPanelCollapsed ? 'flex' : 'hidden sm:flex'}`}>
           <div 
             style={{ backgroundColor: '#07152b', opacity: 1 }}
             className="text-xs font-black text-white px-3.5 py-2 rounded-2xl border-2 border-cyan-400/40 shadow-[0_10px_30px_rgba(0,0,0,0.9)] flex items-center gap-2"

@@ -2,11 +2,11 @@
 
 import React, { useState } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
-import { CheckSquare, ArrowRight, ArrowLeft } from 'lucide-react';
+import { CheckSquare } from 'lucide-react';
 import { briefingRolesData } from '../../data/worldMapData';
 
-export default function BriefingStoryPanel({ mission, onBack }) {
-  const { t, lang, isRtl } = useLanguage();
+export default function BriefingStoryPanel({ mission }) {
+  const { t, lang } = useLanguage();
   const [activeTab, setActiveTab] = useState('farmer');
 
   const farmerAvatar = mission.farmerImage || "/images/farmer_egypt.jpg";
@@ -117,14 +117,6 @@ export default function BriefingStoryPanel({ mission, onBack }) {
         </div>
       </div>
 
-      {/* Back Button */}
-      <button
-        onClick={onBack}
-        className="w-full py-2.5 px-4 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 transition-all border border-cyan-500/25 rounded-xl cursor-pointer shrink-0 shadow-sm mt-auto"
-      >
-        {isRtl ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-        <span>{t.back}</span>
-      </button>
     </div>
   );
 }

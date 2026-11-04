@@ -142,7 +142,7 @@ export default function RealSatelliteLeafletMap({
             </div>
 
             <!-- Perfectly Centered Target Badge Above -->
-            <div style="position: absolute; top: -16px; left: 50%; transform: translateX(-50%); background: rgba(10, 15, 30, 0.95); border: 1px solid #38bdf8; color: #38bdf8; font-size: 8.5px; font-weight: 900; font-family: monospace; padding: 1px 6px; border-radius: 6px; white-space: nowrap; box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);">
+            <div style="position: absolute; top: -18px; left: 50%; transform: translateX(-50%); background: rgba(10, 15, 30, 0.95); border: 1px solid #38bdf8; color: #7dd3fc; font-size: 12px; font-weight: 900; font-family: monospace; padding: 2px 7px; border-radius: 6px; white-space: nowrap; box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);">
               ${lang === 'ar' ? 'موقع المزرعة' : 'FARM LOCATION'}
             </div>
           </div>
@@ -230,8 +230,12 @@ export default function RealSatelliteLeafletMap({
         const row = L.DomUtil.create('p', '', popup);
         const unit = item.unit === 'degC' ? '°C' : item.unit;
         row.textContent = `${item.variable}: ${Number(item.value).toFixed(2)} ${unit} · ${item.referenceDate} · ${item.source?.provider || 'NASA POWER'}`;
+        row.style.fontSize = '14px';
+        row.style.lineHeight = '1.5';
         const quality = L.DomUtil.create('small', '', popup);
         quality.textContent = item.quality || (lang === 'ar' ? 'لم يجرِ التطبيق تقييماً إضافياً للجودة' : 'Quality not further assessed by application');
+        quality.style.fontSize = '12px';
+        quality.style.lineHeight = '1.5';
       });
       marker.bindPopup(popup, { maxWidth: 280 });
       group.addLayer(marker);
@@ -239,11 +243,11 @@ export default function RealSatelliteLeafletMap({
   }, [selectedLocation, environmentalPointLayers, lang]);
 
   return (
-    <div className="relative w-full h-full min-h-[500px]">
+    <div className="relative w-full h-full min-h-0">
       {/* Esri basemap container */}
       <div ref={mapContainerRef} className="w-full h-full z-0 cursor-crosshair" />
 
-      <div className="absolute top-3 right-3 z-[500] rounded-md border border-white/20 bg-[#07152b]/95 px-2 py-1 text-[8px] font-mono text-slate-200 pointer-events-none">
+      <div className="absolute left-3 right-3 top-3 z-[500] max-w-[calc(100%-1.5rem)] rounded-md border border-white/20 bg-[#07152b]/95 px-2 py-1.5 text-[8px] leading-relaxed text-slate-100 pointer-events-none sm:left-auto sm:max-w-[440px] sm:text-xs">
         {lang === 'ar' ? 'الخلفية: صور Esri © Esri وMaxar وEarthstar · التحليل: بيانات نقطية فقط' : 'BASEMAP: ESRI IMAGERY © ESRI, MAXAR, EARTHSTAR · ANALYSIS: POINT DATA ONLY'}
       </div>
 

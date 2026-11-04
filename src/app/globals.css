@@ -12,6 +12,12 @@
   --accent-cyan: #06b6d4;
   --accent-blue: #3b82f6;
   --accent-emerald: #10b981;
+  --type-meta: 0.8125rem;
+  --type-support: 0.875rem;
+  --type-body: 1rem;
+  --type-card-title: clamp(1.0625rem, 1.2vw, 1.25rem);
+  --type-section-title: clamp(1.25rem, 1.8vw, 1.625rem);
+  --type-page-title: clamp(1.5rem, 3vw, 2.125rem);
 }
 
 /* 🌟 Professional Neon Boundary Glow for Leaflet Polygons (NASA Space Apps) 🌟 */
@@ -65,13 +71,77 @@ html {
 body {
   background-color: var(--bg-deep);
   color: #e2e8f0;
-  font-family: 'Cairo', 'Inter', sans-serif;
+  font-family: 'Inter', 'Cairo', sans-serif;
+  font-size: var(--type-body);
+  line-height: 1.55;
   overflow-x: hidden;
   overflow-y: hidden;
   margin: 0;
   padding: 0;
   height: 100%;
   height: 100dvh;
+}
+
+html[lang='ar'] body {
+  font-family: 'Cairo', 'Inter', sans-serif;
+  line-height: 1.7;
+}
+
+html[lang='en'] body {
+  font-family: 'Inter', 'Cairo', sans-serif;
+  letter-spacing: 0;
+}
+
+.type-page-title { font-size: var(--type-page-title); line-height: 1.2; }
+.type-section-title { font-size: var(--type-section-title); line-height: 1.3; }
+.type-card-title { font-size: var(--type-card-title); line-height: 1.4; }
+.type-body { font-size: var(--type-body); line-height: 1.6; }
+.type-support { font-size: var(--type-support); line-height: 1.5; }
+.type-meta { font-size: var(--type-meta); line-height: 1.4; }
+
+/* Text utilities had drifted below comfortable reading sizes. Keep tiny type
+   for genuinely compact metadata while lifting labels, descriptions and chart
+   annotations to a readable floor throughout every screen. */
+[class~='text-xs'], [class*=':text-xs'],
+[class~='text-sm'], [class*=':text-sm'] {
+  font-size: var(--type-support) !important;
+  line-height: 1.5;
+}
+
+[class*='text-[7px]'], [class*='text-[8px]'], [class*='text-[8.5px]'],
+[class*='text-[9px]'], [class*='text-[9.5px]'], [class*='text-[10px]'],
+[class*='text-[10.5px]'], [class*='text-[11px]'], [class*='text-[11.5px]'] {
+  font-size: var(--type-meta) !important;
+  line-height: 1.45;
+}
+
+.app-nav-button { min-height: 2.75rem; }
+
+@media (max-width: 360px) {
+  /* Workflow screens repeat their current step directly beneath the app bar. */
+  .app-nav-title { display: none; }
+}
+
+.leaflet-control-zoom a {
+  width: 2.75rem !important;
+  height: 2.75rem !important;
+  line-height: 2.75rem !important;
+  font-size: 1.5rem !important;
+}
+
+.leaflet-control-attribution { font-size: 0.6875rem !important; }
+
+.recharts-cartesian-axis-tick-value,
+.recharts-legend-item-text,
+.recharts-tooltip-label,
+.recharts-tooltip-item {
+  font-size: 12px !important;
+}
+
+@media (max-width: 639px) {
+  .type-page-title { font-size: clamp(1.5rem, 7vw, 1.75rem); }
+  .type-section-title { font-size: 1.25rem; }
+  .type-card-title { font-size: 1.0625rem; }
 }
 
 /* Custom sleek scrollbar that prevents layout shift */

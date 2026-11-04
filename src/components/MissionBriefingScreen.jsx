@@ -7,7 +7,7 @@ import BriefingDialogue from './briefing/BriefingDialogue';
 import BriefingStoryPanel from './briefing/BriefingStoryPanel';
 import { useLanguage } from '../context/LanguageContext';
 
-export default function MissionBriefingScreen({ mission, onBack, onContinue, onOpenFarmData }) {
+export default function MissionBriefingScreen({ mission, onContinue, onOpenFarmData }) {
   const { lang } = useLanguage();
   const [mobileTab, setMobileTab] = React.useState('dialogue'); // 'dialogue' | 'telemetry' | 'story'
 
@@ -59,7 +59,7 @@ export default function MissionBriefingScreen({ mission, onBack, onContinue, onO
 
         {/* 👨‍🌾 PANEL 3: Story, Perspectives & Objectives (3 Cols) */}
         <div className={`lg:col-span-3 flex flex-col min-h-0 ${mobileTab === 'story' ? 'block' : 'hidden lg:flex'}`}>
-          <BriefingStoryPanel mission={mission} onBack={onBack} />
+          <BriefingStoryPanel mission={mission} />
         </div>
 
       </div>

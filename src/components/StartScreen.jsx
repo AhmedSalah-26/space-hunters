@@ -95,7 +95,7 @@ export default function StartScreen({
           </div>
 
           {/* Title */}
-          <h1 className="text-4xl sm:text-5xl font-black tracking-wider text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.9)] mb-2 leading-none">
+          <h1 className="text-[clamp(1.5rem,7vw,1.75rem)] sm:text-5xl font-black tracking-[0.04em] sm:tracking-wider text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.9)] mb-2 leading-tight">
             <span>SPACE</span>
             <span className="text-[#00b4d8] ml-2 drop-shadow-[0_0_24px_rgba(0,180,216,0.9)]">HUNTERS</span>
           </h1>
