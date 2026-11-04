@@ -20,7 +20,7 @@
 2. **🗺️ Interactive 3D/SVG World Map**:
    - 5 Real-world country missions: **Egypt (Nile Delta)**, **Brazil (Amazon & Cerrado)**, **India (Punjab Plains)**, **USA (High Plains & Ogallala Aquifer)**, and **Australia (Murray-Darling Basin)**.
 3. **📋 Two-Way Comms Mission Briefing**:
-   - Interactive dialogue with NASA Earth Science expert (Sarah) and local farmers to diagnose ground-truth telemetry.
+   - Interactive dialogue with NASA Earth Science expert (Sarah) and local farmers to diagnose ground-truth telemetry. 
 4. **🔄 Crop Rotation Decision Matrix**:
    - 3-Season sequence planner with dynamic agronomic scoring, farmer feedback, and live telemetry gauges.
 5. **🔬 Universal Crop Rotation Sandbox**:
