@@ -14,6 +14,7 @@ export default function RealSatelliteLeafletMap({
   onBoundaryPointMove,
   environmentalPointLayers = [],
   lang = 'en',
+  isVisible = true,
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -97,6 +98,13 @@ export default function RealSatelliteLeafletMap({
       environmentalLayerRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !isVisible) return undefined;
+    const frame = requestAnimationFrame(() => map.invalidateSize({ pan: false }));
+    return () => cancelAnimationFrame(frame);
+  }, [isVisible]);
 
   useEffect(() => {
     const control = zoomControlRef.current;

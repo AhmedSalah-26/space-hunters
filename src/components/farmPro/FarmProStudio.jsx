@@ -68,7 +68,7 @@ function localizeGeometryError(error, lang) {
   return messages[error] || error || '';
 }
 
-export default function FarmProStudio({ onContinue, onEditFarm }) {
+export default function FarmProStudio({ onContinue, onEditFarm, activeStep = 0 }) {
   const { lang, isRtl } = useLanguage();
   const { session, updateSession } = useWorkingSession();
   const farmDraft = session.farmInformation?.farmSelectionDraft || {};
@@ -359,7 +359,8 @@ export default function FarmProStudio({ onContinue, onEditFarm }) {
   };
 
   return (
-    <div className="relative w-full min-h-[calc(100dvh-9rem)] shrink-0 flex flex-col bg-[#050c18] font-sans">
+    <div className="relative w-full shrink-0 flex flex-col bg-[#050c18] font-sans">
+      <div className={activeStep === 0 ? 'block' : 'hidden'}>
       
       {/* ── TOP HEADER & LIVE SEARCH BAR ── */}
       <div id="workflow-section-0" className="scroll-mt-4 w-full bg-[#0a1827]/95 backdrop-blur-md border-b border-white/10 px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2.5 text-sm z-30">
@@ -464,7 +465,7 @@ export default function FarmProStudio({ onContinue, onEditFarm }) {
       </div>
 
       {/* Map imagery is a basemap; environmental data is added as point references only. */}
-      <div className="relative flex-1 min-h-0 w-full h-full overflow-hidden">
+      <div className="relative h-[calc(100dvh-14rem)] min-h-[360px] max-h-[720px] w-full overflow-hidden">
         
         {/* Esri imagery basemap with farm geometry and optional POWER point inspector. */}
         <RealSatelliteLeafletMap
@@ -479,6 +480,7 @@ export default function FarmProStudio({ onContinue, onEditFarm }) {
           onBoundaryPointMove={handleMoveBoundaryPoint}
           environmentalPointLayers={environmentalPointLayers}
           lang={lang}
+          isVisible={activeStep === 0}
         />
 
         {/* ── LEFT FLOATING PANEL: NASA WEATHER & RECOMMENDED ROTATIONS (COLLAPSIBLE, 100% SOLID OPAQUE) ── */}
@@ -667,7 +669,9 @@ export default function FarmProStudio({ onContinue, onEditFarm }) {
 
       </div>
 
-      <section id="workflow-section-1" className="scroll-mt-4 mx-auto w-full max-w-6xl shrink-0 space-y-3 p-3 text-slate-100 sm:p-5" aria-labelledby="environmental-overview-heading">
+      </div>
+
+      <section id="workflow-section-1" className={`${activeStep === 1 ? 'block' : 'hidden'} mx-auto w-full max-w-6xl shrink-0 space-y-3 p-3 text-slate-100 sm:p-5`} aria-labelledby="environmental-overview-heading">
         <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs text-cyan-300">{lang === 'ar' ? 'الخطوة ٢ من ٧' : 'Step 2 of 7'}</p><h2 id="environmental-overview-heading" className="type-section-title font-black">{lang === 'ar' ? 'نظرة بيئية' : 'Environmental Overview'}</h2></div><button type="button" onClick={onEditFarm} className="app-nav-button min-h-11 rounded-lg border border-white/10 px-3 text-sm text-slate-200 hover:bg-white/5">{lang === 'ar' ? 'تعديل الموقع' : 'Edit farm location'}</button></div>
         <EnvironmentalAnalysisDashboard
           id="environmental-analysis"

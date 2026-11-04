@@ -38,7 +38,7 @@ const priorityDescriptions = {
 };
 const formatPercent = (value) => `${Math.round(value)}%`;
 
-export default function RotationStrategyWorkbench({ mission = null, onBack, onDecisionSubmit }) {
+export default function RotationStrategyWorkbench({ mission = null, onBack, onDecisionSubmit, focusSection = 'comparison' }) {
   const { lang, isRtl } = useLanguage();
   const { session, updateSession } = useWorkingSession();
   const ar = lang === 'ar';
@@ -109,12 +109,12 @@ export default function RotationStrategyWorkbench({ mission = null, onBack, onDe
 
   return <div dir={isRtl ? 'rtl' : 'ltr'} className="w-full shrink-0 max-w-[1500px] mx-auto px-3 sm:px-6 py-4 text-slate-100 space-y-4 overflow-visible">
     <header className="flex items-center justify-between gap-3">
-      <div><p className="text-[10px] uppercase tracking-[.2em] text-cyan-300">Field Shift · Decision Support</p><h1 className="text-xl sm:text-2xl font-black">{ar ? 'مقارنة استراتيجيات الدورة الزراعية' : 'Crop Rotation Strategy Comparison'}</h1><p className="mt-1 max-w-3xl text-xs text-slate-400">{ar ? 'قارن خط الأساس مع بديلين باستخدام صفات منشورة وأوزان تحددها أنت.' : 'Compare an existing-rotation baseline with two alternatives using sourced crop traits and priorities you control.'}</p></div>
+      <div><p className="text-xs text-cyan-300">{ar ? 'سير عمل دعم قرار المزرعة' : 'Farm decision workflow'}</p><h1 className="text-xl sm:text-2xl font-black">{ar ? ({ inputs: 'معلومات المزرعة والمحاصيل', comparison: 'مقارنة استراتيجيات الدورة', tradeoffs: 'المخاطر والمقايضات', uncertainty: 'عدم اليقين والقيود' }[focusSection]) : ({ inputs: 'Farm Information & Crops', comparison: 'Rotation Strategy Comparison', tradeoffs: 'Risks & Trade-offs', uncertainty: 'Uncertainty & Limitations' }[focusSection])}</h1><p className="mt-1 max-w-3xl text-sm text-slate-400">{focusSection === 'comparison' ? (ar ? 'قارن خط الأساس مع بديلين باستخدام صفات منشورة وأوزان تحددها أنت.' : 'Compare an existing-rotation baseline with two alternatives using sourced crop traits and priorities you control.') : focusSection === 'inputs' ? (ar ? 'راجع سياق المزرعة وحدد أولويات المقارنة.' : 'Review farm context and set comparison priorities.') : focusSection === 'tradeoffs' ? (ar ? 'راجع تغيرات الصفات المدعومة وتصنيف المخاطر المتاح.' : 'Review supported criterion changes and available risk classifications.') : (ar ? 'راجع اكتمال الأدلة والافتراضات والقيود.' : 'Review evidence completeness, assumptions, and limitations.')}</p></div>
       {onBack && <button onClick={onBack} className="shrink-0 rounded-lg border border-slate-600 px-3 py-2 text-xs">{ar ? 'رجوع' : 'Back'}</button>}
     </header>
 
     <div className="flex min-w-0 flex-col gap-4">
-      <aside id="workflow-section-2" className="min-w-0 scroll-mt-4 rounded-xl border border-slate-700 bg-[#07152b] p-3 space-y-4">
+      <aside id="workflow-section-2" className={`${focusSection === 'inputs' ? 'block' : 'hidden'} min-w-0 scroll-mt-4 rounded-xl border border-slate-700 bg-[#07152b] p-3 space-y-4`}>
         <h2 className="text-base font-bold">{ar ? '٣. معلومات المزرعة والمحاصيل' : '3. Farm Information & Crops'}</h2>
         <section aria-labelledby="selected-farm-context-title" className="rounded-lg border border-cyan-900/70 bg-[#030914] p-3">
           <h3 id="selected-farm-context-title" className="text-sm font-bold text-cyan-100">{ar ? 'ملخص المزرعة المحددة' : 'Selected Farm Context'}</h3>
@@ -142,8 +142,8 @@ export default function RotationStrategyWorkbench({ mission = null, onBack, onDe
         </div>
       </aside>
 
-      <section id="workflow-section-3" className="scroll-mt-4 space-y-3">
-      <h2 className="text-sm font-bold"><span className="me-2 text-cyan-300">04</span>{ar ? 'مقارنة استراتيجيات الدورة' : '4. Rotation Strategy Comparison'}</h2>
+      <section id="workflow-section-3" className={`${focusSection === 'comparison' ? 'block' : 'hidden'} scroll-mt-4 space-y-3`}>
+      <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm font-bold"><span className="me-2 text-cyan-300">04</span>{ar ? 'مقارنة استراتيجيات الدورة' : '4. Rotation Strategy Comparison'}</h2><button type="button" onClick={() => { setSequences(starter); setBaselineConfirmed(false); selectStrategy('strategy-0'); setPriorities(DEFAULT_ROTATION_PRIORITIES); }} className="min-h-11 rounded-lg border border-slate-600 px-3 text-xs">{ar ? 'استعادة القوالب' : 'Restore starter sequences'}</button></div>
       <div id="rotation-comparison" className="grid min-w-0 scroll-mt-4 gap-3 xl:grid-cols-3">
         {strategies.map((strategy, si) => {
           const result = evaluation.strategies[si];
@@ -183,7 +183,7 @@ export default function RotationStrategyWorkbench({ mission = null, onBack, onDe
     </section>
       </section>
     </div>
-    <section id="workflow-section-4" className="scroll-mt-4 rounded-xl border border-amber-700/40 bg-[#07152b] p-3">
+    <section id="workflow-section-4" className={`${focusSection === 'tradeoffs' ? 'block' : 'hidden'} scroll-mt-4 rounded-xl border border-amber-700/40 bg-[#07152b] p-3`}>
       <h2 className="text-sm font-bold"><span className="me-2 text-cyan-300">05</span>{ar ? 'المخاطر والمقايضات' : '5. Risks & Trade-offs'}</h2>
       <p className="mt-1 text-[10px] text-slate-400">{ar ? 'المخطط يقارن درجات الصفات المدعومة بخط الأساس. لا يمثل غلة أو ربحاً.' : 'Bars compare supported trait scores with the baseline. They do not represent yield or profit.'}</p>
       <div className="mt-3 grid gap-3 lg:grid-cols-3">{tradeoffs.map((item, si) => <article key={item.strategyId} className="rounded-lg border border-slate-700 bg-[#030914] p-2.5"><h3 className="text-xs font-bold">{ar ? labelAr[si] : labels[si]}</h3>
@@ -194,7 +194,7 @@ export default function RotationStrategyWorkbench({ mission = null, onBack, onDe
       <p className="mt-2 text-[9px] text-amber-200">{ar ? 'الملاءمة السوقية، تغطية التربة، قيود الإنتاج، والتوافق مع موسم النمو غير متاحة؛ لذلك لا يمكن تقييم تلك المقايضات أو الاستدلال على الإنتاجية.' : 'Market fit, soil cover, production constraints, and growing-season fit are unavailable, so those trade-offs and production outcomes cannot be evaluated.'}</p>
       <details className="mt-3 border-t border-slate-700 pt-2"><summary className="min-h-11 cursor-pointer py-2 text-xs font-bold text-amber-100"><span className="me-2 text-cyan-300">03</span>{ar ? 'المخاطر البيئية (غير مصنفة)' : 'Environmental risks (unclassified)'}</summary><p className="mt-1 text-xs text-slate-400">{ar ? 'تعرضات الحرارة والأمطار مناخية مرجعية؛ لا تُصنف كمخاطر دون حدود محلية موثقة. لا توجد تنبؤات.' : 'Temperature and rainfall are climatological context; hazards are not classified without local thresholds. No forecasts are generated.'}</p><div className="mt-2 grid gap-2 sm:grid-cols-2">{riskAssessment.risks.map((item) => <div key={item.id} className="rounded bg-[#030914] p-2"><div className="flex justify-between gap-2 text-xs"><span>{ar ? item.labelAr : item.label}</span><b className="text-amber-200">{ar ? 'غير مصنف' : 'Unclassified'}</b></div><p className="mt-1 text-xs text-slate-400">{ar ? item.reasonAr : item.reason}</p></div>)}</div><p className="mt-2 text-xs text-amber-200">{riskAssessment.spatial.explanation}</p></details>
     </section>
-    <section id="workflow-section-5" className="scroll-mt-4 rounded-xl border border-violet-500/30 bg-[#07152b] p-3">
+    <section id="workflow-section-5" className={`${focusSection === 'uncertainty' ? 'block' : 'hidden'} scroll-mt-4 rounded-xl border border-violet-500/30 bg-[#07152b] p-3`}>
       <h2 className="text-sm font-bold"><span className="me-2 text-cyan-300">06</span>{ar ? 'عدم اليقين والقيود' : '6. Uncertainty & Limitations'}</h2>
       <p className="mt-2 text-sm text-violet-200">{ar ? uncertainty.overallAr : uncertainty.cropEvidence.status}</p>
       <details className="mt-2"><summary className="min-h-11 cursor-pointer py-2 text-xs font-bold text-violet-200">{ar ? 'عرض مصدر البيانات والقيود التفصيلية' : 'View evidence sources and detailed limits'}</summary><div className="mt-2 grid gap-3 md:grid-cols-3">
@@ -205,7 +205,7 @@ export default function RotationStrategyWorkbench({ mission = null, onBack, onDe
       <div className="mt-2 grid gap-3 md:grid-cols-2"><div><h3 className="text-[10px] font-bold text-amber-200">{ar ? 'معلومات مفقودة' : 'Missing inputs'}</h3><ul className="mt-1 list-disc space-y-1 ps-4 text-[9px] text-slate-400">{(ar ? uncertainty.missingInputsAr : uncertainty.missingInputs).map((item) => <li key={item}>{item}</li>)}</ul></div><div><h3 className="text-[10px] font-bold text-amber-200">{ar ? 'الافتراضات المنهجية' : 'Method assumptions'}</h3><ul className="mt-1 list-disc space-y-1 ps-4 text-[9px] text-slate-400">{uncertainty.assumptions.map((item) => <li key={item}>{ar ? 'تستخدم المقارنة افتراضات معلنة، ولا تمثل هذه النتيجة ضماناً زراعياً.' : item}</li>)}</ul></div></div>
       <p className="mt-2 text-xs text-slate-400">{ar ? uncertainty.basisAr : uncertainty.basis}</p></details>
     </section>
-    <footer className="flex flex-wrap items-center justify-between gap-2 pb-2"><button onClick={() => { setSequences(starter); setBaselineConfirmed(false); selectStrategy('strategy-0'); setPriorities(DEFAULT_ROTATION_PRIORITIES); }} className="inline-flex items-center gap-2 rounded-lg border border-slate-600 px-3 py-2 text-xs"><RotateCcw size={13} />{ar ? 'استعادة القوالب' : 'Restore starter sequences'}</button><button onClick={submit} disabled={!onDecisionSubmit} className="inline-flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-xs font-bold disabled:opacity-50">{ar ? 'اعتماد الاختيار للنتائج' : 'Use selected strategy'}{isRtl ? <ArrowLeft size={14} /> : <ArrowRight size={14} />}</button></footer>
+    {focusSection === 'uncertainty' && <footer className="flex flex-wrap items-center justify-end gap-2 pb-2"><button onClick={submit} disabled={!onDecisionSubmit} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-bold disabled:opacity-50">{ar ? 'اعتماد الاختيار للنتائج' : 'Use selected strategy'}{isRtl ? <ArrowLeft size={14} /> : <ArrowRight size={14} />}</button></footer>}
   </div>;
 }
 
