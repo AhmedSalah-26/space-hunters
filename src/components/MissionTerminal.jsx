@@ -95,6 +95,6 @@ export default function MissionTerminal({ onOpenGame, onWorkflowStepChange, init
       {(activeView === 'inputs' || activeView === 'comparison' || activeView === 'review') && <RotationStrategyWorkbench focusSection={focusForStep} onDecisionSubmit={handleDecision} />}
       {activeView === 'summary' && evaluation && <ResultsDashboardScreen mission={mission} playerChoice={selectedStrategyId} playerEvaluation={evaluation} onNextMission={onOpenGame} nextLabel={ar ? 'العودة إلى المهام التعليمية' : 'Open learning missions'} />}
     </div>
-    <footer className="hidden shrink-0 justify-between gap-2 border-t border-white/5 bg-[#030712] px-3 py-1.5 text-xs text-slate-400 sm:flex sm:px-5"><span>{ar ? 'جلسة مؤقتة على هذا الجهاز · لا يلزم تسجيل' : 'Temporary session on this device · no sign-in required'}</span><span className="hidden shrink-0 sm:block">{ar ? `الخطوة ${step + 1} من ${FLOW.length}` : `Step ${step + 1} of ${FLOW.length}`}</span></footer>
+    <footer className="hidden shrink-0 justify-end gap-2 border-t border-white/5 bg-[#030712] px-3 py-1.5 text-xs text-slate-400 sm:flex sm:px-5"><span>{ar ? `الخطوة ${step + 1} من ${FLOW.length}` : `Step ${step + 1} of ${FLOW.length}`}</span></footer>
   </div>;
 }

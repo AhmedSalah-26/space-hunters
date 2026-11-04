@@ -4,7 +4,7 @@
  */
 
 export const leaderboardHeader = {
-  badge: "NASA Space Apps 2026 Rankings",
+  badge: "Space Hunters Rankings",
   subAr: "ترتيب الفرق والمزارعين بناءً على كفاءة الدورات الزراعية وترشيد المياه",
   subEn: "Global leaderboard tracking crop rotation efficiency, water conservation, and soil resilience",
   footerNoteAr: "يتم تحديث الترتيب دورياً مع كل محاكاة زراعية مكتملة",

@@ -496,7 +496,7 @@ export default function FarmProStudio({ onOpenRotationBuilder, focusEnvironmenta
           </button>
         ) : (
           <div 
-            className="absolute inset-x-2 bottom-2 top-auto z-20 max-h-[90%] w-auto max-w-none border-2 border-indigo-500/60 text-white rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] p-3 sm:inset-x-auto sm:left-4 sm:top-4 sm:bottom-auto sm:max-h-[calc(100%-2rem)] sm:w-[420px] sm:max-w-[440px] sm:p-5 flex flex-col gap-3.5 overflow-y-auto overscroll-contain animate-in fade-in zoom-in-95"
+            className="absolute inset-x-2 bottom-2 top-auto z-20 max-h-[90%] w-auto max-w-none border-2 border-indigo-500/60 text-white rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] p-3 sm:inset-x-auto sm:left-4 sm:top-4 sm:bottom-auto sm:max-h-[calc(100%-2rem)] sm:w-[520px] sm:max-w-[calc(100vw_-_2rem)] sm:p-5 flex flex-col gap-3.5 overflow-y-auto overscroll-contain animate-in fade-in zoom-in-95"
             style={{ backgroundColor: '#07152b', opacity: 1 }}
           >
             

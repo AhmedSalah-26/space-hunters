@@ -172,9 +172,9 @@ export default function EnvironmentalAnalysisDashboard({
   const riskAssessment = useMemo(() => assessEnvironmentalRisk({ observations: monthlyObservations, farmLocation }), [monthlyObservations, farmLocation]);
 
   return (
-    <section id={id || 'environmental-analysis'} className="scroll-mt-3 rounded-2xl border border-cyan-500/30 bg-[#030914] p-3 space-y-3" aria-label={isArabic ? 'تحليل البيئة' : 'Environmental analysis'}>
-      <div className="flex items-start justify-between gap-2">
-        <div>
+    <section id={id || 'environmental-analysis'} className="min-w-0 w-full scroll-mt-3 rounded-2xl border border-cyan-500/30 bg-[#030914] p-3 space-y-3 [overflow-wrap:break-word]" aria-label={isArabic ? 'تحليل البيئة' : 'Environmental analysis'}>
+      <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
           <h2 className="flex items-center gap-1.5 text-xs font-black text-cyan-200"><Activity className="w-4 h-4" />{isArabic ? 'تحليل البيئة' : 'Environmental Analysis'}</h2>
           <p className="text-[9px] text-slate-400 mt-1">{isArabic ? 'NASA POWER · متوسطات مناخية شهرية مرجعية، وليست رصداً حالياً.' : 'NASA POWER · monthly climatological reference values, not current observations.'}</p>
           <p className="text-[8px] text-amber-200 mt-1">{isArabic ? 'بيانات نقطة شبكية؛ الدقة المكانية تختلف حسب المتغير. لا تمثل قياساً دقيقاً للحقل.' : 'Gridded point data; spatial resolution varies by parameter and is not field-scale.'}</p>
@@ -195,7 +195,7 @@ export default function EnvironmentalAnalysisDashboard({
         <div className="grid grid-cols-6 sm:grid-cols-12 gap-0.5 text-center">{MONTHS.map((month, index) => <button type="button" key={month[0]} onClick={() => onSelectedMonthChange(index)} aria-label={month[isArabic ? 2 : 1]} title={month[isArabic ? 2 : 1]} aria-pressed={index === selectedMonth} className={`min-h-11 rounded py-1 font-semibold text-[7px] ${index === selectedMonth ? 'bg-cyan-700 text-white' : 'text-slate-300 hover:bg-white/5'}`}>{isArabic ? MONTH_ABBREVIATIONS_AR[index] : month[1]}</button>)}</div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div className="grid min-w-0 grid-cols-1 gap-2">
         {CATEGORIES.map((category) => {
           const Icon = category.icon;
           const categoryObservations = category.variables.flatMap((variable) => monthlyObservations.filter((item) => item.variable === variable));

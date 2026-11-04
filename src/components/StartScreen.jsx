@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { 
   Rocket, Sprout, RotateCcw, 
   BookOpen, Languages, 
-  ArrowLeft, ArrowRight, Satellite,
+  ArrowLeft, ArrowRight,
   Scan, Compass
 } from 'lucide-react';
 import { startScreenData } from '../data/startScreenData';
@@ -99,14 +99,6 @@ export default function StartScreen({
             <span>SPACE</span>
             <span className="text-[#00b4d8] ml-2 drop-shadow-[0_0_24px_rgba(0,180,216,0.9)]">HUNTERS</span>
           </h1>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-cyan-400/60" />
-            <Satellite className="w-3 h-3 text-cyan-400" />
-            <span className="text-[10px] text-[#38bdf8] font-black tracking-[0.2em] uppercase">NASA Space Apps 2026</span>
-            <Satellite className="w-3 h-3 text-cyan-400 scale-x-[-1]" />
-            <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-cyan-400/60" />
-          </div>
-
           <p className="text-xs sm:text-sm font-bold text-cyan-100/90 leading-relaxed max-w-sm drop-shadow-md">
             {lang === 'ar' ? startScreenData.taglineAr : startScreenData.taglineEn}
           </p>

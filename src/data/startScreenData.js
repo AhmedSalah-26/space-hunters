@@ -70,5 +70,5 @@ export const startScreenData = {
 
   guideBtnAr: "ازاي تلعب؟",
   guideBtnEn: "Game Guide & Manual",
-  teamSignature: "NASA Space Apps 2026 • Space Hunters"
+  teamSignature: "Space Hunters"
 };

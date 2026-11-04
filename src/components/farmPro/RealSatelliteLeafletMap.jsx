@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 export default function RealSatelliteLeafletMap({
   center = [30.825, 31.310], // Nile Delta center
@@ -22,14 +22,16 @@ export default function RealSatelliteLeafletMap({
   const environmentalLayerRef = useRef(null);
   const zoomControlRef = useRef(null);
   const callbacksRef = useRef({});
+  const [tileLoadError, setTileLoadError] = useState(false);
   callbacksRef.current = { onLocationSelect, onBoundaryPointMove };
 
   // Initialize Leaflet Map once
   useEffect(() => {
     let map = null;
+    let cancelled = false;
 
     import('leaflet').then((L) => {
-      if (!mapContainerRef.current) return;
+      if (cancelled || !mapContainerRef.current) return;
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
       }
@@ -43,13 +45,15 @@ export default function RealSatelliteLeafletMap({
       });
 
       // Esri World Imagery is the basemap, not an analytical NASA data layer.
-      L.tileLayer(
+      const imageryLayer = L.tileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         {
           maxZoom: 19,
           attribution: 'Esri, Maxar, Earthstar Geographics'
         }
-      ).addTo(map);
+      );
+      imageryLayer.on('tileerror', () => setTileLoadError(true));
+      imageryLayer.addTo(map);
 
       // 2. Subtle Reference labels (Roads, canals, place names)
       L.tileLayer(
@@ -83,11 +87,14 @@ export default function RealSatelliteLeafletMap({
     });
 
     return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-        zoomControlRef.current = null;
-      }
+      cancelled = true;
+      const mountedMap = mapInstanceRef.current || map;
+      mountedMap?.remove();
+      if (mapInstanceRef.current === mountedMap) mapInstanceRef.current = null;
+      zoomControlRef.current = null;
+      beaconLayerRef.current = null;
+      boundaryLayerRef.current = null;
+      environmentalLayerRef.current = null;
     };
   }, []);
 
@@ -246,6 +253,10 @@ export default function RealSatelliteLeafletMap({
     <div className="relative w-full h-full min-h-0">
       {/* Esri basemap container */}
       <div ref={mapContainerRef} className="w-full h-full z-0 cursor-crosshair" />
+
+      {tileLoadError && <div role="status" className="absolute bottom-3 left-3 right-3 z-[500] rounded-lg border border-amber-400/50 bg-[#07152b]/95 px-3 py-2 text-xs leading-relaxed text-amber-100 shadow-lg sm:right-auto sm:max-w-sm">
+        {lang === 'ar' ? 'تعذر تحميل بعض مربعات صور Esri؛ قد تظهر أجزاء فارغة من الخريطة. تحقق من الاتصال أو أعد تحميل الخريطة.' : 'Some Esri imagery tiles failed to load; blank map areas may appear. Check the connection or reload the map.'}
+      </div>}
 
       <div className="absolute left-3 right-3 top-3 z-[500] max-w-[calc(100%-1.5rem)] rounded-md border border-white/20 bg-[#07152b]/95 px-2 py-1.5 text-[8px] leading-relaxed text-slate-100 pointer-events-none sm:left-auto sm:max-w-[440px] sm:text-xs">
         {lang === 'ar' ? 'الخلفية: صور Esri © Esri وMaxar وEarthstar · التحليل: بيانات نقطية فقط' : 'BASEMAP: ESRI IMAGERY © ESRI, MAXAR, EARTHSTAR · ANALYSIS: POINT DATA ONLY'}

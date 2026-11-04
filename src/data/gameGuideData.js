@@ -11,7 +11,7 @@ export const gameGuideHeader = {
   subEn: "Challenge guide and decision-making manual using NASA Earth observations",
   understandBtnAr: "فهمت، يلا نبدأ اللعب 🚀",
   understandBtnEn: "Got it, Start Game 🚀",
-  teamFooter: "NASA Space Apps Challenge 2026 • Team Space Hunters"
+  teamFooter: "Team Space Hunters"
 };
 
 export const gameGuideHero = {

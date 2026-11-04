@@ -1,15 +1,16 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import AppNavigation from '../components/AppNavigation';
 import StartScreen from '../components/StartScreen';
-import WorldMapScreen from '../components/WorldMapScreen';
-import MissionBriefingScreen from '../components/MissionBriefingScreen';
-import DecisionMatrixScreen from '../components/DecisionMatrixScreen';
-import ResultsDashboardScreen from '../components/ResultsDashboardScreen';
-import MissionTerminal from '../components/MissionTerminal';
-import AgriBankModal from '../components/AgriBankModal';
-import GameGuideModal from '../components/GameGuideModal';
+const WorldMapScreen = dynamic(() => import('../components/WorldMapScreen'));
+const MissionBriefingScreen = dynamic(() => import('../components/MissionBriefingScreen'));
+const DecisionMatrixScreen = dynamic(() => import('../components/DecisionMatrixScreen'));
+const ResultsDashboardScreen = dynamic(() => import('../components/ResultsDashboardScreen'));
+const MissionTerminal = dynamic(() => import('../components/MissionTerminal'));
+const AgriBankModal = dynamic(() => import('../components/AgriBankModal'));
+const GameGuideModal = dynamic(() => import('../components/GameGuideModal'));
 import { missionsData } from '../data/missionsData';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -274,13 +275,11 @@ export default function Home() {
         )}
       </div>
 
-      {/* Persistent Space Apps Challenge 2026 Slim Footer - Hidden on Map screen on mobile */}
+      {/* Project and mission identification; challenge branding appears on the landing screen. */}
       <footer className={`w-full min-h-7 py-1 px-2.5 sm:px-4 border-t border-white/5 bg-[#030712]/95 backdrop-blur-md text-[8.5px] sm:text-[9.5px] text-slate-500 flex flex-wrap items-center justify-between gap-1 shrink-0 z-20 ${
         ['map', 'farmPro', 'universalBuilder'].includes(currentScreen) ? 'hidden sm:flex' : 'flex'
       }`}>
         <div className="flex items-center gap-1.5 text-slate-400">
-          <span className="text-cyan-400 font-black">NASA SPACE APPS 2026</span>
-          <span>•</span>
           <span>Team Space Hunters</span>
         </div>
         
