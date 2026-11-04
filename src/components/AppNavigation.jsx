@@ -48,10 +48,10 @@ export default function AppNavigation({ currentScreen, onBack, onHome, onOpenMap
 
         <nav aria-label={lang === 'ar' ? 'التنقل الرئيسي' : 'Primary navigation'} className="hidden shrink-0 items-center gap-1 lg:flex">
           <button type="button" onClick={onOpenMap} aria-current={currentScreen === 'map' || ['briefing', 'decision', 'results'].includes(currentScreen) ? 'page' : undefined} className="app-nav-button flex items-center gap-2 rounded-xl px-3 text-sm font-bold text-slate-200 hover:bg-white/10 aria-[current=page]:bg-blue-900/60 aria-[current=page]:text-white">
-            <Map aria-hidden="true" className="h-4 w-4" />{lang === 'ar' ? 'المهام' : 'Missions'}
+            <Map aria-hidden="true" className="h-4 w-4" />{lang === 'ar' ? 'المهام التعليمية' : 'Learning missions'}
           </button>
           <button type="button" onClick={onOpenFarm} aria-current={['farmPro', 'universalBuilder'].includes(currentScreen) ? 'page' : undefined} className="app-nav-button flex items-center gap-2 rounded-xl px-3 text-sm font-bold text-slate-200 hover:bg-white/10 aria-[current=page]:bg-cyan-950/70 aria-[current=page]:text-white">
-            <Sprout aria-hidden="true" className="h-4 w-4" />{lang === 'ar' ? 'مساحة المزرعة' : 'Farm workspace'}
+            <Sprout aria-hidden="true" className="h-4 w-4" />{lang === 'ar' ? 'خطط لمزرعتي' : 'Plan for my farm'}
           </button>
         </nav>
 
@@ -60,9 +60,9 @@ export default function AppNavigation({ currentScreen, onBack, onHome, onOpenMap
             {menuOpen ? <X aria-hidden="true" className="h-4 w-4" /> : <Menu aria-hidden="true" className="h-4 w-4" />}
           </button>
           {menuOpen && <div id="app-navigation-menu" className="absolute end-0 top-full z-[70] mt-2 grid min-w-56 gap-1 rounded-2xl border border-cyan-500/30 bg-[#061327] p-2 shadow-2xl" role="group" aria-label={lang === 'ar' ? 'الأقسام والموارد' : 'Sections and resources'}>
-            <button type="button" onClick={() => { setMenuOpen(false); onOpenMap(); }} className="app-nav-button flex items-center gap-2 rounded-xl px-3 text-start text-sm font-semibold text-slate-100 hover:bg-white/10"><Map aria-hidden="true" className="h-4 w-4 text-cyan-300" />{lang === 'ar' ? 'المهام التعليمية' : 'Learning missions'}</button>
-            <button type="button" onClick={() => { setMenuOpen(false); onOpenFarm(); }} className="app-nav-button flex items-center gap-2 rounded-xl px-3 text-start text-sm font-semibold text-slate-100 hover:bg-white/10"><Sprout aria-hidden="true" className="h-4 w-4 text-emerald-300" />{lang === 'ar' ? 'مساحة المزرعة' : 'Farm workspace'}</button>
-            <div className="my-1 border-t border-white/10" />
+            <button type="button" onClick={() => { setMenuOpen(false); onOpenMap(); }} className="app-nav-button flex items-center gap-2 rounded-xl px-3 text-start text-sm font-semibold text-slate-100 hover:bg-white/10 lg:hidden"><Map aria-hidden="true" className="h-4 w-4 text-cyan-300" />{lang === 'ar' ? 'المهام التعليمية' : 'Learning missions'}</button>
+            <button type="button" onClick={() => { setMenuOpen(false); onOpenFarm(); }} className="app-nav-button flex items-center gap-2 rounded-xl px-3 text-start text-sm font-semibold text-slate-100 hover:bg-white/10 lg:hidden"><Sprout aria-hidden="true" className="h-4 w-4 text-emerald-300" />{lang === 'ar' ? 'مساحة المزرعة' : 'Plan for my farm'}</button>
+            <div className="my-1 border-t border-white/10 lg:hidden" />
             <button type="button" onClick={() => { setMenuOpen(false); onOpenAgriBank(); }} className="app-nav-button flex items-center gap-2 rounded-xl px-3 text-start text-sm font-semibold text-slate-100 hover:bg-white/10"><Database aria-hidden="true" className="h-4 w-4 text-cyan-300" />{lang === 'ar' ? 'بنك المحاصيل' : 'Crop library'}</button>
             <button type="button" onClick={() => { setMenuOpen(false); onOpenGameGuide(); }} className="app-nav-button flex items-center gap-2 rounded-xl px-3 text-start text-sm font-semibold text-slate-100 hover:bg-white/10"><BookOpen aria-hidden="true" className="h-4 w-4 text-amber-300" />{lang === 'ar' ? 'دليل التعلم' : 'Learning guide'}</button>
           </div>}

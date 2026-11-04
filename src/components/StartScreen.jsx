@@ -110,20 +110,16 @@ export default function StartScreen({
           {/* PRIMARY 1: FARM PRO STUDIO (TARGET YOUR FARM) */}
           <button
             onClick={onOpenFarmPro}
-            className="w-full py-4 px-5 bg-gradient-to-r from-indigo-700 via-purple-700 to-cyan-600 hover:from-indigo-600 hover:to-cyan-500 text-white rounded-2xl shadow-[0_0_35px_rgba(99,102,241,0.5),0_8px_20px_rgba(0,0,0,0.5)] flex items-center justify-between transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer border border-indigo-400/50 group relative overflow-hidden"
+            className="w-full min-h-24 py-4 px-5 bg-cyan-800 hover:bg-cyan-700 text-white rounded-2xl flex items-center justify-between transition-colors cursor-pointer border border-cyan-600/60 group"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
             <div className="flex items-center gap-3.5 z-10">
               <div className="w-12 h-12 rounded-2xl bg-indigo-500/30 border border-indigo-300/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-inner">
                 <Scan className="w-6 h-6 text-cyan-300" />
               </div>
               <div className="text-left">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
                   <span className="text-base sm:text-lg font-black tracking-wide leading-tight text-white">
-                    {lang === 'ar' ? 'افتح مركز مهمة المزرعة' : 'Open Farm Mission Terminal'}
-                  </span>
-                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-200 border border-cyan-400/40 font-mono font-bold">
-                    PRO
+                    {lang === 'ar' ? 'خطط لمزرعتي' : 'Plan for my farm'}
                   </span>
                 </div>
                 <div className="text-xs text-indigo-200 font-medium mt-0.5">
@@ -139,16 +135,15 @@ export default function StartScreen({
           {/* PRIMARY 2: GAME MODE (PLAY & LEARN) */}
           <button
             onClick={onStartGame}
-            className="w-full py-4 px-5 bg-gradient-to-r from-blue-700 via-blue-600 to-teal-600 hover:from-blue-600 hover:to-teal-500 text-white rounded-2xl shadow-[0_0_30px_rgba(0,120,220,0.4),0_8px_20px_rgba(0,0,0,0.4)] flex items-center justify-between transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer border border-cyan-400/30 group relative overflow-hidden"
+            className="w-full min-h-24 py-4 px-5 bg-[#07152b] hover:bg-[#0b2040] text-slate-100 rounded-2xl flex items-center justify-between transition-colors cursor-pointer border border-white/15 group"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
             <div className="flex items-center gap-3.5 z-10">
               <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0 group-hover:rotate-12 transition-transform duration-300">
                 <Rocket className="w-6 h-6 text-white" />
               </div>
               <div className="text-left">
                 <div className="text-base sm:text-lg font-black tracking-wide leading-tight">
-                  {lang === 'ar' ? 'العب واتعلم (تحديات زراعية)' : 'Play & Learn (Field Missions)'}
+                  {lang === 'ar' ? 'استكشف المهام التعليمية' : 'Explore learning missions'}
                 </div>
                 <div className="text-xs text-cyan-100 font-medium mt-0.5">
                   {lang === 'ar' ? '٦ مهمات ممتعة لحل مشاكل الفلاحين حول العالم' : '6 Global Missions to solve real farm challenges'}

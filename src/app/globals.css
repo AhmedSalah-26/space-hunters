@@ -102,16 +102,13 @@ html[lang='en'] body {
 /* Text utilities had drifted below comfortable reading sizes. Keep tiny type
    for genuinely compact metadata while lifting labels, descriptions and chart
    annotations to a readable floor throughout every screen. */
-[class~='text-xs'], [class*=':text-xs'],
-[class~='text-sm'], [class*=':text-sm'] {
-  font-size: var(--type-support) !important;
-  line-height: 1.5;
-}
+[class~='text-xs'], [class*=':text-xs'] { font-size: var(--type-meta) !important; line-height: 1.5; }
+[class~='text-sm'], [class*=':text-sm'] { font-size: var(--type-support) !important; line-height: 1.5; }
 
 [class*='text-[7px]'], [class*='text-[8px]'], [class*='text-[8.5px]'],
 [class*='text-[9px]'], [class*='text-[9.5px]'], [class*='text-[10px]'],
 [class*='text-[10.5px]'], [class*='text-[11px]'], [class*='text-[11.5px]'] {
-  font-size: var(--type-meta) !important;
+  font-size: 0.75rem !important;
   line-height: 1.45;
 }
 
@@ -232,10 +229,10 @@ button, [role="button"] {
 /* Sci-Fi Glassmorphism Panel Fallback */
 .glass-panel {
   background: linear-gradient(135deg, rgba(14, 30, 56, 0.88) 0%, rgba(8, 18, 36, 0.94) 100%);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(56, 189, 248, 0.3);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .glass-panel-hover {

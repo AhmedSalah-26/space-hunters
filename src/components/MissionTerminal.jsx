@@ -91,10 +91,9 @@ export default function MissionTerminal({ onOpenGame, onWorkflowStepChange, init
     </header>
 
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      {(activeView === 'farm' || activeView === 'environment') && <FarmProStudio onOpenRotationBuilder={() => navigateStep(2)} focusEnvironmental={activeView === 'environment'} />}
+      {(activeView === 'farm' || activeView === 'environment') && <FarmProStudio onContinue={() => navigateStep(Math.min(FLOW.length - 1, step + 1))} onEditFarm={() => navigateStep(0)} focusEnvironmental={activeView === 'environment'} />}
       {(activeView === 'inputs' || activeView === 'comparison' || activeView === 'review') && <RotationStrategyWorkbench focusSection={focusForStep} onDecisionSubmit={handleDecision} />}
       {activeView === 'summary' && evaluation && <ResultsDashboardScreen mission={mission} playerChoice={selectedStrategyId} playerEvaluation={evaluation} onNextMission={onOpenGame} nextLabel={ar ? 'العودة إلى المهام التعليمية' : 'Open learning missions'} />}
     </div>
-    <footer className="hidden shrink-0 justify-end gap-2 border-t border-white/5 bg-[#030712] px-3 py-1.5 text-xs text-slate-400 sm:flex sm:px-5"><span>{ar ? `الخطوة ${step + 1} من ${FLOW.length}` : `Step ${step + 1} of ${FLOW.length}`}</span></footer>
   </div>;
 }

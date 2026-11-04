@@ -68,7 +68,7 @@ function localizeGeometryError(error, lang) {
   return messages[error] || error || '';
 }
 
-export default function FarmProStudio({ onOpenRotationBuilder, focusEnvironmental = false }) {
+export default function FarmProStudio({ onContinue, onEditFarm, focusEnvironmental = false }) {
   const { lang, isRtl } = useLanguage();
   const { session, updateSession } = useWorkingSession();
   const farmDraft = session.farmInformation?.farmSelectionDraft || {};
@@ -109,11 +109,11 @@ export default function FarmProStudio({ onOpenRotationBuilder, focusEnvironmenta
 
   useEffect(() => {
     const mobile = window.matchMedia('(max-width: 639px)');
-    const syncMapPanel = (event) => setIsPanelCollapsed(event.matches);
+    const syncMapPanel = (event) => setIsPanelCollapsed(event.matches && !focusEnvironmental);
     syncMapPanel(mobile);
     mobile.addEventListener('change', syncMapPanel);
     return () => mobile.removeEventListener('change', syncMapPanel);
-  }, []);
+  }, [focusEnvironmental]);
 
   useEffect(() => {
     updateSession({ farmInformation: { ...(session.farmInformation || {}), farmSelectionDraft: { selectedLocation, locationName, selectionMode, areaUnit, areaInput, latitudeInput, longitudeInput, boundaryPoints } } });
@@ -380,7 +380,7 @@ export default function FarmProStudio({ onOpenRotationBuilder, focusEnvironmenta
                 setShowSearchDropdown(true);
               }}
               onFocus={() => setShowSearchDropdown(true)}
-              placeholder={lang === 'ar' ? '🔍 اكتب اسم بلدك، قريتك، أو دوس على الخريطة على طول...' : '🔍 Search village, governorate, or click anywhere on map...'}
+              placeholder={lang === 'ar' ? 'ابحث عن مدينة أو قرية، أو اختر نقطة على الخريطة' : 'Search for a place or select a point on the map'}
               style={{ backgroundColor: '#081426', opacity: 1 }}
               className="min-h-11 w-full border-2 border-indigo-500/60 hover:border-indigo-400 focus:border-cyan-400 text-white rounded-2xl pl-10 pr-10 py-2.5 text-sm font-bold shadow-[0_0_25px_rgba(0,0,0,0.8)] focus:outline-none transition-all placeholder:text-slate-400"
             />
@@ -507,7 +507,7 @@ export default function FarmProStudio({ onOpenRotationBuilder, focusEnvironmenta
                   <MapPin className="w-4 h-4 text-cyan-400" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[10px] text-slate-400 font-bold">{lang === 'ar' ? 'أرضك اللي اخترتها:' : 'Target Farm Location:'}</div>
+                  <div className="text-[10px] text-slate-400 font-bold">{focusEnvironmental ? (lang === 'ar' ? 'الموقع المحدد:' : 'Selected farm:') : (lang === 'ar' ? 'أرضك اللي اخترتها:' : 'Target Farm Location:')}</div>
                   <div className="text-xs font-black text-white truncate">{selectionMode === 'boundary' && polygonCentroid ? (lang === 'ar' ? 'مركز المضلع' : 'Polygon centroid') : locationName}</div>
                 </div>
               </div>
@@ -526,7 +526,7 @@ export default function FarmProStudio({ onOpenRotationBuilder, focusEnvironmenta
             </div>
 
             {/* Farm location and area selection */}
-            <section className="p-3 bg-[#030914] rounded-2xl border border-indigo-400/40 space-y-3" aria-label={lang === 'ar' ? 'تحديد موقع ومساحة المزرعة' : 'Farm location and area selection'}>
+            {!focusEnvironmental && <section className="p-3 bg-[#030914] rounded-2xl border border-indigo-400/40 space-y-3" aria-label={lang === 'ar' ? 'تحديد موقع ومساحة المزرعة' : 'Farm location and area selection'}>
               <div className="flex items-center justify-between gap-2">
                 <h2 className="text-xs font-black text-white">{lang === 'ar' ? 'حدد موقع ومساحة المزرعة' : 'Define Farm Location & Area'}</h2>
                 <span className="text-[9px] text-cyan-300 font-mono">{lang === 'ar' ? 'اختياري' : 'WORKING SESSION'}</span>
@@ -622,8 +622,15 @@ export default function FarmProStudio({ onOpenRotationBuilder, focusEnvironmenta
                   : (lang === 'ar' ? `الطريقة: حدود مرسومة (${boundaryPoints.length} نقاط)` : `Method: drawn polygon (${boundaryPoints.length} vertices)`)}</div>
                 {selectionMode === 'boundary' && boundaryValidation.valid && <div className="text-[9px] text-emerald-300">{lang === 'ar' ? 'هندسة GeoJSON جاهزة للتحليل المكاني لاحقاً.' : 'GeoJSON polygon geometry is ready for future spatial analysis.'}</div>}
               </div>
-            </section>
+            </section>}
 
+            {!focusEnvironmental && <button type="button" disabled={selectionMode === 'point-area' ? !pointAreaIsValid : !boundaryValidation.valid} onClick={onContinue} className="app-nav-button min-h-11 w-full rounded-xl bg-cyan-700 px-4 text-sm font-bold text-white hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-45">{lang === 'ar' ? 'تأكيد الموقع والمتابعة' : 'Confirm farm and continue'}</button>}
+
+            {focusEnvironmental && <>
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-[#030914] px-3 py-2 text-xs">
+              <span className="text-slate-300">{lang === 'ar' ? 'البيانات البيئية مرتبطة بالموقع والنقطة المرجعية المحددين.' : 'Environmental data use the selected farm location and reference point.'}</span>
+              <button type="button" onClick={onEditFarm} className="min-h-11 shrink-0 rounded-lg border border-white/10 px-3 text-slate-200 hover:bg-white/5">{lang === 'ar' ? 'تعديل الموقع' : 'Edit farm'}</button>
+            </div>
             <EnvironmentalAnalysisDashboard
               id="environmental-analysis"
               observations={powerObservations}
@@ -637,11 +644,8 @@ export default function FarmProStudio({ onOpenRotationBuilder, focusEnvironmenta
               onToggleLayer={(variable) => setActiveEnvironmentalLayers((current) => ({ ...current, [variable]: !current[variable] }))}
               fusionGroups={environmentalFusion}
             />
-            <section className="rounded-2xl border border-cyan-700/50 bg-[#030c1d] p-3">
-              <div className="text-xs font-black text-cyan-200">{lang === 'ar' ? 'مقارنة دورات المحاصيل' : 'Crop rotation comparison'}</div>
-              <p className="mt-1 text-[10px] text-slate-400">{lang === 'ar' ? 'قارن خط الأساس والبدائل باستخدام صفات منشورة وأولوياتك.' : 'Compare a baseline and alternatives using sourced crop traits and your priorities.'}</p>
-              <button onClick={onOpenRotationBuilder} className="mt-2 w-full rounded-lg bg-cyan-700 px-3 py-2 text-xs font-bold text-white">{lang === 'ar' ? 'فتح مقارنة الاستراتيجيات' : 'Open strategy comparison'}</button>
-            </section>
+            <button type="button" onClick={onContinue} className="app-nav-button min-h-11 w-full rounded-xl bg-cyan-700 px-4 text-sm font-bold text-white hover:bg-cyan-600">{lang === 'ar' ? 'متابعة إلى معلومات المحاصيل' : 'Continue to crop information'}</button>
+            </>}
             {/* Action Buttons */}
             <div className="flex gap-2 pt-1">
               <button

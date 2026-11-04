@@ -224,16 +224,6 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
           background: 'radial-gradient(ellipse 130% 100% at 50% 45%, #071c3d 0%, #040e21 60%, #020712 100%)',
         }}
       >
-        {/* Grid overlay */}
-        <div className="absolute inset-0 pointer-events-none" style={{
-          backgroundImage: 'linear-gradient(rgba(56,189,248,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,0.04) 1px,transparent 1px)',
-          backgroundSize: '44px 44px',
-        }} />
-
-        {/* Glow vignette */}
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ boxShadow: 'inset 0 0 80px 25px rgba(2,7,18,0.85)' }} />
-
         {/* Desktop Compass Widget */}
         <div
           onClick={(e) => { e.stopPropagation(); recenterMap(); }}
@@ -296,14 +286,14 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
             <div className="flex items-center gap-1 shrink-0">
               <button
                 onClick={handlePrevMission}
-                className="w-8 h-8 bg-[#0a1e3f] hover:bg-[#122e5e] border border-cyan-400/50 rounded-xl flex items-center justify-center text-cyan-300 font-black active:scale-90 transition-all cursor-pointer shadow-sm"
+                className="min-h-11 min-w-11 bg-[#0a1e3f] hover:bg-[#122e5e] border border-cyan-400/40 rounded-xl flex items-center justify-center text-cyan-300 font-black transition-colors cursor-pointer"
                 title={lang === 'ar' ? 'المهمة السابقة' : 'Previous Mission'}
               >
                 ◀
               </button>
               <button
                 onClick={handleNextMission}
-                className="w-8 h-8 bg-[#0a1e3f] hover:bg-[#122e5e] border border-cyan-400/50 rounded-xl flex items-center justify-center text-cyan-300 font-black active:scale-90 transition-all cursor-pointer shadow-sm"
+                className="min-h-11 min-w-11 bg-[#0a1e3f] hover:bg-[#122e5e] border border-cyan-400/40 rounded-xl flex items-center justify-center text-cyan-300 font-black transition-colors cursor-pointer"
                 title={lang === 'ar' ? 'المهمة التالية' : 'Next Mission'}
               >
                 ▶
@@ -311,18 +301,11 @@ export default function WorldMapScreen({ missions, selectedMission, setSelectedM
             </div>
           </div>
 
-          {/* Row 2: Action Buttons (Two full, distinct, non-overlapping buttons) */}
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => setMobileView('details')}
-              className="py-2.5 px-2 bg-[#092247] hover:bg-[#0e2f60] border border-cyan-400/40 rounded-xl text-xs font-black text-cyan-200 transition-all text-center active:scale-95 shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <span>📋</span>
-              <span>{lang === 'ar' ? 'التفاصيل' : 'Details'}</span>
-            </button>
+          {/* Details are available in the map tabs; keep the mission action here. */}
+          <div className="grid grid-cols-1 gap-2">
             <button
               onClick={onStartMission}
-              className="py-2.5 px-3 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-500 hover:from-blue-500 hover:to-teal-400 text-white rounded-xl text-xs font-black shadow-lg shadow-cyan-500/30 border border-cyan-300/50 transition-all active:scale-95 text-center flex items-center justify-center gap-1.5 cursor-pointer"
+              className="min-h-11 px-3 bg-cyan-700 hover:bg-cyan-600 text-white rounded-xl text-sm font-bold border border-cyan-300/30 transition-colors text-center flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>🚀</span>
               <span>{lang === 'ar' ? 'ابدأ المهمة' : 'Start Mission'}</span>
