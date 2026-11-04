@@ -90,7 +90,7 @@ export default function MissionTerminal({ onOpenGame, onWorkflowStepChange, init
       </div>
     </header>
 
-    <div className="min-h-0 flex-1 overflow-hidden">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       {(activeView === 'farm' || activeView === 'environment') && <FarmProStudio onOpenRotationBuilder={() => navigateStep(2)} focusEnvironmental={activeView === 'environment'} />}
       {(activeView === 'inputs' || activeView === 'comparison' || activeView === 'review') && <RotationStrategyWorkbench focusSection={focusForStep} onDecisionSubmit={handleDecision} />}
       {activeView === 'summary' && evaluation && <ResultsDashboardScreen mission={mission} playerChoice={selectedStrategyId} playerEvaluation={evaluation} onNextMission={onOpenGame} nextLabel={ar ? 'العودة إلى المهام التعليمية' : 'Open learning missions'} />}

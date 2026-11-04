@@ -9,6 +9,7 @@ import { DEFAULT_ROTATION_PRIORITIES, ROTATION_CRITERIA, evaluateRotationStrateg
 import { analyzeRotationTradeoffs } from '../../analysis/rotation/analyzeTradeoffs.js';
 import { assessRotationUncertainty } from '../../analysis/uncertainty/assessRotationUncertainty.js';
 import { assessEnvironmentalRisk } from '../../analysis/risk/assessEnvironmentalRisk.js';
+import { formatArea } from '../../utils/farmGeometry.js';
 
 const starterSequences = [
   ['winter_wheat', 'faba_beans', 'summer_corn'],
@@ -28,6 +29,13 @@ const priorityAria = {
   waterNeed: 'أهمية الاحتياج المائي الأقل', nitrogenPotential: 'أهمية إمكانات تثبيت النيتروجين',
   familyDiversity: 'أهمية تنوع العائلات', pestBreak: 'أهمية كسر دورة الآفات', droughtResilience: 'أهمية تحمل الجفاف',
 };
+const priorityDescriptions = {
+  waterNeed: ['How strongly the comparison should favor crops with lower published water needs.', 'مدى تفضيل المحاصيل ذات الاحتياج المائي المنشور الأقل في المقارنة.'],
+  nitrogenPotential: ['How much to value the share of crops with sourced legume-fixation potential.', 'مدى أهمية نسبة المحاصيل ذات إمكانات تثبيت النيتروجين الموثقة.'],
+  familyDiversity: ['How much to value the number of different crop families in a sequence.', 'مدى أهمية عدد العائلات النباتية المختلفة في الدورة.'],
+  pestBreak: ['How much to value changes in crop family between seasons as a pest-cycle proxy.', 'مدى أهمية تغيير العائلة النباتية بين المواسم كمؤشر محتمل لكسر دورة الآفات.'],
+  droughtResilience: ['How much to value sourced drought-response classes when every strategy has comparable data.', 'مدى أهمية فئات تحمل الجفاف الموثقة عند توفر بيانات قابلة للمقارنة لكل الاستراتيجيات.'],
+};
 const formatPercent = (value) => `${Math.round(value)}%`;
 
 export default function RotationStrategyWorkbench({ mission = null, onBack, onDecisionSubmit, focusSection = null }) {
@@ -44,7 +52,7 @@ export default function RotationStrategyWorkbench({ mission = null, onBack, onDe
   const [baselineConfirmed, setBaselineConfirmed] = useState(() => Boolean(session.analysisResults?.rotationEvaluation?.farmInputs?.baselineConfirmed));
   const [selectedId, setSelectedId] = useState(() => session.analysisResults?.selectedStrategyId || 'strategy-0');
   const [priorities, setPriorities] = useState(() => savedInputs.priorities || DEFAULT_ROTATION_PRIORITIES);
-  const [farm, setFarm] = useState(() => ({ region: mission?.regionEn || '', soilType: '', waterAvailability: '', equipment: '', market: '', ...savedInputs }));
+  const [farm, setFarm] = useState(() => ({ region: session.farmLocation?.label || mission?.regionEn || '', soilType: '', waterAvailability: '', equipment: '', market: '', ...savedInputs, region: session.farmLocation?.label || mission?.regionEn || savedInputs.region || '' }));
 
   useEffect(() => {
     const ids = new Set(catalog.map((crop) => crop.id));
@@ -92,15 +100,27 @@ export default function RotationStrategyWorkbench({ mission = null, onBack, onDe
     updateSession({ analysisResults: { ...(session.analysisResults || {}), selectedStrategyId: id } });
   };
 
-  return <div dir={isRtl ? 'rtl' : 'ltr'} className="w-full h-full max-w-[1500px] mx-auto px-3 sm:px-6 py-4 text-slate-100 space-y-4 overflow-y-auto">
+  const farmLocation = session.farmLocation;
+  const farmArea = session.farmArea || farmLocation;
+  const locationLabel = farmLocation?.label || (ar ? mission?.regionAr || 'لم يتم تحديد موقع للمزرعة' : mission?.regionEn || 'No farm location selected');
+  const areaLabel = farmArea?.area != null && farmArea?.areaUnit
+    ? formatArea(farmArea.area, farmArea.areaUnit, ar ? 'ar' : 'en')
+    : (ar ? 'غير متاح' : 'Unavailable');
+  const methodLabel = farmLocation?.selectionMethod === 'polygon-boundary'
+    ? (ar ? 'مساحة محسوبة من حدود مرسومة' : 'Calculated from drawn boundary')
+    : farmLocation?.selectionMethod === 'point-area'
+      ? (ar ? 'نقطة مرجعية ومساحة مدخلة' : 'Reference point and entered area')
+      : (ar ? 'لم تُسجل طريقة القياس' : 'Measurement method unavailable');
+
+  return <div dir={isRtl ? 'rtl' : 'ltr'} className="mobile-scroll w-full h-full min-h-0 max-w-[1500px] mx-auto px-3 sm:px-6 py-4 text-slate-100 space-y-4 overflow-y-auto">
     <header className="flex items-center justify-between gap-3">
       <div><p className="text-[10px] uppercase tracking-[.2em] text-cyan-300">Field Shift · Decision Support</p><h1 className="text-xl sm:text-2xl font-black">{ar ? 'مقارنة استراتيجيات الدورة الزراعية' : 'Crop Rotation Strategy Comparison'}</h1><p className="mt-1 max-w-3xl text-xs text-slate-400">{ar ? 'قارن خط الأساس مع بديلين باستخدام صفات منشورة وأوزان تحددها أنت.' : 'Compare an existing-rotation baseline with two alternatives using sourced crop traits and priorities you control.'}</p></div>
       {onBack && <button onClick={onBack} className="shrink-0 rounded-lg border border-slate-600 px-3 py-2 text-xs">{ar ? 'رجوع' : 'Back'}</button>}
     </header>
 
-    <section className="grid lg:grid-cols-[1fr_300px] gap-3">
-      <div className="md:col-span-3"><h2 className="text-sm font-bold"><span className="me-2 text-cyan-300">01</span>{ar ? 'مقارنة الدورات الزراعية' : 'Module 01 · Compare Rotations'}</h2></div>
-      <div id="rotation-comparison" className="grid scroll-mt-3 md:col-span-3 lg:grid-cols-3 gap-3">
+    <section className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
+      <div className="lg:col-span-2"><h2 className="text-sm font-bold"><span className="me-2 text-cyan-300">01</span>{ar ? 'مقارنة الدورات الزراعية' : 'Module 01 · Compare Rotations'}</h2></div>
+      <div id="rotation-comparison" className="grid min-w-0 scroll-mt-3 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {strategies.map((strategy, si) => {
           const result = evaluation.strategies[si];
           return <article key={strategy.id} onClick={() => setSelectedId(strategy.id)} className={`rounded-xl border p-3 bg-[#07152b]/90 cursor-pointer ${selectedId === strategy.id ? 'border-cyan-400 shadow-[0_0_20px_rgba(34,211,238,.12)]' : 'border-slate-700'}`}>
@@ -122,14 +142,32 @@ export default function RotationStrategyWorkbench({ mission = null, onBack, onDe
           </article>;
         })}
       </div>
-      <aside id="rotation-inputs" className="scroll-mt-3 rounded-xl border border-slate-700 bg-[#07152b] p-3 space-y-3">
-        <h2 className="text-sm font-bold">{ar ? 'المزرعة والأولويات' : 'Farm context & priorities'}</h2>
-        <label className="block text-[10px] text-slate-400">{ar ? 'المنطقة' : 'Growing region'}<input className={`${fieldClass} mt-1`} value={farm.region} onChange={(e) => setFarm({ ...farm, region: e.target.value })} placeholder="e.g. Nile Delta" /></label>
-        <label className="block text-[10px] text-slate-400">{ar ? 'نوع التربة (اختياري)' : 'Soil type (optional)'}<input className={`${fieldClass} mt-1`} value={farm.soilType} onChange={(e) => setFarm({ ...farm, soilType: e.target.value })} /></label>
-        <label className="block text-[10px] text-slate-400">{ar ? 'توفر المياه (سياق فقط)' : 'Water availability (context only)'}<select className={`${fieldClass} mt-1`} value={farm.waterAvailability} onChange={(e) => setFarm({ ...farm, waterAvailability: e.target.value })}><option value="">{ar ? 'غير معروف' : 'Unknown'}</option><option value="Limited">{ar ? 'محدود' : 'Limited'}</option><option value="Moderate">{ar ? 'متوسط' : 'Moderate'}</option><option value="Adequate">{ar ? 'كافٍ' : 'Adequate'}</option></select></label>
-        <label className="block text-[10px] text-slate-400">{ar ? 'قيود المعدات' : 'Equipment constraints'}<input className={`${fieldClass} mt-1`} value={farm.equipment} onChange={(e) => setFarm({ ...farm, equipment: e.target.value })} /></label>
-        <label className="block text-[10px] text-slate-400">{ar ? 'قيود السوق' : 'Market constraints'}<input className={`${fieldClass} mt-1`} value={farm.market} onChange={(e) => setFarm({ ...farm, market: e.target.value })} /></label>
-        <div className="border-t border-slate-700 pt-2"><h3 className="mb-2 text-xs font-bold">{ar ? 'أوزان الأولوية' : 'Priority weights'}</h3>{Object.entries(DEFAULT_ROTATION_PRIORITIES).map(([key]) => <label key={key} className="mb-2 block text-[10px] text-slate-300">{priorityLabels[key][ar ? 1 : 0]} <b className="float-end text-cyan-300">{priorities[key]}</b><input className="mt-1 w-full accent-cyan-400" type="range" min="0" max="100" value={priorities[key]} aria-label={ar ? priorityAria[key] : priorityLabels[key][0]} onChange={(e) => setPriorities({ ...priorities, [key]: Number(e.target.value) })} /></label>)}</div>
+      <aside id="rotation-inputs" className="min-w-0 scroll-mt-3 rounded-xl border border-slate-700 bg-[#07152b] p-3 space-y-4 lg:col-start-2 lg:row-start-2">
+        <h2 className="text-base font-bold">{ar ? 'معلومات المزرعة والأولويات' : 'Farm Information & Priorities'}</h2>
+        <section aria-labelledby="selected-farm-context-title" className="rounded-lg border border-cyan-900/70 bg-[#030914] p-3">
+          <h3 id="selected-farm-context-title" className="text-sm font-bold text-cyan-100">{ar ? 'ملخص المزرعة المحددة' : 'Selected Farm Context'}</h3>
+          <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
+            <div className="min-w-0"><dt className="text-slate-400">{ar ? 'الموقع' : 'Location'}</dt><dd className="break-words font-semibold">{locationLabel}</dd></div>
+            <div className="min-w-0"><dt className="text-slate-400">{ar ? 'الإحداثيات' : 'Coordinates'}</dt><dd className="break-words font-mono text-xs">{Number.isFinite(farmLocation?.latitude) && Number.isFinite(farmLocation?.longitude) ? `${farmLocation.latitude.toFixed(5)}, ${farmLocation.longitude.toFixed(5)}` : (ar ? 'غير متاحة' : 'Unavailable')}</dd></div>
+            <div><dt className="text-slate-400">{ar ? 'مساحة المزرعة' : 'Farm area'}</dt><dd className="font-semibold">{areaLabel}</dd></div>
+            <div className="min-w-0"><dt className="text-slate-400">{ar ? 'طريقة القياس' : 'Area measurement method'}</dt><dd className="break-words">{methodLabel}</dd></div>
+          </dl>
+        </section>
+
+        <details className="rounded-lg border border-slate-700 bg-[#030914]">
+          <summary className="cursor-pointer px-3 py-3 text-sm font-bold text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-400">{ar ? 'معلومات إضافية عن المزرعة (اختياري)' : 'Additional Farm Information (Optional)'}</summary>
+          <div className="space-y-4 border-t border-slate-700 p-3">
+            <p className="text-xs leading-relaxed text-slate-400">{ar ? 'هذه معلومات يشاركها المزارع للسياق فقط. لا تُقاس بالأقمار الصناعية ولا تغيّر درجات المقارنة.' : 'These are farmer-provided context only. They are not satellite measurements and do not change comparison scores.'}</p>
+            <label className="block space-y-1.5 text-sm text-slate-200"><span>{ar ? 'نوع التربة (اختياري)' : 'Soil type (optional)'}</span><input className={fieldClass} value={farm.soilType || ''} onChange={(e) => setFarm({ ...farm, soilType: e.target.value })} placeholder={ar ? 'معلومة يقدّمها المزارع' : 'Farmer-provided information'} /><span className="block text-xs leading-relaxed text-slate-400">{ar ? 'لا يُستدل على نوع التربة من الإحداثيات، ولا يدخل هذا الحقل في الدرجة.' : 'Soil type is not inferred from coordinates and does not affect the score.'}</span></label>
+            <label className="block space-y-1.5 text-sm text-slate-200"><span>{ar ? 'تقدير المزارع لتوفر المياه (اختياري)' : 'Farmer assessment of water availability (optional)'}</span><select className={fieldClass} value={farm.waterAvailability === 'Adequate' ? 'Sufficient' : farm.waterAvailability || ''} onChange={(e) => setFarm({ ...farm, waterAvailability: e.target.value })}><option value="">{ar ? 'غير معروف' : 'Unknown'}</option><option value="Limited">{ar ? 'محدود' : 'Limited'}</option><option value="Moderate">{ar ? 'متوسط' : 'Moderate'}</option><option value="Sufficient">{ar ? 'كافٍ' : 'Sufficient'}</option></select><span className="block text-xs leading-relaxed text-slate-400">{ar ? 'تقدير ذاتي للسياق؛ لا يمثل قياساً للأمطار أو رطوبة التربة أو المياه الجوفية ولا يؤثر في الدرجة.' : 'A self-reported context value, not a measure of rainfall, soil moisture, or groundwater; it does not affect the score.'}</span></label>
+          </div>
+        </details>
+
+        <div className="border-t border-slate-700 pt-3">
+          <h3 className="text-sm font-bold">{ar ? 'أولويات المزارع' : 'Farmer Priorities'}</h3>
+          <p className="mt-1 text-xs leading-relaxed text-slate-400">{ar ? 'تحدد هذه الأوزان مدى تأثير الصفات الزراعية المدعومة في درجة المقارنة النسبية. تُستبعد الصفات التي لا تتوفر لها بيانات قابلة للمقارنة، وتُعاد موازنة الأوزان المتبقية.' : 'These weights set how supported crop traits influence the relative comparison score. Traits without comparable data are excluded, and remaining weights are renormalized.'}</p>
+          <div className="mt-3 space-y-4">{Object.entries(DEFAULT_ROTATION_PRIORITIES).map(([key]) => <label key={key} className="block space-y-1.5 text-sm text-slate-200"><span className="flex items-start justify-between gap-3"><span>{priorityLabels[key][ar ? 1 : 0]}</span><b className="shrink-0 text-cyan-300">{priorities[key]}</b></span><span className="block text-xs leading-relaxed text-slate-400">{priorityDescriptions[key][ar ? 1 : 0]}</span><input className="w-full accent-cyan-400" type="range" min="0" max="100" value={priorities[key]} aria-label={ar ? priorityAria[key] : priorityLabels[key][0]} onChange={(e) => setPriorities({ ...priorities, [key]: Number(e.target.value) })} /></label>)}</div>
+        </div>
       </aside>
     </section>
 
